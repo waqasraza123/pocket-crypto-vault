@@ -3,6 +3,8 @@ export * from "./AppShell";
 export * from "./DesktopHeader";
 export * from "./MarketingShell";
 export * from "./MobileHeader";
+export * from "./NetworkBadge";
 export * from "./ScreenHeader";
 export * from "./TopNavigation";
 export * from "./WalletEntryPlaceholder";
+export * from "./WalletStatusCard";

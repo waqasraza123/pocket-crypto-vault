@@ -6,5 +6,10 @@
   "types": "src/index.ts",
   "scripts": {
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@goal-vault/shared": "workspace:*",
+    "viem": "^2.38.5",
+    "zod": "^4.1.12"
   }
 }

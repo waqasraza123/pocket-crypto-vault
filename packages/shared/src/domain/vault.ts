@@ -1,4 +1,8 @@
-export type VaultAddress = `0x${string}`;
+import type { Address } from "viem";
+
+import type { SupportedChainId } from "./chain";
+
+export type VaultAddress = Address;
 
 export type VaultRuleType = "timeLock";
 
@@ -8,6 +12,7 @@ export type VaultActivityEventType = "created" | "deposit" | "withdrawal" | "mil
 
 export interface Vault {
   address: VaultAddress;
+  chainId: SupportedChainId;
   goalName: string;
   note?: string;
   targetAmount: number;
@@ -19,7 +24,15 @@ export interface Vault {
 }
 
 export interface VaultSummary extends Vault {
+  assetAddress: Address;
+  ownerAddress: Address;
+  targetAmountAtomic: bigint;
+  savedAmountAtomic: bigint;
+  totalDepositedAtomic: bigint;
+  totalWithdrawnAtomic: bigint;
+  currentBalanceAtomic: bigint;
   progressRatio: number;
+  source: "onchain" | "fallback";
 }
 
 export interface VaultActivityEvent {
@@ -32,7 +45,7 @@ export interface VaultActivityEvent {
   amount?: number;
 }
 
-export interface WithdrawEligibility {
+export interface VaultEligibility {
   state: "locked" | "eligible" | "unavailable";
   message: string;
   unlockDate: string;
@@ -48,9 +61,37 @@ export interface DepositPreview {
 export interface VaultDetail extends VaultSummary {
   ownerLabel: string;
   depositPreview: DepositPreview;
-  withdrawEligibility: WithdrawEligibility;
+  withdrawEligibility: VaultEligibility;
   activityPreview: VaultActivityEvent[];
 }
+
+export interface VaultReadError {
+  code:
+    | "disconnected"
+    | "unsupported_chain"
+    | "missing_rpc"
+    | "missing_factory_address"
+    | "not_found"
+    | "read_failed";
+  message: string;
+}
+
+export type VaultReadResult<T> =
+  | {
+      status: "success";
+      data: T;
+      error: null;
+    }
+  | {
+      status: "empty";
+      data: null;
+      error: null;
+    }
+  | {
+      status: "unavailable" | "error";
+      data: null;
+      error: VaultReadError;
+    };
 
 export interface CreateVaultInput {
   goalName: string;

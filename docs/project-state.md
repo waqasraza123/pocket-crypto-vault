@@ -9,17 +9,18 @@ Core promise:
 - Protect the money from impulse withdrawals.
 
 ## Current Repository Reality
-The repository now has a real Phase 1 scaffold:
+The repository now has a real Phase 2 foundation:
 - `pnpm` workspace monorepo
 - Expo-based universal React Native app in `apps/mobile`
 - Expo Router marketing and app route groups
-- shared TypeScript package boundaries for config, domain models, API client placeholder, and contracts SDK placeholder
-- static product-quality UI shell for landing, vault list, create vault, vault detail, and activity
+- shared TypeScript package boundaries for config, domain models, API client placeholder, contracts package, and contracts SDK
+- app-owned wallet boundary with Base and Base Sepolia support states
+- typed read-only chain access through centralized config and `viem`
+- hybrid product screens that use real connection/network state and fallback safely when chain config is incomplete
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- real wallet integration
-- smart contracts
+- create, deposit, and withdraw transaction UX
 - backend/indexing
 - production CI and release workflows
 
@@ -67,8 +68,8 @@ Still not implemented:
 ## Current Roadmap
 - Phase 0: finalize PRD, flows, state model, contract interface draft, copy system
 - Phase 1: universal Expo scaffold, design system, adaptive shell, and static core screens
-- Phase 2: onchain `v1` time-lock contracts and tests
-- Phase 3: frontend integration
+- Phase 2: universal wallet boundary, chain config, contracts package boundaries, and read-only app integration
+- Phase 3: create-vault, deposit, and withdraw transaction flows
 - Phase 4: metadata backend and polish
 - Phase 5: cooldown unlock
 - Phase 6: guardian approval
@@ -83,6 +84,8 @@ Still not implemented:
 - English and Arabic are part of the active plan, with Arabic implemented as a real RTL experience rather than a string-only translation layer.
 - Bilingual delivery is a first-class implementation track: direction-aware primitives, a header-level language switcher, translation parity, and RTL validation gates are required before launch.
 - Phase 1 is now scaffolded in-repo with a universal Expo app shell, typed shared models, adaptive layout primitives, and static product screens.
+- Phase 2 now adds Reown AppKit as the wallet strategy, `viem` read clients, centralized Base/Base Sepolia config, initial Solidity package boundaries, and app-owned connection/read hooks.
+- Wallet SDK specifics must stay isolated to `apps/mobile/src/lib/blockchain/wallet/`; presentation components consume only app-level hooks and connection state.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -90,10 +93,11 @@ Still not implemented:
 - The Phase 0 engineering spec lives at `docs/plans/goal-vault-phase-0.md`.
 - The active universal React Native Phase 0 engineering spec lives at `docs/plans/goal-vault-universal-react-native-phase-0.md`.
 - The Phase 1 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-1.md`.
+- The Phase 2 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-2.md`.
 
 ## Deferred / Not Yet Implemented
-- Smart contracts, tests, and deployment scripts
-- Backend, database, indexing code, and live wallet/data integration
+- Production write flows for create, deposit, and withdraw
+- Backend, database, and indexed activity integrations
 - CI, linting, formatting, and release workflows
 
 ## Risks / Watchouts
@@ -105,6 +109,7 @@ Still not implemented:
 - `find docs -maxdepth 3 -type f | sort`
 - `pnpm typecheck`
 - `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios`
 - `git status --short`
 - `sed -n '1,220p' docs/project-state.md`
 - `sed -n '1,220p' docs/_local/current-session.md`

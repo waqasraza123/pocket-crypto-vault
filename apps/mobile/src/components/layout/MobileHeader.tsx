@@ -12,9 +12,10 @@ import { WalletEntryPlaceholder } from "./WalletEntryPlaceholder";
 export interface MobileHeaderProps {
   links: HeaderLink[];
   ctaHref: Href;
+  ctaLabel: string;
 }
 
-export const MobileHeader = ({ links, ctaHref }: MobileHeaderProps) => {
+export const MobileHeader = ({ links, ctaHref, ctaLabel }: MobileHeaderProps) => {
   return (
     <View style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.backgroundElevated }}>
       <PageContainer>
@@ -65,7 +66,7 @@ export const MobileHeader = ({ links, ctaHref }: MobileHeaderProps) => {
                 })}
               >
                 <AppText size="sm" style={{ color: colors.white }} weight="semibold">
-                  Open app
+                  {ctaLabel}
                 </AppText>
               </Pressable>
             </Link>

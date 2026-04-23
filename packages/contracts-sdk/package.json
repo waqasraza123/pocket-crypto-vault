@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@goal-vault/config": "workspace:*",
-    "@goal-vault/shared": "workspace:*"
+    "@goal-vault/shared": "workspace:*",
+    "viem": "^2.38.5"
   }
 }

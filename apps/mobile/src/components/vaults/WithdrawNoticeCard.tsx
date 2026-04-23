@@ -1,9 +1,9 @@
-import type { WithdrawEligibility } from "../../types";
+import type { VaultEligibility } from "../../types";
 import { formatUsdc } from "../../lib/format";
 import { AppHeading, AppText, SurfaceCard } from "../primitives";
 
 export interface WithdrawNoticeCardProps {
-  withdrawEligibility: WithdrawEligibility;
+  withdrawEligibility: VaultEligibility;
 }
 
 export const WithdrawNoticeCard = ({ withdrawEligibility }: WithdrawNoticeCardProps) => {

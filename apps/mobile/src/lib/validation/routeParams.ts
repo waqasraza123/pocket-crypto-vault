@@ -1,9 +1,12 @@
+import { isAddress } from "viem";
 import { z } from "zod";
 
 import type { VaultAddress } from "../../types";
 
 const vaultAddressSchema = z.object({
-  vaultAddress: z.string().regex(/^0x[a-fA-F0-9]{8,}$/),
+  vaultAddress: z.string().refine((value) => isAddress(value), {
+    message: "Vault address must be a valid EVM address.",
+  }),
 });
 
 export const parseVaultRouteParams = (

@@ -1,9 +1,11 @@
 import { View } from "react-native";
 
 import { useCreateVaultForm } from "../../../features/create-vault/useCreateVaultForm";
+import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { colors, spacing } from "../../../theme";
 import { FormSection, StepPills } from "../../../components/forms";
 import { ScreenHeader } from "../../../components/layout";
+import { StateBanner } from "../../../components/feedback";
 import {
   AmountField,
   AppText,
@@ -19,6 +21,7 @@ const stepLabels = ["Goal", "Rule", "Review"];
 
 export default function CreateVaultScreen() {
   const { values, errors, step, preview, setFieldValue, nextStep, previousStep, validateAll } = useCreateVaultForm();
+  const { connectionState } = useWalletConnection();
   const targetAmount = Number.parseFloat(values.targetAmount || "0");
 
   const showGoalStep = step === 0;
@@ -31,7 +34,16 @@ export default function CreateVaultScreen() {
         <ScreenHeader
           eyebrow="Create Vault"
           title="Protect one goal with a simple time rule."
-          description="This foundation phase uses local form state and validation so later transaction wiring can slot in without restructuring the screen."
+          description="This phase keeps creation static while the wallet, chain, and contract-read boundaries settle underneath the same universal route."
+        />
+
+        <StateBanner
+          icon="hammer-wrench"
+          label={
+            connectionState.status === "ready"
+              ? "Wallet and network are ready. Vault creation transactions arrive in the next phase."
+              : "This flow is already structured for later transactions, but write wiring is intentionally deferred."
+          }
         />
 
         <StepPills currentStep={step} steps={stepLabels} />

@@ -1,3 +1,4 @@
+import type { PropsWithChildren } from "react";
 import { View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -13,10 +14,11 @@ export interface EmptyStateProps {
 }
 
 export const EmptyState = ({
+  children,
   title,
   description,
   icon = "bullseye-arrow",
-}: EmptyStateProps) => {
+}: PropsWithChildren<EmptyStateProps>) => {
   return (
     <SurfaceCard tone="muted" style={{ alignItems: "flex-start" }}>
       <View
@@ -35,6 +37,7 @@ export const EmptyState = ({
         <AppHeading size="md">{title}</AppHeading>
         <AppText tone="secondary">{description}</AppText>
       </View>
+      {children}
     </SurfaceCard>
   );
 };

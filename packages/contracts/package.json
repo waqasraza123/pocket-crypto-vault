@@ -1,0 +1,11 @@
+{
+  "name": "@goal-vault/contracts",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "typecheck": "echo \"contracts package boundary ready\""
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  }
+}

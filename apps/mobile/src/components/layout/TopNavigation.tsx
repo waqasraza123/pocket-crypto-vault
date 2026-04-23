@@ -25,7 +25,7 @@ export const TopNavigation = ({ area }: TopNavigationProps) => {
   const ctaLabel = area === "marketing" ? "Open app" : "New vault";
 
   if (breakpoint.isCompact) {
-    return <MobileHeader ctaHref={ctaHref} links={links} />;
+    return <MobileHeader ctaHref={ctaHref} ctaLabel={ctaLabel} links={links} />;
   }
 
   return <DesktopHeader ctaHref={ctaHref} ctaLabel={ctaLabel} links={links} />;

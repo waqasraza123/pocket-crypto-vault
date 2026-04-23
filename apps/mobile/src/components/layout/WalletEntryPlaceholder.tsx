@@ -1,14 +1,16 @@
 import { View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { useWalletPlaceholderState } from "../../state";
+import { useWalletConnection } from "../../hooks/useWalletConnection";
+import { formatWalletAddress } from "../../lib/blockchain/wallet/helpers";
 import { colors, radii, spacing } from "../../theme";
 import { AppText, SecondaryButton } from "../primitives";
+import { NetworkBadge } from "./NetworkBadge";
 
 export const WalletEntryPlaceholder = () => {
-  const { walletState } = useWalletPlaceholderState();
+  const { connect, connectionState, switchNetwork } = useWalletConnection();
 
-  if (walletState.connectionState === "connected" && walletState.accountLabel) {
+  if (connectionState.status === "ready" && connectionState.session?.address) {
     return (
       <View
         style={{
@@ -24,12 +26,21 @@ export const WalletEntryPlaceholder = () => {
         }}
       >
         <MaterialCommunityIcons color={colors.positive} name="shield-check-outline" size={18} />
+        <NetworkBadge label={connectionState.session.chain?.shortName ?? "Base"} />
         <AppText size="sm" tone="secondary" weight="semibold">
-          {walletState.accountLabel}
+          {formatWalletAddress(connectionState.session.address)}
         </AppText>
       </View>
     );
   }
 
-  return <SecondaryButton icon="wallet-outline" label="Wallet soon" />;
+  if (connectionState.status === "unsupportedNetwork") {
+    return <SecondaryButton icon="swap-horizontal" label="Switch network" onPress={() => void switchNetwork()} />;
+  }
+
+  if (connectionState.status === "connecting") {
+    return <SecondaryButton icon="timer-sand" label="Connecting..." />;
+  }
+
+  return <SecondaryButton icon="wallet-outline" label="Connect wallet" onPress={() => void connect()} />;
 };
