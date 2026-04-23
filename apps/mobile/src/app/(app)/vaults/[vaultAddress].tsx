@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import { useVaultDepositFlow } from "../../../hooks/useVaultDepositFlow";
 import { useVaultDetail } from "../../../hooks/useVaultDetail";
+import { useVaultWithdrawFlow } from "../../../hooks/useVaultWithdrawFlow";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useI18n } from "../../../lib/i18n";
 import { parseVaultRouteParams } from "../../../lib/validation";
@@ -23,7 +24,7 @@ import {
   VaultDetailHeader,
   VaultProgressPanel,
   VaultRulePanel,
-  WithdrawNoticeCard,
+  WithdrawActionPanel,
 } from "../../../components/vaults";
 
 export default function VaultDetailScreen() {
@@ -34,6 +35,7 @@ export default function VaultDetailScreen() {
   const adaptiveLayout = useAdaptiveLayout();
   const { messages } = useI18n();
   const depositFlow = useVaultDepositFlow(vault);
+  const withdrawFlow = useVaultWithdrawFlow(vault);
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
@@ -64,15 +66,15 @@ export default function VaultDetailScreen() {
 
         {vault?.metadataStatus === "failed" ? (
           <MetadataRecoveryNotice
-            description="This vault is active onchain, but its display details still need to be saved from the create flow."
-            title="Vault active"
+            description={messages.feedback.metadataFailedDescription}
+            title={messages.feedback.metadataLiveTitle}
           />
         ) : null}
 
         {vault?.metadataStatus === "pending" ? (
           <MetadataRecoveryNotice
-            description="This vault is active onchain. Goal details are still syncing into the app."
-            title="Vault active"
+            description={messages.feedback.metadataPendingDescription}
+            title={messages.feedback.metadataLiveTitle}
           />
         ) : null}
 
@@ -90,12 +92,12 @@ export default function VaultDetailScreen() {
           <View style={{ flexDirection: adaptiveLayout.useSplitLayout ? "row" : "column", gap: spacing[4] }}>
             <View style={{ flex: 1, gap: spacing[4] }}>
               <VaultProgressPanel vault={vault} />
-              <VaultRulePanel vault={vault} />
+              <VaultRulePanel eligibility={withdrawFlow.eligibility} vault={vault} />
               <VaultActivityPreview events={vault.activityPreview} />
             </View>
             <View style={{ flex: 1, gap: spacing[4] }}>
               <DepositActionPanel flow={depositFlow} vault={vault} />
-              <WithdrawNoticeCard withdrawEligibility={vault.withdrawEligibility} />
+              <WithdrawActionPanel flow={withdrawFlow} vault={vault} />
             </View>
           </View>
         ) : null}

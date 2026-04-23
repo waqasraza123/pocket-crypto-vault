@@ -13,6 +13,15 @@ export type VaultAccentTheme = "sand" | "sage" | "sky" | "terracotta";
 export type VaultMetadataStatus = "pending" | "saved" | "failed";
 
 export type VaultActivityEventType = "created" | "deposit" | "withdrawal" | "milestone";
+export type VaultLockState = "locked" | "unlocked";
+export type WithdrawalAvailability =
+  | "locked"
+  | "ready"
+  | "empty"
+  | "owner_only"
+  | "disconnected"
+  | "unsupported_network"
+  | "unavailable";
 
 export interface Vault {
   address: VaultAddress;
@@ -55,15 +64,51 @@ export interface VaultActivityEvent {
   source?: "indexed" | "session" | "fallback";
 }
 
-export interface VaultEligibility {
-  state: "locked" | "eligible" | "unavailable";
+export interface UnlockCountdown {
+  totalMs: number;
+  totalSeconds: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isComplete: boolean;
+}
+
+export interface WithdrawableAmountState {
+  amount: number;
+  amountAtomic: bigint;
+  hasFunds: boolean;
+}
+
+export interface WithdrawEligibility {
+  lockState: VaultLockState;
+  availability: WithdrawalAvailability;
   message: string;
   unlockDate: string;
+  unlockTimestampMs: number;
   availableAmount: number;
+  availableAmountAtomic: bigint;
+  withdrawableAmount: WithdrawableAmountState;
+  countdown: UnlockCountdown | null;
+  isOwner: boolean;
+  connectedAddress: Address | null;
+  ownerAddress: Address;
+  isConnected: boolean;
+  isSupportedNetwork: boolean;
+  canWithdraw: boolean;
 }
+
+export type VaultEligibility = WithdrawEligibility;
 
 export interface DepositPreview {
   depositAmount: number;
+  resultingSavedAmount: number;
+  resultingProgressRatio: number;
+  resultingRemainingAmount: number;
+}
+
+export interface WithdrawPreview {
+  withdrawAmount: number;
   resultingSavedAmount: number;
   resultingProgressRatio: number;
   resultingRemainingAmount: number;
@@ -73,10 +118,14 @@ export interface DepositFormInput {
   amount: string;
 }
 
+export interface WithdrawFormInput {
+  amount: string;
+}
+
 export interface VaultDetail extends VaultSummary {
   ownerLabel: string;
   depositPreview: DepositPreview;
-  withdrawEligibility: VaultEligibility;
+  withdrawEligibility: WithdrawEligibility;
   activityPreview: VaultActivityEvent[];
 }
 

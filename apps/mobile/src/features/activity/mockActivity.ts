@@ -38,10 +38,10 @@ export const mockActivity: VaultActivityEvent[] = [
     vaultAddress: "0x9D56a671Ba41Fff55e8D9aB6B0B3Db4f5B0Bc1A2",
     chainId: 84532,
     type: "withdrawal",
-    title: "Withdrawal window is open",
-    subtitle: "This vault can now move funds when you are ready.",
+    title: "Withdrawal confirmed",
+    subtitle: "Studio Upgrade released $500 USDC.",
     occurredAt: "2026-04-02T07:00:00.000Z",
-    amount: 0,
+    amount: 500,
     source: "fallback",
   },
 ] as const;

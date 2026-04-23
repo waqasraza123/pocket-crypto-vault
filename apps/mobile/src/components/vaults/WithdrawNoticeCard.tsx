@@ -11,11 +11,11 @@ export const WithdrawNoticeCard = ({ withdrawEligibility }: WithdrawNoticeCardPr
   const { messages } = useI18n();
 
   return (
-    <SurfaceCard tone={withdrawEligibility.state === "eligible" ? "default" : "muted"}>
+    <SurfaceCard tone={withdrawEligibility.canWithdraw ? "default" : "muted"}>
       <AppHeading size="md">{messages.vaults.withdrawalsStaySerious}</AppHeading>
       <AppText tone="secondary">{withdrawEligibility.message}</AppText>
       <AppText weight="semibold">
-        {withdrawEligibility.state === "eligible"
+        {withdrawEligibility.canWithdraw
           ? interpolate(messages.vaults.availableAmount, {
               amount: formatUsdc(withdrawEligibility.availableAmount),
             })

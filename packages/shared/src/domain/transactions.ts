@@ -104,3 +104,34 @@ export interface DepositFlowState {
   approvalCompleted: boolean;
   result: DepositResult | null;
 }
+
+export type WithdrawFlowStatus =
+  | "idle"
+  | "invalid"
+  | "locked"
+  | "ready"
+  | "confirming_intent"
+  | "awaiting_wallet_confirmation"
+  | "submitting"
+  | "confirming"
+  | "success"
+  | "failed";
+
+export interface WithdrawResult {
+  chainId: SupportedChainId;
+  ownerAddress: Address;
+  vaultAddress: VaultAddress;
+  amountAtomic: bigint;
+  withdrawTxHash: Hash;
+  confirmedAt: string;
+}
+
+export interface WithdrawFlowState {
+  status: WithdrawFlowStatus;
+  errorMessage: string | null;
+  withdrawTxHash: Hash | null;
+  amountAtomic: bigint | null;
+  isRetryable: boolean;
+  intentConfirmed: boolean;
+  result: WithdrawResult | null;
+}

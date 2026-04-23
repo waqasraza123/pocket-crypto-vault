@@ -18,11 +18,11 @@ The repository now has a real Phase 4 foundation:
 - typed read-only chain access through centralized config and `viem`
 - real create-vault write flow with typed transaction stages, receipt-based address resolution, owner-vault-list fallback, and session-aware metadata refresh
 - real USDC deposit flow with balance reads, allowance reads, approval handling, deposit confirmation, and session-backed activity refresh
+- real time-lock withdrawal flow with owner gating, unlock countdowns, deliberate confirmation UX, receipt-confirmed withdrawals, and session-backed activity refresh
 - hybrid product screens that use real connection/network state and fall back safely when chain config is incomplete
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- withdraw transaction UX
 - full backend/indexing rollout
 - production CI and release workflows
 
@@ -73,9 +73,10 @@ Still not implemented:
 - Phase 2: universal wallet boundary, chain config, contracts package boundaries, and read-only app integration
 - Phase 3: create-vault write flow, success/recovery UX, and session-aware metadata refresh
 - Phase 4: deposit flow with USDC approval, confirmation UX, and refreshed vault/activity state
-- Phase 5: metadata backend and indexed activity polish
-- Phase 6: cooldown unlock
-- Phase 7: guardian approval
+- Phase 5: withdraw flow with time-lock eligibility, confirmation UX, and refreshed vault/activity state
+- Phase 6: metadata backend and indexed activity polish
+- Phase 7: cooldown unlock
+- Phase 8: guardian approval
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -93,6 +94,7 @@ Still not implemented:
 - The first write flow must keep transaction stages app-owned and explicit instead of leaking wallet SDK state into presentation screens.
 - Metadata stays display-only. The app now uses a session cache after onchain success so just-created vaults remain visible before full backend/indexer rollout.
 - Deposit activity now follows the same bridge pattern: the app records confirmed deposits in local session state immediately after onchain confirmation, then defers full indexed history to the backend phase.
+- Withdrawals now follow the same bridge pattern: the app records confirmed withdrawals in local session state immediately after onchain confirmation, then defers full indexed history to the backend phase.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -103,9 +105,9 @@ Still not implemented:
 - The Phase 2 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-2.md`.
 - The Phase 3 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-3.md`.
 - The Phase 4 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-4.md`.
+- The Phase 5 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-5.md`.
 
 ## Deferred / Not Yet Implemented
-- Withdraw write flow
 - Backend, database, and indexed activity integrations beyond the current metadata POST/session fallback bridge
 - CI, linting, formatting, and release workflows
 

@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 
 import { mockActivity } from "../features/activity/mockActivity";
+import { useI18n } from "../lib/i18n";
 import { getSessionVaultActivities, useVaultStoreVersion } from "../state/vault-store";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useVaultActivity = () => {
+  const { messages } = useI18n();
   const { connectionState } = useWalletConnection();
   const vaultStoreVersion = useVaultStoreVersion();
 
@@ -41,7 +43,7 @@ export const useVaultActivity = () => {
     dataSource: events.some((event) => event.source === "session") ? ("session" as const) : ("fallback" as const),
     notice:
       events.some((event) => event.source === "session")
-        ? "New deposits appear here as soon as onchain confirmation completes. Full indexed history still lands in a later phase."
-        : "Indexed activity remains partially mocked until backend indexing lands in a later phase.",
+        ? messages.pages.activity.description
+        : messages.pages.activity.emptyDescription,
   };
 };

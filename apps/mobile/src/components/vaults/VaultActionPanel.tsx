@@ -6,7 +6,7 @@ export interface VaultActionPanelProps {
 }
 
 export const VaultActionPanel = ({ vault }: VaultActionPanelProps) => {
-  const canWithdraw = vault.withdrawEligibility.state === "eligible";
+  const canWithdraw = vault.withdrawEligibility.canWithdraw;
 
   return (
     <SurfaceCard>

@@ -8,6 +8,7 @@ export * from "./read/erc20";
 export * from "./read/factory";
 export * from "./read/vault";
 export * from "./write/deposit";
+export * from "./write/withdraw";
 export * from "./write/erc20";
 export * from "./types/contract-types";
 export * from "./types/vault-types";

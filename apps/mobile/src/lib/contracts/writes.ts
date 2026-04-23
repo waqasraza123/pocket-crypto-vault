@@ -2,6 +2,7 @@ export {
   prepareApproveUsdcForVaultWriteRequest,
   prepareCreateVaultWriteRequest,
   prepareDepositToVaultWriteRequest,
+  prepareWithdrawFromVaultWriteRequest,
   buildApproveErc20WriteRequest,
   buildCreateVaultWriteRequest,
   buildDepositVaultWriteRequest,

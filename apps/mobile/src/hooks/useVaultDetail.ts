@@ -4,10 +4,12 @@ import type { VaultDetail, VaultSummary } from "@goal-vault/shared";
 
 import { readVaultDetailByAddress, type VaultQueryResult } from "../lib/contracts/queries";
 import { createSessionVaultDetail, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
+import { useI18n } from "../lib/i18n";
 import { getSessionVaultActivities, getSessionVaultMetadata, useVaultStoreVersion } from "../state/vault-store";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
+  const { messages } = useI18n();
   const { connectionState } = useWalletConnection();
   const vaultStoreVersion = useVaultStoreVersion();
   const [result, setResult] = useState<VaultQueryResult<VaultDetail>>({
@@ -112,10 +114,10 @@ export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
 
   const notice =
     sessionMetadata?.metadataStatus === "failed"
-      ? "This vault is live onchain, but its display details still need to be saved."
+      ? messages.feedback.metadataFailedDescription
       : sessionMetadata?.metadataStatus === "pending"
-        ? "This vault is active. Goal details are still syncing."
-      : result.message;
+        ? messages.feedback.metadataPendingDescription
+        : result.message;
 
   return {
     connectionState,

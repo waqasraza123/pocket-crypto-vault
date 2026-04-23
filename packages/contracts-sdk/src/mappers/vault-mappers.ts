@@ -1,7 +1,7 @@
 import type { GoalVaultContractSummary } from "../types/contract-types";
 import type { VaultMetadataFallback } from "../types/vault-types";
 import { formatTokenAmountNumber } from "./token-mappers";
-import type { VaultAddress, VaultDetail, VaultEligibility, VaultSummary } from "@goal-vault/shared";
+import type { VaultAddress, VaultDetail, WithdrawEligibility, VaultSummary } from "@goal-vault/shared";
 
 const usdcDecimals = 6;
 
@@ -67,34 +67,83 @@ export const mapVaultSummary = ({
   };
 };
 
-const buildVaultEligibility = (vault: VaultSummary): VaultEligibility => {
+const buildVaultEligibility = (vault: VaultSummary): WithdrawEligibility => {
+  const unlockTimestampMs = Date.parse(vault.unlockDate);
+  const availableAmount = vault.status === "unlocked" ? vault.savedAmount : 0;
+  const availableAmountAtomic = vault.status === "unlocked" ? vault.currentBalanceAtomic : 0n;
+
   if (vault.status === "unlocked") {
     return {
-      state: "eligible",
+      lockState: "unlocked",
+      availability: availableAmountAtomic > 0n ? "ready" : "empty",
       message: "Withdrawals are available whenever you are ready.",
       unlockDate: vault.unlockDate,
-      availableAmount: vault.savedAmount,
+      unlockTimestampMs,
+      availableAmount,
+      availableAmountAtomic,
+      withdrawableAmount: {
+        amount: availableAmount,
+        amountAtomic: availableAmountAtomic,
+        hasFunds: availableAmountAtomic > 0n,
+      },
+      countdown: null,
+      isOwner: false,
+      connectedAddress: null,
+      ownerAddress: vault.ownerAddress,
+      isConnected: false,
+      isSupportedNetwork: true,
+      canWithdraw: availableAmountAtomic > 0n,
     };
   }
 
   if (vault.status === "closed") {
     return {
-      state: "unavailable",
+      lockState: "unlocked",
+      availability: "empty",
       message: "This vault has already been emptied.",
       unlockDate: vault.unlockDate,
+      unlockTimestampMs,
       availableAmount: 0,
+      availableAmountAtomic: 0n,
+      withdrawableAmount: {
+        amount: 0,
+        amountAtomic: 0n,
+        hasFunds: false,
+      },
+      countdown: null,
+      isOwner: false,
+      connectedAddress: null,
+      ownerAddress: vault.ownerAddress,
+      isConnected: false,
+      isSupportedNetwork: true,
+      canWithdraw: false,
     };
   }
 
   return {
-    state: "locked",
+    lockState: "locked",
+    availability: "locked",
     message: `Withdrawals stay unavailable until ${new Date(vault.unlockDate).toLocaleDateString("en-US", {
       month: "long",
       day: "numeric",
       year: "numeric",
     })}.`,
     unlockDate: vault.unlockDate,
+    unlockTimestampMs,
     availableAmount: 0,
+    availableAmountAtomic: 0n,
+    withdrawableAmount: {
+      amount: 0,
+      amountAtomic: 0n,
+      hasFunds: false,
+    },
+    countdown: null,
+    isOwner: false,
+    connectedAddress: null,
+    ownerAddress: vault.ownerAddress,
+    isConnected: false,
+    isSupportedNetwork: true,
+    canWithdraw: false,
   };
 };
 

@@ -4,34 +4,31 @@
 2026-04-23
 
 ## Current Objective
-Add Arabic as the second language with a production-grade i18n and RTL implementation in the universal Expo app.
+Implement Phase 5 as the real time-lock withdrawal flow in the universal Expo app.
 
 ## Last Completed Step
-Implemented bilingual locale infrastructure, a header-level language switcher, direction-aware primitives, and Arabic coverage across the major marketing, dashboard, create-vault, and deposit flows.
+Implemented the real withdraw flow with owner-aware eligibility, active-session unlock countdowns, deliberate confirmation, transaction states, and refreshed vault/activity state.
 
 ## Current Step
-Arabic and RTL support are implemented and verified. Leave the repo ready for live UI QA and any remaining translation coverage passes.
+Phase 5 is implemented and verified. Leave the repo ready for backend-indexed activity polish and live QA on device and web.
 
 ## Why This Step Exists
-The product already had real create and deposit flows. This step adds the first production i18n layer and makes Arabic a real RTL experience instead of a later cosmetic pass.
+Phase 4 established real funding. Phase 5 adds the serious side of the product: owner-gated withdrawals that only unlock when the time rule allows them.
 
 ## Files Touched
+- `apps/mobile/src/app/(app)/vaults/[vaultAddress].tsx`
+- `apps/mobile/src/components/feedback/{OwnerOnlyNotice.tsx,WithdrawErrorState.tsx,WithdrawalLockedNotice.tsx,index.ts}`
+- `apps/mobile/src/components/vaults/{UnlockCountdownCard.tsx,WithdrawActionPanel.tsx,WithdrawAmountField.tsx,WithdrawConfirmationCard.tsx,WithdrawEligibilityCard.tsx,WithdrawPreviewCard.tsx,WithdrawSuccessCard.tsx,VaultRulePanel.tsx,WithdrawNoticeCard.tsx,index.ts}`
+- `apps/mobile/src/features/{activity/mockActivity.ts,vault-detail/mockVaultDetail.ts}`
+- `apps/mobile/src/hooks/{useWithdrawEligibility.ts,useVaultWithdrawFlow.ts,useVaultActivity.ts,useVaultDetail.ts,useVaults.ts}`
+- `apps/mobile/src/lib/contracts/{amount-utils.ts,time-lock-utils.ts,withdraw-flow.ts,vault-writes.ts,writes.ts}`
+- `apps/mobile/src/lib/format/date.ts`
 - `apps/mobile/src/lib/i18n/index.tsx`
-- `apps/mobile/src/app/_layout.tsx`
-- `apps/mobile/src/components/layout/{LanguageSwitcher.tsx,DesktopHeader.tsx,MobileHeader.tsx,TopNavigation.tsx,AppFooter.tsx,WalletEntryPlaceholder.tsx,WalletStatusCard.tsx}`
-- `apps/mobile/src/components/primitives/{AppText.tsx,AppHeading.tsx,PrimaryButton.tsx,SecondaryButton.tsx,TextField.tsx,AmountField.tsx}`
-- `apps/mobile/src/components/forms/StepPills.tsx`
-- `apps/mobile/src/components/marketing/{HeroSection.tsx,HowItWorksSection.tsx,SecurityTrustSection.tsx,FinalCtaSection.tsx}`
-- `apps/mobile/src/components/feedback/{AllowanceRequiredNotice.tsx,CreateVaultErrorState.tsx,DepositErrorState.tsx,MetadataRecoveryNotice.tsx,TransactionStatusCard.tsx,DisconnectedState.tsx,StateBanner.tsx,UnsupportedNetworkNotice.tsx}`
-- `apps/mobile/src/components/vaults/{CreateVaultPreviewCard.tsx,CreateVaultReviewPanel.tsx,CreateVaultSuccessCard.tsx,DepositActionPanel.tsx,DepositAmountField.tsx,DepositApprovalNotice.tsx,DepositPreviewCard.tsx,DepositSuccessCard.tsx,VaultActivityPreview.tsx,VaultCard*.tsx,VaultDetailHeader.tsx,VaultProgressPanel.tsx,VaultRulePanel.tsx,WithdrawNoticeCard.tsx}`
-- `apps/mobile/src/app/(marketing)/*`
-- `apps/mobile/src/app/(app)/{index.tsx,activity.tsx,vaults/[vaultAddress].tsx,vaults/new.tsx}`
-- `apps/mobile/src/features/create-vault/useCreateVaultForm.ts`
-- `apps/mobile/src/hooks/{useCreateVaultMutation.ts,useVaultDepositFlow.ts,useVaultActivity.ts,useVaultDetail.ts}`
-- `apps/mobile/src/lib/contracts/{mappers.ts,deposit-flow.ts}`
-- `apps/mobile/src/lib/format/{currency.ts,date.ts,progress.ts}`
-- `apps/mobile/src/state/{create-vault-state.ts,deposit-flow-state.ts}`
-- `packages/shared/src/validation/createVault.ts`
+- `apps/mobile/src/state/{index.ts,withdraw-flow-state.ts}`
+- `apps/mobile/src/types/domain.ts`
+- `packages/contracts-sdk/src/{index.ts,mappers/vault-events.ts,mappers/vault-mappers.ts,write/withdraw.ts}`
+- `packages/shared/src/domain/{transactions.ts,vault.ts}`
+- `docs/plans/goal-vault-universal-react-native-phase-5.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 
@@ -46,27 +43,27 @@ The product already had real create and deposit flows. This step adds the first 
 - Create-vault resolution uses receipt logs first and owner vault list fallback second.
 - Session metadata cache is now the bridge between onchain success and later backend/indexer rollout.
 - Deposit confirmations now write session activity immediately after receipt confirmation so the app reflects funding before full backend indexing ships.
-- Locale state is app-owned, persisted with AsyncStorage, and used to drive document `dir`, root layout direction, formatting, and direction-aware icon/layout helpers from one place.
+- Withdrawal confirmations now use the same bridge: invalidate vault queries, refresh onchain state, and upsert a session activity event immediately after receipt confirmation.
+- Withdrawal eligibility is app-owned and recalculated from unlock time, wallet ownership, active chain, and current balance, with a live countdown that flips to eligible during an active session.
 
 ## Scope Boundaries
-- No withdraw flow yet.
 - No cooldown or guardian yet.
 - Backend metadata POST is optional by env; session metadata plus session deposit activity are the current fallback bridge.
-- Arabic support is limited to the current product surface. Future routes and new copy must use the shared i18n catalog rather than hardcoded strings.
+- Arabic support remains limited to the current product surface. Future routes and new copy must use the shared i18n catalog rather than hardcoded strings.
 
 ## Exact Next Steps
-1. Run live browser and device QA in both English and Arabic, especially around header, navigation, create-vault, and deposit states.
-2. Replace remaining hardcoded strings in untouched future surfaces with the shared i18n catalog as those flows expand.
-3. Add withdraw flow and unlocked-state action handling on top of the same locale and direction system.
-4. Replace session activity fallback with indexed backend activity and richer metadata reads.
+1. Replace the session activity bridge with indexed backend history and richer metadata reads.
+2. Run live browser and device QA against deployed Base Sepolia vaults for lock-to-eligible transitions and real withdrawals.
+3. Extend the same state model for cooldown unlock.
+4. Continue replacing remaining untouched hardcoded strings with shared i18n copy as product surfaces expand.
 
 ## Verification Commands
 - `pnpm typecheck`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-i18n`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-i18n`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-phase5`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-phase5`
 - `git status --short`
-- `sed -n '1,220p' apps/mobile/src/lib/i18n/index.tsx`
-- `sed -n '1,220p' docs/project-state.md`
+- `sed -n '1,240p' docs/plans/goal-vault-universal-react-native-phase-5.md`
+- `sed -n '1,240p' apps/mobile/src/hooks/useVaultWithdrawFlow.ts`
 
 ## Handoff Note
-Arabic is now a first-class app mode. For live QA, verify both locales on device and web, check header switching, confirm `dir` flips on web, and exercise create/deposit flows in both directions before shipping.
+Phase 5 now completes the v1 money movement loop. For live QA, validate both locked and eligible vaults, confirm owner-only gating, watch the unlock countdown flip during an active session, and test real withdrawals on Base Sepolia before moving to backend indexing work.
