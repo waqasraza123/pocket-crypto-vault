@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { VaultSummary } from "@goal-vault/shared";
+import type { SyncFreshnessSnapshot, VaultSummary } from "@goal-vault/shared";
 
+import { fetchOwnerVaults } from "../lib/api/vaults";
 import { readVaultSummariesByOwner, type VaultQueryResult } from "../lib/contracts/queries";
 import { createSessionVaultSummary, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
 import { useI18n } from "../lib/i18n";
@@ -36,10 +37,29 @@ export const useVaults = () => {
       }
 
       setIsLoading(true);
-      const nextResult = await readVaultSummariesByOwner({
+      const backendResult = await fetchOwnerVaults({
         chainId: connectionState.session.chain.id,
-        ownerAddress: connectionState.session.address,
+        ownerWallet: connectionState.session.address,
       });
+      let nextResult: VaultQueryResult<VaultSummary[]>;
+
+      if (backendResult.status === "success" && backendResult.data) {
+        nextResult = {
+          status: backendResult.data.length > 0 ? "success" : "empty",
+          data: backendResult.data.length > 0 ? backendResult.data : null,
+          source: "backend",
+          message: null,
+        };
+      } else {
+        const chainResult = await readVaultSummariesByOwner({
+          chainId: connectionState.session.chain.id,
+          ownerAddress: connectionState.session.address,
+        });
+        nextResult = {
+          ...chainResult,
+          message: backendResult.message ?? chainResult.message,
+        };
+      }
 
       if (isActive) {
         setResult(nextResult);
@@ -89,11 +109,21 @@ export const useVaults = () => {
       : sessionVaults.find((record) => record.metadataStatus === "pending")
         ? messages.feedback.metadataPendingDescription
         : null;
+  const freshnessNotice =
+    result.source === "backend" &&
+    (result.data ?? []).some(
+      (vault) =>
+        "freshness" in vault &&
+        ((vault.freshness as SyncFreshnessSnapshot).freshness === "syncing" ||
+          (vault.freshness as SyncFreshnessSnapshot).freshness === "lagging"),
+    )
+      ? messages.feedback.vaultSyncingDescription
+      : null;
 
   const queryStatus =
     mergedVaults.length > 0 ? "success" : result.status === "success" ? "empty" : result.status;
   const dataSource = result.source ?? (mergedVaults.length > 0 ? "session" : null);
-  const notice = sessionNotice ?? result.message;
+  const notice = sessionNotice ?? freshnessNotice ?? result.message;
 
   return {
     connectionState,

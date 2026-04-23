@@ -1,4 +1,6 @@
 export * from "./domain/chain";
+export * from "./domain/activity";
+export * from "./domain/sync";
 export * from "./domain/transactions";
 export * from "./domain/vault";
 export * from "./domain/wallet";

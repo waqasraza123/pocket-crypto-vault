@@ -164,8 +164,8 @@ const enMessages = {
       eyebrow: "Activity",
       title: "Every vault movement in one calm timeline.",
       description:
-        "Confirmed deposits and withdrawals appear here immediately from the app session while fuller indexed history lands in a later phase.",
-      emptyDescription: "Confirmed deposits, withdrawals, and future indexed activity will appear here.",
+        "Confirmed deposits and withdrawals appear here through the indexed Goal Vault history, with gentle syncing when recent activity is still catching up.",
+      emptyDescription: "Confirmed deposits, withdrawals, and new vault activity will appear here.",
     },
     vaultDetail: {
       eyebrow: "Vault Detail",
@@ -258,6 +258,8 @@ const enMessages = {
     metadataLiveTitle: "Your vault is live",
     metadataPendingDescription: "This vault is active onchain. Goal details are still syncing into the app.",
     metadataFailedDescription: "This vault is active onchain, but its display details still need to be saved from the create flow.",
+    vaultSyncingDescription: "Vault details are syncing.",
+    activityUpdatingDescription: "Your latest transaction has been confirmed and is being reflected in activity.",
   },
   vaults: {
     status: {
@@ -272,7 +274,12 @@ const enMessages = {
     withdrawalsStaySerious: "Withdrawals stay serious",
     availableAmount: "{amount} available",
     noFundsAvailable: "No funds available yet",
-    activityEmpty: "New deposits will appear here after they confirm onchain.",
+    activityEmpty: "Confirmed deposits, withdrawals, and new vault activity will appear here.",
+  },
+  activityFeed: {
+    fallbackGoalName: "Goal Vault",
+    createdTitle: "Vault created",
+    createdSubtitle: "{goal} is now live.",
   },
   createVaultState: {
     idleTitle: "Protect this goal",
@@ -625,8 +632,8 @@ const arMessages: AppMessages = {
     activity: {
       eyebrow: "النشاط",
       title: "كل حركة للخزنة في خط زمني هادئ واحد.",
-      description: "تظهر هنا الإيداعات والسحوبات المؤكدة فوراً من جلسة التطبيق، بينما يصل السجل المفهرس الكامل في مرحلة لاحقة.",
-      emptyDescription: "ستظهر هنا الإيداعات والسحوبات المؤكدة والنشاطات المفهرسة لاحقاً.",
+      description: "تظهر هنا الإيداعات والسحوبات المؤكدة من سجل Goal Vault المفهرس، مع مزامنة هادئة عندما تكون الحركة الأخيرة ما زالت تلحق بالواجهة.",
+      emptyDescription: "ستظهر هنا الإيداعات والسحوبات المؤكدة ونشاط الخزنة الجديد.",
     },
     vaultDetail: {
       eyebrow: "تفاصيل الخزنة",
@@ -714,6 +721,8 @@ const arMessages: AppMessages = {
     metadataLiveTitle: "خزنتك حية الآن",
     metadataPendingDescription: "هذه الخزنة نشطة على السلسلة. ما زالت تفاصيل الهدف تتم مزامنتها داخل التطبيق.",
     metadataFailedDescription: "هذه الخزنة نشطة على السلسلة، لكن تفاصيل العرض ما زالت بحاجة إلى الحفظ من تدفق الإنشاء.",
+    vaultSyncingDescription: "تجري مزامنة تفاصيل الخزنة.",
+    activityUpdatingDescription: "تم تأكيد معاملتك الأخيرة ويجري الآن عكسها داخل النشاط.",
   },
   vaults: {
     status: {
@@ -728,7 +737,12 @@ const arMessages: AppMessages = {
     withdrawalsStaySerious: "السحوبات تبقى جادة",
     availableAmount: "{amount} متاح",
     noFundsAvailable: "لا توجد أموال متاحة بعد",
-    activityEmpty: "ستظهر الإيداعات الجديدة هنا بعد تأكيدها على السلسلة.",
+    activityEmpty: "ستظهر هنا الإيداعات والسحوبات المؤكدة ونشاط الخزنة الجديد.",
+  },
+  activityFeed: {
+    fallbackGoalName: "Goal Vault",
+    createdTitle: "تم إنشاء الخزنة",
+    createdSubtitle: "أصبحت {goal} نشطة الآن.",
   },
   createVaultState: {
     idleTitle: "احمِ هذا الهدف",

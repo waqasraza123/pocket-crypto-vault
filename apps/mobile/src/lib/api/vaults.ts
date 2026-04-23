@@ -1,6 +1,14 @@
-import type { MetadataSaveResult, VaultMetadataPayload } from "@goal-vault/shared";
+import {
+  parseVaultDetailResponse,
+  parseVaultListResponse,
+  type VaultDetailResponse,
+  type VaultListResponse,
+} from "@goal-vault/api-client";
+import type { MetadataSaveResult, SupportedChainId, VaultDetailEnriched, VaultMetadataPayload, VaultSummaryEnriched } from "@goal-vault/shared";
+import type { Address } from "viem";
 
 import { clientEnv } from "../env/client";
+import { fetchBackendJson } from "./client";
 
 const normalizePayload = (payload: VaultMetadataPayload) => ({
   contractAddress: payload.contractAddress,
@@ -58,5 +66,67 @@ export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<
     message,
     retryable: true,
     responseStatus: response.status,
+  };
+};
+
+export const fetchOwnerVaults = async ({
+  chainId,
+  ownerWallet,
+}: {
+  chainId: SupportedChainId;
+  ownerWallet: Address;
+}): Promise<{
+  status: "success" | "unavailable" | "error" | "not_found";
+  data: VaultSummaryEnriched[] | null;
+  message: string | null;
+}> => {
+  const response = await fetchBackendJson<VaultListResponse>({
+    path: `/vaults?chainId=${chainId}&ownerWallet=${ownerWallet}`,
+    fallbackMessage: "Vault list is not available right now.",
+  });
+
+  if (response.status !== "success" || !response.data) {
+    return {
+      status: response.status,
+      data: null,
+      message: response.message,
+    };
+  }
+
+  return {
+    status: "success",
+    data: parseVaultListResponse(response.data).items,
+    message: null,
+  };
+};
+
+export const fetchVaultDetail = async ({
+  chainId,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  vaultAddress: Address;
+}): Promise<{
+  status: "success" | "unavailable" | "error" | "not_found";
+  data: VaultDetailEnriched | null;
+  message: string | null;
+}> => {
+  const response = await fetchBackendJson<VaultDetailResponse>({
+    path: `/vaults/${vaultAddress}?chainId=${chainId}`,
+    fallbackMessage: "Vault detail is not available right now.",
+  });
+
+  if (response.status !== "success" || !response.data) {
+    return {
+      status: response.status,
+      data: null,
+      message: response.message,
+    };
+  }
+
+  return {
+    status: "success",
+    data: parseVaultDetailResponse(response.data).item,
+    message: null,
   };
 };

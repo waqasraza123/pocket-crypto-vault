@@ -9,7 +9,7 @@ Core promise:
 - Protect the money from impulse withdrawals.
 
 ## Current Repository Reality
-The repository now has a real Phase 4 foundation:
+The repository now has a real Phase 6 foundation:
 - `pnpm` workspace monorepo
 - Expo-based universal React Native app in `apps/mobile`
 - Expo Router marketing and app route groups
@@ -19,11 +19,12 @@ The repository now has a real Phase 4 foundation:
 - real create-vault write flow with typed transaction stages, receipt-based address resolution, owner-vault-list fallback, and session-aware metadata refresh
 - real USDC deposit flow with balance reads, allowance reads, approval handling, deposit confirmation, and session-backed activity refresh
 - real time-lock withdrawal flow with owner gating, unlock countdowns, deliberate confirmation UX, receipt-confirmed withdrawals, and session-backed activity refresh
+- a thin Fastify backend in `apps/api` with persisted sync state, normalized event indexing, metadata reconciliation, enriched vault/activity reads, and internal sync triggers
 - hybrid product screens that use real connection/network state and fall back safely when chain config is incomplete
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- full backend/indexing rollout
+- external database-backed backend persistence
 - production CI and release workflows
 
 ## Confirmed Product Boundaries
@@ -95,6 +96,10 @@ Still not implemented:
 - Metadata stays display-only. The app now uses a session cache after onchain success so just-created vaults remain visible before full backend/indexer rollout.
 - Deposit activity now follows the same bridge pattern: the app records confirmed deposits in local session state immediately after onchain confirmation, then defers full indexed history to the backend phase.
 - Withdrawals now follow the same bridge pattern: the app records confirmed withdrawals in local session state immediately after onchain confirmation, then defers full indexed history to the backend phase.
+- Phase 6 now makes backend enrichment the primary product read path when the API is configured, while preserving direct chain reads and session overlays as honest fallbacks.
+- The API owns normalized confirmed activity, metadata reconciliation status, and sync freshness hints. It does not invent financial truth beyond confirmed chain reads and indexed events.
+- The backend currently persists index state in a file-backed store under `apps/api/.data/` so the repo can boot, sync, and recover without external infrastructure. A database-backed replacement remains a later infrastructure step.
+- Confirmed create, deposit, and withdraw flows now trigger a thin backend sync endpoint and then invalidate reads so backend-enriched vaults and activity refresh more cleanly.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -108,7 +113,7 @@ Still not implemented:
 - The Phase 5 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-5.md`.
 
 ## Deferred / Not Yet Implemented
-- Backend, database, and indexed activity integrations beyond the current metadata POST/session fallback bridge
+- External database infrastructure for the backend beyond the current file-backed persistent store
 - CI, linting, formatting, and release workflows
 
 ## Risks / Watchouts

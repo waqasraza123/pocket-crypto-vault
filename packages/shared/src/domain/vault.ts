@@ -1,6 +1,8 @@
 import type { Address, Hash } from "viem";
 
 import type { SupportedChainId } from "./chain";
+import type { ActivityFeedResult, VaultActivityItem } from "./activity";
+import type { SyncFreshnessSnapshot, VaultReconciliationStatus } from "./sync";
 
 export type VaultAddress = Address;
 
@@ -48,7 +50,7 @@ export interface VaultSummary extends Vault {
   totalWithdrawnAtomic: bigint;
   currentBalanceAtomic: bigint;
   progressRatio: number;
-  source: "onchain" | "fallback" | "session";
+  source: "backend" | "onchain" | "fallback" | "session";
 }
 
 export interface VaultActivityEvent {
@@ -127,6 +129,33 @@ export interface VaultDetail extends VaultSummary {
   depositPreview: DepositPreview;
   withdrawEligibility: WithdrawEligibility;
   activityPreview: VaultActivityEvent[];
+}
+
+export interface VaultSummaryEnriched extends VaultSummary {
+  reconciliationStatus: VaultReconciliationStatus;
+  activityCount: number;
+  lastActivityAt: string | null;
+  freshness: SyncFreshnessSnapshot;
+}
+
+export interface VaultDetailEnriched extends VaultDetail {
+  reconciliationStatus: VaultReconciliationStatus;
+  normalizedActivity: VaultActivityItem[];
+  freshness: SyncFreshnessSnapshot;
+}
+
+export interface VaultListResult {
+  items: VaultSummaryEnriched[];
+}
+
+export interface VaultDetailResult {
+  item: VaultDetailEnriched;
+}
+
+export interface VaultActivityResult extends ActivityFeedResult {
+  vaultAddress: VaultAddress;
+  chainId: SupportedChainId;
+  freshness: SyncFreshnessSnapshot;
 }
 
 export interface VaultReadError {

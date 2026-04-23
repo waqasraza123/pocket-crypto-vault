@@ -4,31 +4,30 @@
 2026-04-23
 
 ## Current Objective
-Implement Phase 5 as the real time-lock withdrawal flow in the universal Expo app.
+Implement Phase 6 as the thin backend, indexing, and reconciliation layer for the universal Expo app.
 
 ## Last Completed Step
-Implemented the real withdraw flow with owner-aware eligibility, active-session unlock countdowns, deliberate confirmation, transaction states, and refreshed vault/activity state.
+Implemented the `apps/api` package, normalized event indexing, metadata reconciliation, backend-first mobile hooks, and transaction-triggered backend sync nudges.
 
 ## Current Step
-Phase 5 is implemented and verified. Leave the repo ready for backend-indexed activity polish and live QA on device and web.
+Phase 6 is implemented, verified, and ready to be committed on both `main` and `dev`.
 
 ## Why This Step Exists
-Phase 4 established real funding. Phase 5 adds the serious side of the product: owner-gated withdrawals that only unlock when the time rule allows them.
+Phases 3 through 5 made create, deposit, and withdrawal real. Phase 6 makes metadata, activity, and vault reads behave like one coherent product instead of a fragile hybrid.
 
 ## Files Touched
-- `apps/mobile/src/app/(app)/vaults/[vaultAddress].tsx`
-- `apps/mobile/src/components/feedback/{OwnerOnlyNotice.tsx,WithdrawErrorState.tsx,WithdrawalLockedNotice.tsx,index.ts}`
-- `apps/mobile/src/components/vaults/{UnlockCountdownCard.tsx,WithdrawActionPanel.tsx,WithdrawAmountField.tsx,WithdrawConfirmationCard.tsx,WithdrawEligibilityCard.tsx,WithdrawPreviewCard.tsx,WithdrawSuccessCard.tsx,VaultRulePanel.tsx,WithdrawNoticeCard.tsx,index.ts}`
-- `apps/mobile/src/features/{activity/mockActivity.ts,vault-detail/mockVaultDetail.ts}`
-- `apps/mobile/src/hooks/{useWithdrawEligibility.ts,useVaultWithdrawFlow.ts,useVaultActivity.ts,useVaultDetail.ts,useVaults.ts}`
-- `apps/mobile/src/lib/contracts/{amount-utils.ts,time-lock-utils.ts,withdraw-flow.ts,vault-writes.ts,writes.ts}`
-- `apps/mobile/src/lib/format/date.ts`
+- `apps/api/src/{app.ts,env.ts,index.ts}`
+- `apps/api/src/lib/contracts.ts`
+- `apps/api/src/jobs/{sync-factory-events.ts,sync-vault-events.ts,reconcile-vault-metadata.ts}`
+- `apps/api/src/modules/{health,indexer,vault-events,vaults}/*`
+- `apps/mobile/src/hooks/{useCreateVaultMutation.ts,useVaultActivity.ts,useVaultDepositFlow.ts,useVaultDetail.ts,useVaultWithdrawFlow.ts,useVaults.ts}`
+- `apps/mobile/src/lib/api/{client.ts,vaults.ts,activity.ts,sync-status.ts}`
+- `apps/mobile/src/lib/contracts/queries.ts`
 - `apps/mobile/src/lib/i18n/index.tsx`
-- `apps/mobile/src/state/{index.ts,withdraw-flow-state.ts}`
-- `apps/mobile/src/types/domain.ts`
-- `packages/contracts-sdk/src/{index.ts,mappers/vault-events.ts,mappers/vault-mappers.ts,write/withdraw.ts}`
-- `packages/shared/src/domain/{transactions.ts,vault.ts}`
-- `docs/plans/goal-vault-universal-react-native-phase-5.md`
+- `packages/api-client/src/index.ts`
+- `packages/shared/src/domain/{activity.ts,sync.ts,vault.ts}`
+- `packages/shared/src/index.ts`
+- `docs/plans/goal-vault-universal-react-native-phase-6.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 
@@ -45,25 +44,30 @@ Phase 4 established real funding. Phase 5 adds the serious side of the product: 
 - Deposit confirmations now write session activity immediately after receipt confirmation so the app reflects funding before full backend indexing ships.
 - Withdrawal confirmations now use the same bridge: invalidate vault queries, refresh onchain state, and upsert a session activity event immediately after receipt confirmation.
 - Withdrawal eligibility is app-owned and recalculated from unlock time, wallet ownership, active chain, and current balance, with a live countdown that flips to eligible during an active session.
+- Phase 6 introduces a thin Fastify backend with a persisted file-backed store for normalized events, vault records, and sync cursors.
+- Backend enrichment is now the preferred read path for vault lists, vault detail, and activity when `EXPO_PUBLIC_API_BASE_URL` is present.
+- Post-transaction flows now call an internal backend sync endpoint before invalidating reads so the app can move from local session bridges toward indexed activity and reconciled metadata.
 
 ## Scope Boundaries
 - No cooldown or guardian yet.
-- Backend metadata POST is optional by env; session metadata plus session deposit activity are the current fallback bridge.
+- Backend metadata POST and indexed reads are optional by env; session metadata and session activity remain the fallback bridge when the API is unavailable or catching up.
 - Arabic support remains limited to the current product surface. Future routes and new copy must use the shared i18n catalog rather than hardcoded strings.
 
 ## Exact Next Steps
-1. Replace the session activity bridge with indexed backend history and richer metadata reads.
-2. Run live browser and device QA against deployed Base Sepolia vaults for lock-to-eligible transitions and real withdrawals.
-3. Extend the same state model for cooldown unlock.
-4. Continue replacing remaining untouched hardcoded strings with shared i18n copy as product surfaces expand.
+1. Configure real Base Sepolia RPC and factory env values for the API, then run live sync QA against deployed vaults.
+2. Validate idempotent reruns and lag handling with real create, deposit, and withdrawal traffic.
+3. Replace the file-backed store with the planned database-backed persistence layer when infrastructure is introduced.
+4. Extend the same indexed model for cooldown unlock.
 
 ## Verification Commands
 - `pnpm typecheck`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-phase5`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-phase5`
+- `pnpm --filter @goal-vault/api start`
+- `curl -s http://127.0.0.1:3001/health`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-phase6`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-phase6`
 - `git status --short`
-- `sed -n '1,240p' docs/plans/goal-vault-universal-react-native-phase-5.md`
-- `sed -n '1,240p' apps/mobile/src/hooks/useVaultWithdrawFlow.ts`
+- `sed -n '1,260p' docs/plans/goal-vault-universal-react-native-phase-6.md`
+- `sed -n '1,260p' apps/api/src/modules/indexer/factory-sync.service.ts`
 
 ## Handoff Note
-Phase 5 now completes the v1 money movement loop. For live QA, validate both locked and eligible vaults, confirm owner-only gating, watch the unlock countdown flip during an active session, and test real withdrawals on Base Sepolia before moving to backend indexing work.
+Phase 6 makes Goal Vault feel more production-shaped without changing product scope. After commit and push, set API RPC and factory env values, create a vault on Base Sepolia, then confirm that create, deposit, and withdraw flows all show up through backend-enriched vaults and activity after sync nudges.

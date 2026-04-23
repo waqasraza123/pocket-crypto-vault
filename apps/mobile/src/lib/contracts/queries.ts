@@ -10,7 +10,7 @@ import { readFactoryVaultAddresses, readGoalVaultSummary } from "./reads";
 export interface VaultQueryResult<T> {
   status: "success" | "empty" | "unavailable" | "error";
   data: T | null;
-  source: "onchain" | "fallback" | null;
+  source: "backend" | "onchain" | "fallback" | null;
   message: string | null;
 }
 

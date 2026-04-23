@@ -4,6 +4,7 @@ import type { CreateVaultInput, CreateVaultResult, CreateVaultTransactionState, 
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
 import { buildCreateVaultMetadataPayload, createVaultTransaction } from "../lib/contracts/create-vault";
+import { triggerIndexerSync } from "../lib/api/sync-status";
 import { saveVaultMetadata } from "../lib/api/vaults";
 import {
   getTransactionStatusCopy,
@@ -109,6 +110,10 @@ export const useCreateVaultMutation = () => {
         chainId: payload.chainId,
         vaultAddress: payload.contractAddress,
         status: metadataSave.status,
+      });
+      await triggerIndexerSync({
+        chainId: payload.chainId,
+        mode: "all",
       });
       invalidateVaultQueries();
 

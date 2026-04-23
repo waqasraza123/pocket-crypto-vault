@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { DepositFlowState, VaultDetail } from "../types";
+import { triggerIndexerSync } from "../lib/api/sync-status";
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
 import { getCurrentMessages, useI18n } from "../lib/i18n";
@@ -358,6 +359,10 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
         chainId,
         ownerAddress,
         event: activityEvent,
+      });
+      await triggerIndexerSync({
+        chainId,
+        mode: "all",
       });
       invalidateVaultQueries();
       setAllowanceOverrideAtomic(null);
