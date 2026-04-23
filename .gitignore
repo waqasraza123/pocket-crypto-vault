@@ -1,1 +1,10 @@
 docs/_local/
+node_modules/
+.turbo/
+**/.turbo/
+.expo/
+dist/
+dist-web/
+web-build/
+.DS_Store
+coverage/

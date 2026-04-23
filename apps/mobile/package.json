@@ -1,0 +1,36 @@
+{
+  "name": "@goal-vault/mobile",
+  "private": true,
+  "version": "0.1.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.1.1",
+    "@goal-vault/api-client": "workspace:*",
+    "@goal-vault/config": "workspace:*",
+    "@goal-vault/contracts-sdk": "workspace:*",
+    "@goal-vault/shared": "workspace:*",
+    "expo": "~55.0.0",
+    "expo-constants": "~55.0.15",
+    "expo-linking": "~55.0.14",
+    "expo-router": "~55.0.13",
+    "expo-status-bar": "~55.0.5",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-native": "0.83.6",
+    "react-native-safe-area-context": "~5.6.2",
+    "react-native-screens": "~4.23.0",
+    "react-native-web": "~0.21.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "babel-preset-expo": "~55.0.0"
+  }
+}

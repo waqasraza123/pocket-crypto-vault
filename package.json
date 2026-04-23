@@ -1,0 +1,17 @@
+{
+  "name": "goal-vault-base-usdc",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.11.1",
+  "scripts": {
+    "dev": "pnpm --filter @goal-vault/mobile start",
+    "dev:web": "pnpm --filter @goal-vault/mobile web",
+    "dev:ios": "pnpm --filter @goal-vault/mobile ios",
+    "dev:android": "pnpm --filter @goal-vault/mobile android",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.3"
+  }
+}

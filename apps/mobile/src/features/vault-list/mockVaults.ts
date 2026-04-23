@@ -1,0 +1,40 @@
+import type { VaultSummary } from "../../types";
+
+export const mockVaults: VaultSummary[] = [
+  {
+    address: "0x4fA4D52C8fA01d9a0c3b71Fe83eB31091A9340f3",
+    goalName: "Emergency Reserve",
+    note: "Six months of calm.",
+    targetAmount: 12000,
+    savedAmount: 7450,
+    unlockDate: "2026-08-30T00:00:00.000Z",
+    ruleType: "timeLock",
+    status: "active",
+    accentTone: "#6f8f84",
+    progressRatio: 0.62,
+  },
+  {
+    address: "0x8aC7F0D9a412B0A55F08683dD9a4bB8f6358eD91",
+    goalName: "Umrah Fund",
+    note: "Protected until travel season.",
+    targetAmount: 8500,
+    savedAmount: 4100,
+    unlockDate: "2026-11-12T00:00:00.000Z",
+    ruleType: "timeLock",
+    status: "locked",
+    accentTone: "#c49a57",
+    progressRatio: 0.48,
+  },
+  {
+    address: "0x9D56a671Ba41Fff55e8D9aB6B0B3Db4f5B0Bc1A2",
+    goalName: "Studio Upgrade",
+    note: "Cameras, lenses, and a quieter edit suite.",
+    targetAmount: 16000,
+    savedAmount: 13250,
+    unlockDate: "2026-05-18T00:00:00.000Z",
+    ruleType: "timeLock",
+    status: "unlocked",
+    accentTone: "#7c6bb3",
+    progressRatio: 0.83,
+  },
+] as const;
