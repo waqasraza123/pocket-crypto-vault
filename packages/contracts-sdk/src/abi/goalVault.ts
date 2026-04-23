@@ -57,4 +57,39 @@ export const goalVaultAbi = [
       { name: "vaultIsUnlocked", type: "bool" },
     ],
   },
+  {
+    type: "function",
+    stateMutability: "nonpayable",
+    name: "deposit",
+    inputs: [{ name: "amount", type: "uint256" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    stateMutability: "nonpayable",
+    name: "withdraw",
+    inputs: [
+      { name: "amount", type: "uint256" },
+      { name: "to", type: "address" },
+    ],
+    outputs: [],
+  },
+  {
+    type: "event",
+    name: "Deposited",
+    inputs: [
+      { indexed: true, name: "from", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+      { indexed: false, name: "timestamp", type: "uint256" },
+    ],
+  },
+  {
+    type: "event",
+    name: "Withdrawn",
+    inputs: [
+      { indexed: true, name: "to", type: "address" },
+      { indexed: false, name: "amount", type: "uint256" },
+      { indexed: false, name: "timestamp", type: "uint256" },
+    ],
+  },
 ] as const;

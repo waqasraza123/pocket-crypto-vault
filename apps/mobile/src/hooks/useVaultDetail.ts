@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { VaultDetail, VaultSummary } from "@goal-vault/shared";
 
 import { readVaultDetailByAddress, type VaultQueryResult } from "../lib/contracts/queries";
+import { createSessionVaultDetail, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
+import { getSessionVaultActivities, getSessionVaultMetadata, useVaultStoreVersion } from "../state/vault-store";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
   const { connectionState } = useWalletConnection();
+  const vaultStoreVersion = useVaultStoreVersion();
   const [result, setResult] = useState<VaultQueryResult<VaultDetail>>({
     status: "empty",
     data: null,
@@ -47,14 +50,84 @@ export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
     return () => {
       isActive = false;
     };
-  }, [connectionState, vaultAddress]);
+  }, [connectionState, vaultAddress, vaultStoreVersion]);
+
+  const sessionMetadata = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return null;
+    }
+
+    return getSessionVaultMetadata({
+      chainId: connectionState.session.chain.id,
+      vaultAddress,
+    });
+  }, [connectionState, vaultAddress, vaultStoreVersion]);
+
+  const vault = useMemo(() => {
+    if (result.data && sessionMetadata) {
+      return {
+        ...result.data,
+        ...mergeVaultSummaryWithMetadata({
+          vault: result.data,
+          metadata: sessionMetadata,
+        }),
+      };
+    }
+
+    if (result.data) {
+      return result.data;
+    }
+
+    if (sessionMetadata) {
+      return createSessionVaultDetail(sessionMetadata);
+    }
+
+    return null;
+  }, [result.data, sessionMetadata]);
+
+  const activityPreview = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return vault?.activityPreview ?? [];
+    }
+
+    const sessionEvents = getSessionVaultActivities({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+      vaultAddress,
+    });
+    const activityMap = new Map<string, VaultDetail["activityPreview"][number]>();
+
+    for (const event of vault?.activityPreview ?? []) {
+      activityMap.set(event.id, event);
+    }
+
+    for (const event of sessionEvents) {
+      activityMap.set(event.id, event);
+    }
+
+    return Array.from(activityMap.values())
+      .sort((left, right) => (left.occurredAt < right.occurredAt ? 1 : -1))
+      .slice(0, 6);
+  }, [connectionState, vault, vaultAddress, vaultStoreVersion]);
+
+  const notice =
+    sessionMetadata?.metadataStatus === "failed"
+      ? "This vault is live onchain, but its display details still need to be saved."
+      : sessionMetadata?.metadataStatus === "pending"
+        ? "This vault is active. Goal details are still syncing."
+      : result.message;
 
   return {
     connectionState,
     isLoading,
-    vault: result.data,
-    queryStatus: result.status,
-    dataSource: result.source,
-    notice: result.message,
+    vault: vault
+      ? {
+          ...vault,
+          activityPreview,
+        }
+      : null,
+    queryStatus: vault ? "success" : result.status,
+    dataSource: result.source ?? (vault ? "session" : null),
+    notice,
   };
 };

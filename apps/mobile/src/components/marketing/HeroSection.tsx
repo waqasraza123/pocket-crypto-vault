@@ -1,11 +1,9 @@
 import { useRouter } from "expo-router";
 import { View } from "react-native";
 
-import { appCopy } from "@goal-vault/config";
-
 import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
+import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
-import { heroHighlights } from "../../features/marketing/data";
 import { colors, radii, spacing } from "../../theme";
 import { AppHeading, AppText, PrimaryButton, SecondaryButton, SectionContainer } from "../primitives";
 import { HeroVaultPreviewCard } from "./HeroVaultPreviewCard";
@@ -13,6 +11,7 @@ import { HeroVaultPreviewCard } from "./HeroVaultPreviewCard";
 export const HeroSection = () => {
   const adaptiveLayout = useAdaptiveLayout();
   const router = useRouter();
+  const { inlineDirection, messages } = useI18n();
 
   return (
     <SectionContainer
@@ -33,27 +32,31 @@ export const HeroSection = () => {
           }}
         >
           <AppText size="sm" tone="accent" weight="semibold">
-            Base-native USDC saving
+            {messages.landing.heroBadge}
           </AppText>
         </View>
         <View style={{ gap: spacing[3] }}>
-          <AppHeading size={adaptiveLayout.isCompact ? "xl" : "display"}>{appCopy.heroTitle}</AppHeading>
+          <AppHeading size={adaptiveLayout.isCompact ? "xl" : "display"}>{messages.landing.heroTitle}</AppHeading>
           <AppText size="lg" tone="secondary">
-            {appCopy.heroSubtitle}
+            {messages.landing.heroSubtitle}
           </AppText>
         </View>
         <View style={{ gap: spacing[2] }}>
-          {heroHighlights.map((item) => (
+          {messages.landing.heroHighlights.map((item) => (
             <AppText key={item} tone="secondary">
               • {item}
             </AppText>
           ))}
         </View>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[3] }}>
-          <PrimaryButton icon="arrow-right" label="Open the app shell" onPress={() => router.push(routes.appHome)} />
+        <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
+          <PrimaryButton
+            icon="arrow-right"
+            label={messages.common.buttons.openAppShell}
+            onPress={() => router.push(routes.appHome)}
+          />
           <SecondaryButton
             icon="arrow-top-right"
-            label="See how it works"
+            label={messages.common.buttons.seeHowItWorks}
             onPress={() => router.push(routes.howItWorks)}
           />
         </View>

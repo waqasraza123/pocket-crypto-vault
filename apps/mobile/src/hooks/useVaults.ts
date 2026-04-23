@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { VaultSummary } from "@goal-vault/shared";
 
 import { readVaultSummariesByOwner, type VaultQueryResult } from "../lib/contracts/queries";
+import { createSessionVaultSummary, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
+import { getSessionVaultsByOwner, useVaultStoreVersion } from "../state/vault-store";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useVaults = () => {
   const { connectionState } = useWalletConnection();
+  const vaultStoreVersion = useVaultStoreVersion();
   const [result, setResult] = useState<VaultQueryResult<VaultSummary[]>>({
     status: "empty",
     data: null,
@@ -47,14 +50,55 @@ export const useVaults = () => {
     return () => {
       isActive = false;
     };
-  }, [connectionState]);
+  }, [connectionState, vaultStoreVersion]);
+
+  const sessionVaults = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain || !connectionState.session.address) {
+      return [];
+    }
+
+    return getSessionVaultsByOwner({
+      chainId: connectionState.session.chain.id,
+      ownerWallet: connectionState.session.address,
+    });
+  }, [connectionState, vaultStoreVersion]);
+
+  const mergedVaults = useMemo(() => {
+    const vaultMap = new Map<string, VaultSummary>();
+
+    for (const vault of result.data ?? []) {
+      const metadata = sessionVaults.find((record) => record.contractAddress.toLowerCase() === vault.address.toLowerCase()) ?? null;
+      vaultMap.set(vault.address.toLowerCase(), mergeVaultSummaryWithMetadata({ vault, metadata }));
+    }
+
+    for (const sessionVault of sessionVaults) {
+      const key = sessionVault.contractAddress.toLowerCase();
+      if (!vaultMap.has(key)) {
+        vaultMap.set(key, createSessionVaultSummary(sessionVault));
+      }
+    }
+
+    return Array.from(vaultMap.values()).sort((left, right) => (left.unlockDate > right.unlockDate ? 1 : -1));
+  }, [result.data, sessionVaults]);
+
+  const sessionNotice =
+    sessionVaults.find((record) => record.metadataStatus === "failed")?.metadataStatus === "failed"
+      ? "A vault is live onchain, but its display details still need to be saved."
+      : sessionVaults.find((record) => record.metadataStatus === "pending")
+        ? "Your newest vault is live. Goal details are still syncing."
+        : null;
+
+  const queryStatus =
+    mergedVaults.length > 0 ? "success" : result.status === "success" ? "empty" : result.status;
+  const dataSource = result.source ?? (mergedVaults.length > 0 ? "session" : null);
+  const notice = sessionNotice ?? result.message;
 
   return {
     connectionState,
     isLoading,
-    vaults: result.data ?? [],
-    queryStatus: result.status,
-    dataSource: result.source,
-    notice: result.message,
+    vaults: mergedVaults,
+    queryStatus,
+    dataSource,
+    notice,
   };
 };

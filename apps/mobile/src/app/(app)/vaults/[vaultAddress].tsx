@@ -1,17 +1,24 @@
 import { useLocalSearchParams } from "expo-router";
 import { View } from "react-native";
 
+import { useVaultDepositFlow } from "../../../hooks/useVaultDepositFlow";
 import { useVaultDetail } from "../../../hooks/useVaultDetail";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
+import { useI18n } from "../../../lib/i18n";
 import { parseVaultRouteParams } from "../../../lib/validation";
 import { useAdaptiveLayout } from "../../../hooks/useAdaptiveLayout";
 import { spacing } from "../../../theme";
-import { ChainDataLoadingState, DisconnectedState, StateBanner, UnsupportedNetworkNotice } from "../../../components/feedback";
+import {
+  ChainDataLoadingState,
+  DisconnectedState,
+  MetadataRecoveryNotice,
+  StateBanner,
+  UnsupportedNetworkNotice,
+} from "../../../components/feedback";
 import { ScreenHeader } from "../../../components/layout";
 import { EmptyState, PageContainer, Screen } from "../../../components/primitives";
 import {
-  DepositPreviewCard,
-  VaultActionPanel,
+  DepositActionPanel,
   VaultActivityPreview,
   VaultDetailHeader,
   VaultProgressPanel,
@@ -25,14 +32,16 @@ export default function VaultDetailScreen() {
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { dataSource, isLoading, notice, queryStatus, vault } = useVaultDetail(vaultAddress);
   const adaptiveLayout = useAdaptiveLayout();
+  const { messages } = useI18n();
+  const depositFlow = useVaultDepositFlow(vault);
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
-          eyebrow="Vault Detail"
-          title="One place for progress, rules, and next actions."
-          description="This screen uses typed route params and mock detail data so contract and backend reads can replace the source later without changing the structure."
+          eyebrow={messages.pages.vaultDetail.eyebrow}
+          title={messages.pages.vaultDetail.title}
+          description={messages.pages.vaultDetail.description}
         />
 
         {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
@@ -53,11 +62,25 @@ export default function VaultDetailScreen() {
           />
         ) : null}
 
+        {vault?.metadataStatus === "failed" ? (
+          <MetadataRecoveryNotice
+            description="This vault is active onchain, but its display details still need to be saved from the create flow."
+            title="Vault active"
+          />
+        ) : null}
+
+        {vault?.metadataStatus === "pending" ? (
+          <MetadataRecoveryNotice
+            description="This vault is active onchain. Goal details are still syncing into the app."
+            title="Vault active"
+          />
+        ) : null}
+
         {connectionState.status === "ready" && !isLoading && queryStatus !== "success" ? (
           <EmptyState
-            description="The requested vault could not be resolved from the supported chain reads or the fallback dataset."
+            description={messages.pages.vaultDetail.notAvailableDescription}
             icon="shield-star-outline"
-            title="Vault not available"
+            title={messages.pages.vaultDetail.notAvailableTitle}
           />
         ) : null}
 
@@ -71,8 +94,7 @@ export default function VaultDetailScreen() {
               <VaultActivityPreview events={vault.activityPreview} />
             </View>
             <View style={{ flex: 1, gap: spacing[4] }}>
-              <VaultActionPanel vault={vault} />
-              <DepositPreviewCard preview={vault.depositPreview} />
+              <DepositActionPanel flow={depositFlow} vault={vault} />
               <WithdrawNoticeCard withdrawEligibility={vault.withdrawEligibility} />
             </View>
           </View>

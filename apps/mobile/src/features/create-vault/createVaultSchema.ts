@@ -1,1 +1,1 @@
-export { createVaultSchema } from "@goal-vault/shared";
+export { createCreateVaultSchema, createVaultSchema } from "@goal-vault/shared";

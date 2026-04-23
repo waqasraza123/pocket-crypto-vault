@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import { Text, type StyleProp, type TextProps, type TextStyle } from "react-native";
 
 import { colors, typography } from "../../theme";
+import { useI18n } from "../../lib/i18n";
 
 type TextTone = "primary" | "secondary" | "muted" | "accent" | "positive" | "danger";
 type TextSize = "xs" | "sm" | "md" | "lg" | "xl";
@@ -40,6 +41,8 @@ export const AppText = ({
   style,
   ...props
 }: PropsWithChildren<AppTextProps>) => {
+  const { direction, textAlignStart } = useI18n();
+
   return (
     <Text
       {...props}
@@ -47,7 +50,8 @@ export const AppText = ({
         {
           fontFamily: typography.fontFamily.body,
           fontWeight: typography.weight[weight] as TextStyle["fontWeight"],
-          textAlign: align,
+          textAlign: align === "auto" ? textAlignStart : align,
+          writingDirection: direction,
         },
         toneStyles[tone],
         sizeStyles[size],

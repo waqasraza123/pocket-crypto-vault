@@ -3,6 +3,7 @@ import { View } from "react-native";
 
 import { getUnlockedVaultCount, getTotalSaved } from "../../features/vault-list/selectors";
 import { formatUsdc } from "../../lib/format";
+import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
 import { colors, radii, spacing } from "../../theme";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
@@ -16,6 +17,7 @@ export default function MyVaultsScreen() {
   const router = useRouter();
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { dataSource, isLoading, notice, queryStatus, vaults } = useVaults();
+  const { messages } = useI18n();
   const totalSaved = getTotalSaved(vaults);
   const unlockedCount = getUnlockedVaultCount(vaults);
 
@@ -25,10 +27,16 @@ export default function MyVaultsScreen() {
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
-          eyebrow="My Vaults"
-          title="Protect the money meant for something real."
-          description="A calm view of progress, rules, and upcoming withdrawal eligibility."
-          action={<PrimaryButton icon="plus" label="Create vault" onPress={() => router.push(routes.createVault)} />}
+          eyebrow={messages.pages.myVaults.eyebrow}
+          title={messages.pages.myVaults.title}
+          description={messages.pages.myVaults.description}
+          action={
+            <PrimaryButton
+              icon="plus"
+              label={messages.common.buttons.createVault}
+              onPress={() => router.push(routes.createVault)}
+            />
+          }
         />
 
         {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
@@ -54,15 +62,15 @@ export default function MyVaultsScreen() {
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
           <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
-            <AppText tone="secondary">Total saved</AppText>
+            <AppText tone="secondary">{messages.common.labels.totalSaved}</AppText>
             <AppHeading size="xl">{formatUsdc(totalSaved)}</AppHeading>
           </SurfaceCard>
           <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
-            <AppText tone="secondary">Vault count</AppText>
+            <AppText tone="secondary">{messages.common.labels.vaultCount}</AppText>
             <AppHeading size="xl">{vaults.length}</AppHeading>
           </SurfaceCard>
           <SurfaceCard tone="muted" style={{ flex: 1, minWidth: 220, backgroundColor: colors.accentSoft }}>
-            <AppText tone="secondary">Eligible soon</AppText>
+            <AppText tone="secondary">{messages.common.labels.eligibleSoon}</AppText>
             <AppHeading size="xl">{unlockedCount}</AppHeading>
             <View
               style={{
@@ -74,7 +82,7 @@ export default function MyVaultsScreen() {
               }}
             >
               <AppText size="sm" tone="secondary">
-                Withdraw when eligible
+                {messages.common.labels.withdrawWhenEligible}
               </AppText>
             </View>
           </SurfaceCard>
@@ -82,9 +90,11 @@ export default function MyVaultsScreen() {
 
         {connectionState.status === "ready" && !isLoading && queryStatus === "empty" ? (
           <EmptyState
-            description="Create your first vault in the next phase once onchain write flows land. The app is already connected and reading the supported network."
-            title="No vaults yet"
-          />
+            description={messages.pages.myVaults.emptyDescription}
+            title={messages.pages.myVaults.emptyTitle}
+          >
+            <PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />
+          </EmptyState>
         ) : null}
 
         {showVaultGrid ? <VaultGrid vaults={vaults} /> : null}

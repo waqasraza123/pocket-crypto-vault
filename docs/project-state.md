@@ -9,19 +9,21 @@ Core promise:
 - Protect the money from impulse withdrawals.
 
 ## Current Repository Reality
-The repository now has a real Phase 2 foundation:
+The repository now has a real Phase 4 foundation:
 - `pnpm` workspace monorepo
 - Expo-based universal React Native app in `apps/mobile`
 - Expo Router marketing and app route groups
 - shared TypeScript package boundaries for config, domain models, API client placeholder, contracts package, and contracts SDK
 - app-owned wallet boundary with Base and Base Sepolia support states
 - typed read-only chain access through centralized config and `viem`
-- hybrid product screens that use real connection/network state and fallback safely when chain config is incomplete
+- real create-vault write flow with typed transaction stages, receipt-based address resolution, owner-vault-list fallback, and session-aware metadata refresh
+- real USDC deposit flow with balance reads, allowance reads, approval handling, deposit confirmation, and session-backed activity refresh
+- hybrid product screens that use real connection/network state and fall back safely when chain config is incomplete
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- create, deposit, and withdraw transaction UX
-- backend/indexing
+- withdraw transaction UX
+- full backend/indexing rollout
 - production CI and release workflows
 
 ## Confirmed Product Boundaries
@@ -69,10 +71,11 @@ Still not implemented:
 - Phase 0: finalize PRD, flows, state model, contract interface draft, copy system
 - Phase 1: universal Expo scaffold, design system, adaptive shell, and static core screens
 - Phase 2: universal wallet boundary, chain config, contracts package boundaries, and read-only app integration
-- Phase 3: create-vault, deposit, and withdraw transaction flows
-- Phase 4: metadata backend and polish
-- Phase 5: cooldown unlock
-- Phase 6: guardian approval
+- Phase 3: create-vault write flow, success/recovery UX, and session-aware metadata refresh
+- Phase 4: deposit flow with USDC approval, confirmation UX, and refreshed vault/activity state
+- Phase 5: metadata backend and indexed activity polish
+- Phase 6: cooldown unlock
+- Phase 7: guardian approval
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -83,9 +86,13 @@ Still not implemented:
 - The repo direction has changed from the earlier web-first planning path to a universal React Native plan with one Expo app for iOS, Android, and web.
 - English and Arabic are part of the active plan, with Arabic implemented as a real RTL experience rather than a string-only translation layer.
 - Bilingual delivery is a first-class implementation track: direction-aware primitives, a header-level language switcher, translation parity, and RTL validation gates are required before launch.
+- The app now owns locale state in `apps/mobile/src/lib/i18n/`, persists the selected language, and applies `lang` plus `dir` at the document/root shell level so web and native share one RTL/LTR model.
 - Phase 1 is now scaffolded in-repo with a universal Expo app shell, typed shared models, adaptive layout primitives, and static product screens.
 - Phase 2 now adds Reown AppKit as the wallet strategy, `viem` read clients, centralized Base/Base Sepolia config, initial Solidity package boundaries, and app-owned connection/read hooks.
 - Wallet SDK specifics must stay isolated to `apps/mobile/src/lib/blockchain/wallet/`; presentation components consume only app-level hooks and connection state.
+- The first write flow must keep transaction stages app-owned and explicit instead of leaking wallet SDK state into presentation screens.
+- Metadata stays display-only. The app now uses a session cache after onchain success so just-created vaults remain visible before full backend/indexer rollout.
+- Deposit activity now follows the same bridge pattern: the app records confirmed deposits in local session state immediately after onchain confirmation, then defers full indexed history to the backend phase.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -94,10 +101,12 @@ Still not implemented:
 - The active universal React Native Phase 0 engineering spec lives at `docs/plans/goal-vault-universal-react-native-phase-0.md`.
 - The Phase 1 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-1.md`.
 - The Phase 2 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-2.md`.
+- The Phase 3 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-3.md`.
+- The Phase 4 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-4.md`.
 
 ## Deferred / Not Yet Implemented
-- Production write flows for create, deposit, and withdraw
-- Backend, database, and indexed activity integrations
+- Withdraw write flow
+- Backend, database, and indexed activity integrations beyond the current metadata POST/session fallback bridge
 - CI, linting, formatting, and release workflows
 
 ## Risks / Watchouts

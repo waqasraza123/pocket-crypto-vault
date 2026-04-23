@@ -1,4 +1,4 @@
-import type { Address } from "viem";
+import type { Address, Hash } from "viem";
 
 import type { SupportedChainId } from "./chain";
 
@@ -8,19 +8,26 @@ export type VaultRuleType = "timeLock";
 
 export type VaultStatus = "active" | "locked" | "unlocked" | "withdrawn" | "closed";
 
+export type VaultAccentTheme = "sand" | "sage" | "sky" | "terracotta";
+
+export type VaultMetadataStatus = "pending" | "saved" | "failed";
+
 export type VaultActivityEventType = "created" | "deposit" | "withdrawal" | "milestone";
 
 export interface Vault {
   address: VaultAddress;
   chainId: SupportedChainId;
   goalName: string;
+  category?: string;
   note?: string;
   targetAmount: number;
   savedAmount: number;
   unlockDate: string;
   ruleType: VaultRuleType;
   status: VaultStatus;
+  accentTheme?: VaultAccentTheme;
   accentTone: string;
+  metadataStatus?: VaultMetadataStatus;
 }
 
 export interface VaultSummary extends Vault {
@@ -32,17 +39,20 @@ export interface VaultSummary extends Vault {
   totalWithdrawnAtomic: bigint;
   currentBalanceAtomic: bigint;
   progressRatio: number;
-  source: "onchain" | "fallback";
+  source: "onchain" | "fallback" | "session";
 }
 
 export interface VaultActivityEvent {
   id: string;
   vaultAddress: VaultAddress;
+  chainId?: SupportedChainId;
   type: VaultActivityEventType;
   title: string;
   subtitle: string;
   occurredAt: string;
   amount?: number;
+  txHash?: Hash;
+  source?: "indexed" | "session" | "fallback";
 }
 
 export interface VaultEligibility {
@@ -56,6 +66,11 @@ export interface DepositPreview {
   depositAmount: number;
   resultingSavedAmount: number;
   resultingProgressRatio: number;
+  resultingRemainingAmount: number;
+}
+
+export interface DepositFormInput {
+  amount: string;
 }
 
 export interface VaultDetail extends VaultSummary {
@@ -76,6 +91,23 @@ export interface VaultReadError {
   message: string;
 }
 
+export interface TokenReadError {
+  code: "missing_rpc" | "read_failed";
+  message: string;
+}
+
+export type TokenReadResult<T> =
+  | {
+      status: "success";
+      data: T;
+      error: null;
+    }
+  | {
+      status: "unavailable" | "error";
+      data: null;
+      error: TokenReadError;
+    };
+
 export type VaultReadResult<T> =
   | {
       status: "success";
@@ -95,7 +127,47 @@ export type VaultReadResult<T> =
 
 export interface CreateVaultInput {
   goalName: string;
+  category: string;
   note: string;
   targetAmount: string;
+  accentTheme: VaultAccentTheme | "";
   unlockDate: string;
+}
+
+export type CreateVaultFormInput = CreateVaultInput;
+
+export interface CreateVaultReviewModel {
+  goalName: string;
+  category?: string;
+  note: string;
+  accentTheme?: VaultAccentTheme;
+  accentTone: string;
+  targetAmount: number;
+  targetAmountAtomic: bigint;
+  targetAmountDisplay: string;
+  assetSymbol: string;
+  networkLabel: string;
+  unlockDate: string;
+  unlockDateLabel: string;
+  unlockTimestamp: bigint;
+  protectionCopy: string[];
+}
+
+export interface VaultMetadataPayload {
+  contractAddress: VaultAddress;
+  chainId: SupportedChainId;
+  ownerWallet: Address;
+  displayName: string;
+  category?: string;
+  note?: string;
+  accentTheme?: VaultAccentTheme;
+  targetAmount: string;
+  unlockDate: string;
+}
+
+export interface VaultMetadataRecord extends VaultMetadataPayload {
+  metadataStatus: VaultMetadataStatus;
+  accentTone: string;
+  createdAt: string;
+  txHash?: Hash;
 }

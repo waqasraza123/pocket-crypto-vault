@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { formatWalletAddress } from "../../lib/blockchain/wallet/helpers";
+import { interpolate, useI18n } from "../../lib/i18n";
 import { spacing } from "../../theme";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { AppHeading, AppText, PrimaryButton, SecondaryButton, SurfaceCard } from "../primitives";
@@ -8,30 +9,31 @@ import { NetworkBadge } from "./NetworkBadge";
 
 export const WalletStatusCard = () => {
   const { connect, connectionState, disconnect, switchNetwork } = useWalletConnection();
+  const { inlineDirection, messages } = useI18n();
 
-  const chainLabel = connectionState.session?.chain?.shortName ?? "Wallet";
+  const chainLabel = connectionState.session?.chain?.shortName ?? messages.common.networkBase;
 
   return (
     <SurfaceCard tone={connectionState.status === "ready" ? "default" : "muted"}>
       <View style={{ gap: spacing[2] }}>
-        <AppHeading size="md">Connection status</AppHeading>
+        <AppHeading size="md">{messages.common.labels.connectionStatus}</AppHeading>
         <AppText tone="secondary">
           {connectionState.status === "walletUnavailable"
-            ? "Wallet connectivity is waiting for runtime configuration."
+            ? messages.wallet.runtimeWaiting
             : connectionState.status === "disconnected"
-              ? "Connect a wallet to move from the static shell into real Base-aware reads."
+              ? messages.wallet.disconnected
               : connectionState.status === "unsupportedNetwork"
-                ? "The wallet is connected, but the active network is outside the supported launch set."
+                ? messages.wallet.unsupported
                 : connectionState.status === "connecting"
-                  ? "Waiting for wallet approval."
-                  : "Wallet and supported network are ready for read-only chain access."}
+                  ? messages.wallet.connecting
+                  : messages.wallet.ready}
         </AppText>
       </View>
 
-      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: spacing[3] }}>
+      <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", alignItems: "center", gap: spacing[3] }}>
         {connectionState.session?.address ? (
           <NetworkBadge
-            label={connectionState.session.chain?.shortName ?? "Unsupported"}
+            label={connectionState.session.chain?.shortName ?? messages.common.unsupported}
             tone={connectionState.status === "unsupportedNetwork" ? "unsupported" : "supported"}
           />
         ) : null}
@@ -40,15 +42,19 @@ export const WalletStatusCard = () => {
         ) : null}
       </View>
 
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[3] }}>
+      <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
         {connectionState.status === "walletUnavailable" ? null : connectionState.status === "unsupportedNetwork" ? (
-          <PrimaryButton icon="swap-horizontal" label={`Switch to ${chainLabel}`} onPress={() => void switchNetwork()} />
+          <PrimaryButton
+            icon="swap-horizontal"
+            label={interpolate(messages.wallet.switchToChain, { chain: chainLabel })}
+            onPress={() => void switchNetwork()}
+          />
         ) : connectionState.status === "disconnected" ? (
-          <PrimaryButton icon="wallet-outline" label="Connect wallet" onPress={() => void connect()} />
+          <PrimaryButton icon="wallet-outline" label={messages.common.buttons.connectWallet} onPress={() => void connect()} />
         ) : connectionState.status === "connecting" ? (
-          <SecondaryButton icon="timer-sand" label="Connecting..." />
+          <SecondaryButton icon="timer-sand" label={messages.common.buttons.connecting} />
         ) : (
-          <SecondaryButton icon="logout" label="Disconnect" onPress={() => void disconnect()} />
+          <SecondaryButton icon="logout" label={messages.common.buttons.disconnect} onPress={() => void disconnect()} />
         )}
       </View>
     </SurfaceCard>

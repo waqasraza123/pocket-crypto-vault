@@ -4,8 +4,10 @@ import { Pressable, View } from "react-native";
 import { productConfig } from "@goal-vault/config";
 
 import { routes } from "../../lib/routing";
+import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
 import { AppHeading, AppText, PageContainer, PrimaryButton } from "../primitives";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { WalletEntryPlaceholder } from "./WalletEntryPlaceholder";
 
 export interface HeaderLink {
@@ -21,13 +23,14 @@ export interface DesktopHeaderProps {
 
 export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) => {
   const router = useRouter();
+  const { inlineDirection, justifyEnd, justifyStart, messages } = useI18n();
 
   return (
     <View style={{ borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.backgroundElevated }}>
       <PageContainer width="dashboard">
         <View
           style={{
-            flexDirection: "row",
+            flexDirection: inlineDirection(),
             alignItems: "center",
             justifyContent: "space-between",
             gap: spacing[6],
@@ -39,12 +42,12 @@ export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) 
               <View style={{ gap: spacing[1] }}>
                 <AppHeading size="sm">{productConfig.shortName}</AppHeading>
                 <AppText size="sm" tone="muted">
-                  Premium goal vaults on Base
+                  {messages.navigation.desktopTagline}
                 </AppText>
               </View>
             </Pressable>
           </Link>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing[3] }}>
+          <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3], justifyContent: justifyStart }}>
             {links.map((link) => (
               <Link key={link.label} href={link.href} asChild>
                 <Pressable
@@ -62,7 +65,8 @@ export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) 
               </Link>
             ))}
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing[3] }}>
+          <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3], justifyContent: justifyEnd }}>
+            <LanguageSwitcher />
             <WalletEntryPlaceholder />
             <PrimaryButton label={ctaLabel} onPress={() => router.push(ctaHref)} />
           </View>

@@ -1,3 +1,4 @@
+import { useI18n } from "../../lib/i18n";
 import { EmptyState, SecondaryButton } from "../primitives";
 
 export interface DisconnectedStateProps {
@@ -5,13 +6,15 @@ export interface DisconnectedStateProps {
 }
 
 export const DisconnectedState = ({ onConnect }: DisconnectedStateProps) => {
+  const { messages } = useI18n();
+
   return (
     <EmptyState
-      description="Connect a wallet to read vaults on Base, check the active network, and prepare for later onchain actions."
+      description={messages.wallet.connectToOpenAppDescription}
       icon="wallet-outline"
-      title="Connect a wallet to open the app"
+      title={messages.wallet.connectToOpenAppTitle}
     >
-      <SecondaryButton icon="wallet-outline" label="Connect wallet" onPress={onConnect} />
+      <SecondaryButton icon="wallet-outline" label={messages.common.buttons.connectWallet} onPress={onConnect} />
     </EmptyState>
   );
 };

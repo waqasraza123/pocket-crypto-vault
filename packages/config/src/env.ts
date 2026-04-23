@@ -25,6 +25,7 @@ const runtimeEnvSchema = z.object({
   EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL: optionalUrlSchema,
   EXPO_PUBLIC_BASE_FACTORY_ADDRESS: optionalAddressSchema,
   EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: optionalAddressSchema,
+  EXPO_PUBLIC_API_BASE_URL: optionalUrlSchema,
 });
 
 export interface AppRuntimeEnv {
@@ -32,6 +33,7 @@ export interface AppRuntimeEnv {
   walletMetadataUrl: string;
   rpcUrls: Record<SupportedChainId, string | null>;
   factoryAddresses: Record<SupportedChainId, Address | null>;
+  apiBaseUrl: string | null;
   validationErrors: string[];
 }
 
@@ -52,6 +54,7 @@ export const readAppRuntimeEnv = (
         8453: null,
         84532: null,
       },
+      apiBaseUrl: null,
       validationErrors: parsed.error.issues.map((issue) => issue.message),
     };
   }
@@ -68,6 +71,7 @@ export const readAppRuntimeEnv = (
       8453: (parsed.data.EXPO_PUBLIC_BASE_FACTORY_ADDRESS as Address | undefined) || null,
       84532: (parsed.data.EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS as Address | undefined) || null,
     },
+    apiBaseUrl: parsed.data.EXPO_PUBLIC_API_BASE_URL || null,
     validationErrors: [],
   };
 };

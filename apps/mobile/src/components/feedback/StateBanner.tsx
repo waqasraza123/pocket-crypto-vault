@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
 import { AppText } from "../primitives";
 
@@ -11,13 +12,14 @@ export interface StateBannerProps {
 }
 
 export const StateBanner = ({ tone = "neutral", icon = "information-outline", label }: StateBannerProps) => {
+  const { inlineDirection } = useI18n();
   const backgroundColor = tone === "warning" ? colors.warningSoft : colors.surfaceMuted;
   const iconColor = tone === "warning" ? colors.warning : colors.textSecondary;
 
   return (
     <View
       style={{
-        flexDirection: "row",
+        flexDirection: inlineDirection(),
         alignItems: "center",
         gap: spacing[2],
         borderRadius: radii.md,

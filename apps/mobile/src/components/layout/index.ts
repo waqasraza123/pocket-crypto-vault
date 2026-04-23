@@ -1,6 +1,7 @@
 export * from "./AppFooter";
 export * from "./AppShell";
 export * from "./DesktopHeader";
+export * from "./LanguageSwitcher";
 export * from "./MarketingShell";
 export * from "./MobileHeader";
 export * from "./NetworkBadge";

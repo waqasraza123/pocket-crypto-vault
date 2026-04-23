@@ -1,16 +1,19 @@
 import { FinalCtaSection, SecurityTrustSection } from "../../components/marketing";
 import { ScreenHeader } from "../../components/layout";
 import { PageContainer, Screen } from "../../components/primitives";
+import { useI18n } from "../../lib/i18n";
 import { spacing } from "../../theme";
 
 export default function SecurityScreen() {
+  const { messages } = useI18n();
+
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
       <PageContainer width="dashboard" style={{ gap: spacing[10], paddingTop: spacing[6] }}>
         <ScreenHeader
-          eyebrow="Security"
-          title="A narrow trust model is easier to understand."
-          description="The shell is intentionally calm and factual: Base only, USDC only, and rule-based withdrawal clarity."
+          eyebrow={messages.pages.security.eyebrow}
+          title={messages.pages.security.title}
+          description={messages.pages.security.description}
         />
         <SecurityTrustSection />
         <FinalCtaSection />

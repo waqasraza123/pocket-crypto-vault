@@ -1,6 +1,7 @@
 import { View } from "react-native";
 
 import { useWalletConnection } from "../hooks/useWalletConnection";
+import { useI18n } from "../lib/i18n";
 import { MarketingShell } from "../components/layout";
 import { WalletStatusCard } from "../components/layout/WalletStatusCard";
 import { FinalCtaSection, HeroSection, HowItWorksSection } from "../components/marketing";
@@ -9,6 +10,7 @@ import { spacing } from "../theme";
 
 export default function LandingScreen() {
   const { connectionState } = useWalletConnection();
+  useI18n();
 
   return (
     <MarketingShell>

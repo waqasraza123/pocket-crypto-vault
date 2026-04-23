@@ -1,11 +1,26 @@
-import { View } from "react-native";
+import { useMemo } from "react";
+import { Pressable, View } from "react-native";
+import { useRouter } from "expo-router";
 
 import { useCreateVaultForm } from "../../../features/create-vault/useCreateVaultForm";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
-import { colors, spacing } from "../../../theme";
+import { useCreateVaultMutation } from "../../../hooks/useCreateVaultMutation";
+import { useContractConfig } from "../../../hooks/useContractConfig";
+import { defaultGoalVaultChainId } from "../../../lib/blockchain/chains";
+import { buildCreateVaultReviewModel, getVaultAccentThemeOptions } from "../../../lib/contracts/mappers";
+import { interpolate, useI18n } from "../../../lib/i18n";
+import { routes } from "../../../lib/routing";
+import { colors, radii, spacing } from "../../../theme";
 import { FormSection, StepPills } from "../../../components/forms";
 import { ScreenHeader } from "../../../components/layout";
-import { StateBanner } from "../../../components/feedback";
+import {
+  CreateVaultErrorState,
+  DisconnectedState,
+  MetadataRecoveryNotice,
+  StateBanner,
+  TransactionStatusCard,
+  UnsupportedNetworkNotice,
+} from "../../../components/feedback";
 import {
   AmountField,
   AppText,
@@ -15,149 +30,293 @@ import {
   SecondaryButton,
   TextField,
 } from "../../../components/primitives";
-import { CreateVaultPreviewCard } from "../../../components/vaults";
-
-const stepLabels = ["Goal", "Rule", "Review"];
+import { CreateVaultPreviewCard, CreateVaultReviewPanel, CreateVaultSuccessCard } from "../../../components/vaults";
 
 export default function CreateVaultScreen() {
-  const { values, errors, step, preview, setFieldValue, nextStep, previousStep, validateAll } = useCreateVaultForm();
-  const { connectionState } = useWalletConnection();
+  const router = useRouter();
+  const { inlineDirection, messages } = useI18n();
+  const { values, errors, step, setFieldValue, nextStep, previousStep, validateAll, reset } = useCreateVaultForm();
+  const { chainId, config } = useContractConfig();
+  const { connect, connectionState, switchNetwork } = useWalletConnection();
+  const { state, statusCopy, result, submit, retry, reset: resetMutation, isBusy } = useCreateVaultMutation();
   const targetAmount = Number.parseFloat(values.targetAmount || "0");
+  const stepLabels = messages.pages.createVault.steps;
+  const accentThemeOptions = useMemo(() => getVaultAccentThemeOptions(), [messages.pages.createVault.accentThemes]);
 
+  const activeChainId = connectionState.session?.chain?.id ?? chainId ?? defaultGoalVaultChainId;
+  const review = useMemo(() => {
+    try {
+      return buildCreateVaultReviewModel({
+        chainId: activeChainId,
+        values,
+      });
+    } catch {
+      return null;
+    }
+  }, [activeChainId, values]);
+
+  const factoryConfigured = Boolean(config?.goalVaultFactoryAddress);
   const showGoalStep = step === 0;
   const showRuleStep = step === 1;
   const showReviewStep = step === 2;
+  const canSubmit = connectionState.status === "ready" && factoryConfigured && Boolean(review) && !isBusy;
+
+  const handleCreate = async () => {
+    const isValid = validateAll();
+
+    if (!isValid) {
+      return;
+    }
+
+    if (connectionState.status !== "ready") {
+      if (connectionState.status === "disconnected" || connectionState.status === "walletUnavailable") {
+        await connect();
+        return;
+      }
+
+      if (connectionState.status === "unsupportedNetwork") {
+        await switchNetwork();
+      }
+
+      return;
+    }
+
+    await submit(values);
+  };
+
+  const handleResetFlow = () => {
+    reset();
+    resetMutation();
+  };
+
+  const handleViewVault = () => {
+    if (result?.vaultAddress) {
+      router.replace(routes.vaultDetail(result.vaultAddress));
+    }
+  };
+
+  const handleBackToVaults = () => {
+    router.replace(routes.appHome);
+  };
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }} keyboardShouldPersistTaps="always">
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
-          eyebrow="Create Vault"
-          title="Protect one goal with a simple time rule."
-          description="This phase keeps creation static while the wallet, chain, and contract-read boundaries settle underneath the same universal route."
+          eyebrow={messages.pages.createVault.eyebrow}
+          title={messages.pages.createVault.title}
+          description={messages.pages.createVault.description}
         />
 
         <StateBanner
-          icon="hammer-wrench"
-          label={
-            connectionState.status === "ready"
-              ? "Wallet and network are ready. Vault creation transactions arrive in the next phase."
-              : "This flow is already structured for later transactions, but write wiring is intentionally deferred."
-          }
+          icon="shield-lock-outline"
+          label={messages.pages.createVault.stateBanner}
         />
 
-        <StepPills currentStep={step} steps={stepLabels} />
+        {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
+          <DisconnectedState onConnect={() => void connect()} />
+        ) : null}
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[6], alignItems: "flex-start" }}>
-          <View style={{ flex: 1, minWidth: 320, gap: spacing[6] }}>
-            {showGoalStep ? (
-              <FormSection
-                title="What are you saving for?"
-                description="Keep the goal specific enough that progress feels emotionally meaningful."
-              >
-                <TextField
-                  errorMessage={errors.goalName}
-                  helperText="Examples: Emergency reserve, Umrah fund, Studio upgrade"
-                  label="Goal name"
-                  onChangeText={(value) => setFieldValue("goalName", value)}
-                  placeholder="Emergency Reserve"
-                  value={values.goalName}
-                />
-                <TextField
-                  errorMessage={errors.note}
-                  helperText="Optional context that keeps the goal vivid."
-                  label="Short note"
-                  multiline
-                  onChangeText={(value) => setFieldValue("note", value)}
-                  placeholder="Six months of living costs, protected until late summer."
-                  value={values.note}
-                />
-                <AmountField
-                  errorMessage={errors.targetAmount}
-                  onChangeText={(value) => setFieldValue("targetAmount", value)}
-                  value={values.targetAmount}
-                />
-              </FormSection>
-            ) : null}
+        {connectionState.status === "unsupportedNetwork" ? (
+          <UnsupportedNetworkNotice
+            label={connectionState.session?.chainId ? `Chain ${connectionState.session.chainId}` : null}
+            onSwitch={() => void switchNetwork()}
+          />
+        ) : null}
 
-            {showRuleStep ? (
-              <FormSection
-                title="Protect this goal"
-                description="Phase 1 only supports a time lock, which keeps the rule model clear and simple."
-                aside={
-                  <View
-                    style={{
-                      borderRadius: 18,
-                      borderWidth: 1,
-                      borderColor: colors.border,
-                      backgroundColor: colors.surfaceMuted,
-                      padding: spacing[5],
-                      gap: spacing[2],
-                    }}
+        {connectionState.status === "ready" && !factoryConfigured ? (
+          <StateBanner
+            icon="alert-circle-outline"
+            label={messages.pages.createVault.missingFactory}
+            tone="warning"
+          />
+        ) : null}
+
+        {state.status !== "idle" && state.status !== "success" ? (
+          <TransactionStatusCard
+            description={statusCopy.description}
+            details={[
+              ...(state.txHash ? [{ label: messages.common.labels.transactionHash, value: state.txHash }] : []),
+              ...(state.vaultAddress ? [{ label: messages.common.labels.vaultAddress, value: state.vaultAddress }] : []),
+            ]}
+            title={statusCopy.title}
+            tone={state.status === "failed" ? "muted" : "accent"}
+          />
+        ) : null}
+
+        {state.status === "failed" && state.didOnchainSucceed && result ? (
+          <MetadataRecoveryNotice
+            description={state.errorMessage ?? messages.feedback.metadataFailedDescription}
+            onRetry={() => void retry()}
+            onViewVault={handleViewVault}
+            title={messages.feedback.metadataLiveTitle}
+          />
+        ) : null}
+
+        {state.status === "failed" && (!state.didOnchainSucceed || !result) ? (
+          <CreateVaultErrorState onReset={handleResetFlow} onRetry={() => void retry()} state={state} />
+        ) : null}
+
+        {state.status === "success" && result ? (
+          <CreateVaultSuccessCard onBackToVaults={handleBackToVaults} onViewVault={handleViewVault} result={result} />
+        ) : (
+          <>
+            <StepPills currentStep={step} steps={stepLabels} />
+
+            <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[6], alignItems: "flex-start" }}>
+              <View style={{ flex: 1, minWidth: 320, gap: spacing[6] }}>
+                {showGoalStep ? (
+                  <FormSection
+                    title={messages.pages.createVault.goalSectionTitle}
+                    description={messages.pages.createVault.goalSectionDescription}
                   >
-                    <AppText weight="semibold">Time lock</AppText>
-                    <AppText tone="secondary">
-                      Deposits stay easy. Withdrawals stay unavailable until the chosen date.
-                    </AppText>
-                  </View>
-                }
-              >
-                <TextField
-                  errorMessage={errors.unlockDate}
-                  helperText="Choose the date after which the vault can allow withdrawals."
-                  label="Unlock date"
-                  onChangeText={(value) => setFieldValue("unlockDate", value)}
-                  placeholder="2026-08-30"
-                  value={values.unlockDate}
-                />
-              </FormSection>
-            ) : null}
+                    <TextField
+                      errorMessage={errors.goalName}
+                      helperText={messages.pages.createVault.fields.goalNameHelper}
+                      label={messages.pages.createVault.fields.goalName}
+                      onChangeText={(value) => setFieldValue("goalName", value)}
+                      placeholder={messages.pages.createVault.fields.goalNamePlaceholder}
+                      value={values.goalName}
+                    />
+                    <AmountField
+                      errorMessage={errors.targetAmount}
+                      helperText={messages.pages.createVault.fields.targetAmountHelper}
+                      label={messages.pages.createVault.fields.targetAmount}
+                      onChangeText={(value) => setFieldValue("targetAmount", value)}
+                      value={values.targetAmount}
+                    />
+                    <TextField
+                      errorMessage={errors.category}
+                      helperText={messages.pages.createVault.fields.categoryHelper}
+                      label={messages.pages.createVault.fields.category}
+                      onChangeText={(value) => setFieldValue("category", value)}
+                      placeholder={messages.pages.createVault.fields.categoryPlaceholder}
+                      value={values.category}
+                    />
+                    <TextField
+                      errorMessage={errors.note}
+                      helperText={messages.pages.createVault.fields.noteHelper}
+                      label={messages.pages.createVault.fields.note}
+                      multiline
+                      onChangeText={(value) => setFieldValue("note", value)}
+                      placeholder={messages.pages.createVault.fields.notePlaceholder}
+                      value={values.note}
+                    />
+                    <View style={{ gap: spacing[3] }}>
+                      <AppText size="sm" tone="secondary" weight="medium">
+                        {messages.common.labels.accentTheme}
+                      </AppText>
+                      <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
+                        {accentThemeOptions.map((option) => {
+                          const isSelected = values.accentTheme === option.value;
 
-            {showReviewStep ? (
-              <FormSection
-                title="Review the vault"
-                description="The final create action arrives in a later phase. This step already locks the structure and copy."
-              >
-                <View
-                  style={{
-                    borderRadius: 18,
-                    borderWidth: 1,
-                    borderColor: colors.border,
-                    backgroundColor: colors.surface,
-                    padding: spacing[5],
-                    gap: spacing[3],
-                  }}
-                >
-                  <AppText tone="secondary">Goal</AppText>
-                  <AppText weight="semibold">{preview.goalName}</AppText>
-                  <AppText tone="secondary">Target amount</AppText>
-                  <AppText weight="semibold">{values.targetAmount || "0"} USDC</AppText>
-                  <AppText tone="secondary">Unlock date</AppText>
-                  <AppText weight="semibold">{values.unlockDate}</AppText>
+                          return (
+                            <Pressable
+                              key={option.value}
+                              accessibilityRole="button"
+                              onPress={() => setFieldValue("accentTheme", isSelected ? "" : option.value)}
+                              style={{
+                                borderRadius: radii.pill,
+                                borderWidth: 1,
+                                borderColor: option.tone,
+                                backgroundColor: isSelected ? option.tone : colors.surface,
+                                paddingHorizontal: spacing[4],
+                                paddingVertical: spacing[3],
+                              }}
+                            >
+                              <AppText style={{ color: isSelected ? colors.white : option.tone }} weight="semibold">
+                                {option.label}
+                              </AppText>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  </FormSection>
+                ) : null}
+
+                {showRuleStep ? (
+                  <FormSection
+                    title={messages.pages.createVault.ruleSectionTitle}
+                    description={messages.pages.createVault.ruleSectionDescription}
+                    aside={
+                      <View
+                        style={{
+                          borderRadius: 18,
+                          borderWidth: 1,
+                          borderColor: colors.border,
+                          backgroundColor: colors.surfaceMuted,
+                          padding: spacing[5],
+                          gap: spacing[2],
+                        }}
+                      >
+                        <AppText weight="semibold">{messages.pages.createVault.timeLockOnly}</AppText>
+                        <AppText tone="secondary">
+                          {messages.pages.createVault.timeLockDescription}
+                        </AppText>
+                      </View>
+                    }
+                  >
+                    <TextField
+                      errorMessage={errors.unlockDate}
+                      helperText={messages.pages.createVault.fields.unlockDateHelper}
+                      label={messages.pages.createVault.fields.unlockDate}
+                      onChangeText={(value) => setFieldValue("unlockDate", value)}
+                      placeholder={messages.pages.createVault.fields.unlockDatePlaceholder}
+                      value={values.unlockDate}
+                    />
+                  </FormSection>
+                ) : null}
+
+                {showReviewStep && review ? (
+                  <FormSection
+                    title={messages.pages.createVault.reviewSectionTitle}
+                    description={messages.pages.createVault.reviewSectionDescription}
+                  >
+                    <CreateVaultReviewPanel review={review} />
+                  </FormSection>
+                ) : null}
+
+                <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
+                  {step > 0 ? (
+                    <SecondaryButton disabled={isBusy} icon="arrow-left" label={messages.common.buttons.back} onPress={previousStep} />
+                  ) : null}
+                  {step < 2 ? (
+                    <PrimaryButton disabled={isBusy} icon="arrow-right" label={messages.common.buttons.continue} onPress={nextStep} />
+                  ) : connectionState.status === "disconnected" || connectionState.status === "walletUnavailable" ? (
+                    <PrimaryButton
+                      disabled={isBusy}
+                      icon="wallet-outline"
+                      label={messages.common.buttons.connectWallet}
+                      onPress={() => void connect()}
+                    />
+                  ) : connectionState.status === "unsupportedNetwork" ? (
+                    <PrimaryButton
+                      disabled={isBusy}
+                      icon="swap-horizontal"
+                      label={interpolate(messages.wallet.switchToChain, { chain: messages.common.networkBase })}
+                      onPress={() => void switchNetwork()}
+                    />
+                  ) : (
+                    <PrimaryButton
+                      disabled={!canSubmit}
+                      icon="shield-check-outline"
+                      label={messages.common.buttons.createVault}
+                      onPress={() => void handleCreate()}
+                    />
+                  )}
                 </View>
-              </FormSection>
-            ) : null}
+              </View>
 
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[3] }}>
-              {step > 0 ? <SecondaryButton icon="arrow-left" label="Back" onPress={previousStep} /> : null}
-              {step < 2 ? (
-                <PrimaryButton icon="arrow-right" label="Continue" onPress={nextStep} />
-              ) : (
-                <PrimaryButton
-                  icon="check-circle-outline"
-                  label="Validation ready"
-                  onPress={() => {
-                    validateAll();
-                  }}
-                />
-              )}
+              <View style={{ flex: 1, minWidth: 280, gap: spacing[4] }}>
+                <CreateVaultPreviewCard targetAmount={Number.isFinite(targetAmount) ? targetAmount : 0} values={values} />
+                {result && state.status !== "success" && state.didOnchainSucceed ? (
+                  <SecondaryButton icon="shield-check-outline" label={messages.common.buttons.viewVault} onPress={handleViewVault} />
+                ) : null}
+              </View>
             </View>
-          </View>
-
-          <View style={{ flex: 1, minWidth: 280 }}>
-            <CreateVaultPreviewCard targetAmount={Number.isFinite(targetAmount) ? targetAmount : 0} values={values} />
-          </View>
-        </View>
+          </>
+        )}
       </PageContainer>
     </Screen>
   );

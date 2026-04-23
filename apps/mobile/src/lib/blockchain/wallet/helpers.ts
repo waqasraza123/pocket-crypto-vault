@@ -98,7 +98,7 @@ export const createConnectionState = ({
     chainSupportStatus: "supported",
     session,
     isReadyForReads: true,
-    isReadyForWrites: false,
+    isReadyForWrites: true,
     reason: null,
   };
 };

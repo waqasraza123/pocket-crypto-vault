@@ -3,6 +3,7 @@ import { Pressable, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors, radii, spacing } from "../../theme";
+import { useI18n } from "../../lib/i18n";
 import { AppText } from "./AppText";
 
 export interface PrimaryButtonProps {
@@ -13,6 +14,8 @@ export interface PrimaryButtonProps {
 }
 
 export const PrimaryButton = ({ label, onPress, disabled, icon }: PrimaryButtonProps) => {
+  const { getDirectionalIcon, inlineDirection } = useI18n();
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -25,8 +28,8 @@ export const PrimaryButton = ({ label, onPress, disabled, icon }: PrimaryButtonP
         paddingVertical: spacing[4],
       })}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing[2] }}>
-        {icon ? <MaterialCommunityIcons color={colors.white} name={icon} size={18} /> : null}
+      <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "center", gap: spacing[2] }}>
+        {icon ? <MaterialCommunityIcons color={colors.white} name={getDirectionalIcon(icon)} size={18} /> : null}
         <AppText align="center" style={{ color: colors.white }} weight="semibold">
           {label}
         </AppText>

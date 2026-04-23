@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 import { TextInput, View, type TextInputProps } from "react-native";
 
+import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing, typography } from "../../theme";
 import { AppText } from "./AppText";
 
@@ -12,6 +13,8 @@ export interface TextFieldProps extends TextInputProps {
 
 export const TextField = forwardRef<TextInput, TextFieldProps>(
   ({ label, helperText, errorMessage, multiline, style, ...props }, ref) => {
+    const { direction, textAlignStart } = useI18n();
+
     return (
       <View style={{ gap: spacing[2] }}>
         {label ? (
@@ -35,7 +38,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
               paddingVertical: spacing[4],
               fontSize: typography.size.md,
               lineHeight: typography.lineHeight.md,
+              textAlign: textAlignStart,
               textAlignVertical: multiline ? "top" : "center",
+              writingDirection: direction,
             },
             style,
           ]}

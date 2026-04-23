@@ -2,6 +2,7 @@ import type { PropsWithChildren } from "react";
 import type { StyleProp, TextStyle } from "react-native";
 
 import { typography } from "../../theme";
+import { useI18n } from "../../lib/i18n";
 import { AppText, type AppTextProps } from "./AppText";
 
 type HeadingSize = "sm" | "md" | "lg" | "xl" | "display";
@@ -43,6 +44,8 @@ export const AppHeading = ({
   style,
   ...props
 }: PropsWithChildren<AppHeadingProps>) => {
+  const { isRTL } = useI18n();
+
   return (
     <AppText
       {...props}
@@ -51,7 +54,10 @@ export const AppHeading = ({
         {
           fontFamily: typography.fontFamily.heading,
         },
-        headingSizeStyles[size],
+        {
+          ...headingSizeStyles[size],
+          letterSpacing: isRTL ? 0 : headingSizeStyles[size].letterSpacing,
+        },
         style,
       ]}
     >

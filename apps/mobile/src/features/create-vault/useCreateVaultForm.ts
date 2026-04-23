@@ -1,27 +1,48 @@
 import { useMemo, useState } from "react";
 
-import { createVaultSchema } from "./createVaultSchema";
+import { createCreateVaultSchema } from "./createVaultSchema";
 import { createVaultDefaults } from "./createVaultDefaults";
 import type { CreateVaultInput } from "../../types";
+import { useI18n } from "../../lib/i18n";
 
 type CreateVaultField = keyof CreateVaultInput;
 
 const stepFields: Record<number, CreateVaultField[]> = {
-  0: ["goalName", "note", "targetAmount"],
+  0: ["goalName", "category", "note", "targetAmount", "accentTheme"],
   1: ["unlockDate"],
-  2: ["goalName", "note", "targetAmount", "unlockDate"],
+  2: ["goalName", "category", "note", "targetAmount", "accentTheme", "unlockDate"],
 };
 
 export const useCreateVaultForm = () => {
+  const { messages } = useI18n();
   const [values, setValues] = useState<CreateVaultInput>(createVaultDefaults);
   const [errors, setErrors] = useState<Partial<Record<CreateVaultField, string>>>({});
   const [step, setStep] = useState(0);
+  const createVaultSchema = useMemo(
+    () =>
+      createCreateVaultSchema({
+        goalNameRequired: messages.validation.createVault.goalNameRequired,
+        goalNameMax: messages.validation.createVault.goalNameMax,
+        categoryMax: messages.validation.createVault.categoryMax,
+        noteMax: messages.validation.createVault.noteMax,
+        targetAmount: messages.validation.createVault.targetAmount,
+        unlockDate: messages.validation.createVault.unlockDate,
+      }),
+    [messages.validation.createVault],
+  );
 
   const validateFields = (fields: CreateVaultField[]) => {
     const result = createVaultSchema.safeParse(values);
 
     if (result.success) {
-      setErrors({});
+      setErrors((current) => {
+        const nextErrors = { ...current };
+        for (const field of fields) {
+          nextErrors[field] = undefined;
+        }
+
+        return nextErrors;
+      });
       return true;
     }
 
@@ -34,6 +55,7 @@ export const useCreateVaultForm = () => {
     }
 
     setErrors((current) => ({
+      ...Object.fromEntries(fields.map((field) => [field, undefined])),
       ...current,
       ...nextErrors,
     }));
@@ -68,12 +90,14 @@ export const useCreateVaultForm = () => {
   const preview = useMemo(() => {
     const amount = Number.parseFloat(values.targetAmount || "0");
     return {
-      goalName: values.goalName || "Your next milestone",
-      note: values.note || "A protected vault for a meaningful goal.",
+      goalName: values.goalName || messages.pages.createVault.preview.emptyGoal,
+      category: values.category || undefined,
+      note: values.note || messages.pages.createVault.preview.emptyNote,
       targetAmount: Number.isFinite(amount) ? amount : 0,
+      accentTheme: values.accentTheme || "",
       unlockDate: values.unlockDate,
     };
-  }, [values]);
+  }, [messages.pages.createVault.preview.emptyGoal, messages.pages.createVault.preview.emptyNote, values]);
 
   return {
     values,
@@ -83,6 +107,12 @@ export const useCreateVaultForm = () => {
     setFieldValue,
     nextStep,
     previousStep,
+    setStep,
+    reset: () => {
+      setValues(createVaultDefaults);
+      setErrors({});
+      setStep(0);
+    },
     validateAll: () => validateFields(stepFields[2]),
   };
 };

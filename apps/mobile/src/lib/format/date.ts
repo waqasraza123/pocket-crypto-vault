@@ -1,5 +1,7 @@
+import { getCurrentLocaleTag } from "../i18n";
+
 export const formatLongDate = (value: string): string =>
-  new Intl.DateTimeFormat("en-US", {
+  new Intl.DateTimeFormat(getCurrentLocaleTag(), {
     month: "long",
     day: "numeric",
     year: "numeric",

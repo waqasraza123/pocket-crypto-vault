@@ -1,5 +1,6 @@
 import { View } from "react-native";
 
+import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
 import { AppText } from "../primitives";
 
@@ -9,8 +10,10 @@ export interface StepPillsProps {
 }
 
 export const StepPills = ({ currentStep, steps }: StepPillsProps) => {
+  const { inlineDirection } = useI18n();
+
   return (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[2] }}>
+    <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
       {steps.map((step, index) => {
         const isActive = index === currentStep;
         return (

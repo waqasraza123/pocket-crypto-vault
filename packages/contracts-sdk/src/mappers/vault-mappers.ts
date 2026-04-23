@@ -1,12 +1,15 @@
-import { formatUnits } from "viem";
-
 import type { GoalVaultContractSummary } from "../types/contract-types";
 import type { VaultMetadataFallback } from "../types/vault-types";
+import { formatTokenAmountNumber } from "./token-mappers";
 import type { VaultAddress, VaultDetail, VaultEligibility, VaultSummary } from "@goal-vault/shared";
 
 const usdcDecimals = 6;
 
-const toDisplayNumber = (value: bigint): number => Number.parseFloat(formatUnits(value, usdcDecimals));
+const toDisplayNumber = (value: bigint): number =>
+  formatTokenAmountNumber({
+    value,
+    decimals: usdcDecimals,
+  });
 
 const deriveVaultStatus = (summary: GoalVaultContractSummary): VaultSummary["status"] => {
   if (summary.currentBalance === 0n && summary.totalWithdrawn > 0n) {
@@ -44,13 +47,16 @@ export const mapVaultSummary = ({
     assetAddress: summary.asset,
     ownerAddress: summary.owner,
     goalName: metadataFallback?.goalName || "Goal Vault",
+    category: metadataFallback?.category,
     note: metadataFallback?.note,
     targetAmount,
     savedAmount,
     unlockDate: new Date(Number(summary.unlockAt) * 1000).toISOString(),
     ruleType: "timeLock",
     status: deriveVaultStatus(summary),
+    accentTheme: metadataFallback?.accentTheme as VaultSummary["accentTheme"],
     accentTone: metadataFallback?.accentTone || "#87684f",
+    metadataStatus: metadataFallback?.metadataStatus,
     targetAmountAtomic: summary.targetAmount,
     savedAmountAtomic: summary.currentBalance,
     totalDepositedAtomic: summary.totalDeposited,
@@ -105,6 +111,7 @@ export const mapVaultDetail = (vault: VaultSummary): VaultDetail => {
         vault.targetAmount > 0
           ? Math.min((vault.savedAmount + (nextDepositAmount > 0 ? nextDepositAmount : 0)) / vault.targetAmount, 1)
           : 0,
+      resultingRemainingAmount: Math.max(vault.targetAmount - (vault.savedAmount + (nextDepositAmount > 0 ? nextDepositAmount : 0)), 0),
     },
     withdrawEligibility: buildVaultEligibility(vault),
     activityPreview: [],

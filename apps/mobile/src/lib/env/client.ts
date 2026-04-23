@@ -13,3 +13,5 @@ export const hasRpcUrlForChain = (chainId: SupportedChainId): boolean => Boolean
 
 export const hasFactoryAddressForChain = (chainId: SupportedChainId): boolean =>
   Boolean(clientEnv.factoryAddresses[chainId]);
+
+export const hasApiBaseUrl = (): boolean => Boolean(clientEnv.apiBaseUrl);

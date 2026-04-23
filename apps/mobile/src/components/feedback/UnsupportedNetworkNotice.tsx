@@ -1,3 +1,4 @@
+import { interpolate, useI18n } from "../../lib/i18n";
 import { SurfaceCard, AppHeading, AppText, SecondaryButton } from "../primitives";
 
 export interface UnsupportedNetworkNoticeProps {
@@ -6,15 +7,17 @@ export interface UnsupportedNetworkNoticeProps {
 }
 
 export const UnsupportedNetworkNotice = ({ onSwitch, label }: UnsupportedNetworkNoticeProps) => {
+  const { messages } = useI18n();
+
   return (
     <SurfaceCard tone="muted">
-      <AppHeading size="md">Switch to Base or Base Sepolia</AppHeading>
+      <AppHeading size="md">{messages.feedback.unsupportedNetworkTitle}</AppHeading>
       <AppText tone="secondary">
         {label
-          ? `${label} is connected right now. Goal Vault reads are only enabled on Base and Base Sepolia.`
-          : "Goal Vault reads are only enabled on Base and Base Sepolia."}
+          ? interpolate(messages.feedback.unsupportedNetworkDescriptionWithLabel, { label })
+          : messages.feedback.unsupportedNetworkDescription}
       </AppText>
-      <SecondaryButton icon="swap-horizontal" label="Switch network" onPress={onSwitch} />
+      <SecondaryButton icon="swap-horizontal" label={messages.common.buttons.switchNetwork} onPress={onSwitch} />
     </SurfaceCard>
   );
 };

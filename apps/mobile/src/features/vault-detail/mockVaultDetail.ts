@@ -10,6 +10,7 @@ const detailMap: Record<VaultAddress, VaultDetail> = {
       depositAmount: 250,
       resultingSavedAmount: 7700,
       resultingProgressRatio: 0.64,
+      resultingRemainingAmount: 4300,
     },
     withdrawEligibility: {
       state: "locked",
@@ -28,6 +29,7 @@ const detailMap: Record<VaultAddress, VaultDetail> = {
       depositAmount: 400,
       resultingSavedAmount: 4500,
       resultingProgressRatio: 0.53,
+      resultingRemainingAmount: 4000,
     },
     withdrawEligibility: {
       state: "locked",
@@ -46,6 +48,7 @@ const detailMap: Record<VaultAddress, VaultDetail> = {
       depositAmount: 500,
       resultingSavedAmount: 13750,
       resultingProgressRatio: 0.86,
+      resultingRemainingAmount: 2250,
     },
     withdrawEligibility: {
       state: "eligible",

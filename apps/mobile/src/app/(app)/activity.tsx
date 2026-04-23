@@ -2,6 +2,8 @@ import { View } from "react-native";
 
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useVaultActivity } from "../../hooks/useVaultActivity";
+import { formatLongDate } from "../../lib/format";
+import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
 import { DisconnectedState, StateBanner, UnsupportedNetworkNotice } from "../../components/feedback";
 import { ScreenHeader } from "../../components/layout";
@@ -10,14 +12,15 @@ import { AppText, PageContainer, Screen, SurfaceCard } from "../../components/pr
 export default function ActivityScreen() {
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { dataSource, events, notice } = useVaultActivity();
+  const { inlineDirection, messages } = useI18n();
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
       <PageContainer width="reading" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
-          eyebrow="Activity"
-          title="Every vault movement in one calm timeline."
-          description="Event indexing comes later. The screen structure is already ready for merged onchain and metadata activity."
+          eyebrow={messages.pages.activity.eyebrow}
+          title={messages.pages.activity.title}
+          description={messages.pages.activity.description}
         />
         {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
           <DisconnectedState onConnect={() => void connect()} />
@@ -35,7 +38,7 @@ export default function ActivityScreen() {
         <View style={{ gap: spacing[4] }}>
           {events.map((event) => (
             <SurfaceCard key={event.id}>
-              <View style={{ flexDirection: "row", alignItems: "flex-start", gap: spacing[4] }}>
+              <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[4] }}>
                 <View
                   style={{
                     width: 12,
@@ -49,11 +52,7 @@ export default function ActivityScreen() {
                   <AppText weight="semibold">{event.title}</AppText>
                   <AppText tone="secondary">{event.subtitle}</AppText>
                   <AppText size="sm" tone="muted">
-                    {new Date(event.occurredAt).toLocaleDateString("en-US", {
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {formatLongDate(event.occurredAt)}
                   </AppText>
                 </View>
               </View>

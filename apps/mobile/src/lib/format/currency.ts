@@ -1,5 +1,7 @@
+import { getCurrentLocaleTag } from "../i18n";
+
 export const formatCurrency = (value: number): string =>
-  new Intl.NumberFormat("en-US", {
+  new Intl.NumberFormat(getCurrentLocaleTag(), {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: value >= 1000 ? 0 : 2,
