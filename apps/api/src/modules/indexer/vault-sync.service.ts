@@ -6,7 +6,12 @@ import { readGoalVaultSummaryForIndexer } from "../../lib/contracts";
 import { classifyObservedError } from "../../lib/observability/event-classification";
 import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
-import { normalizeVaultDepositLogs, normalizeVaultWithdrawalLogs } from "./event-normalizer";
+import {
+  getRuleStatePatchFromSummary,
+  normalizeVaultDepositLogs,
+  normalizeVaultUnlockLifecycleLogs,
+  normalizeVaultWithdrawalLogs,
+} from "./event-normalizer";
 import type { PersistedVaultEventRecord } from "./indexer-store";
 import { mergeVaultRecord } from "./reconciliation.service";
 import { createVaultSyncStateKey, isLogAfterCursor } from "./sync-state.service";
@@ -112,7 +117,19 @@ const syncVaultAddress = async ({
         cursor: previousState,
       }),
     );
-    const events = sortEventRecords([...deposits, ...withdrawals]);
+    const unlockLifecycleEvents = normalizeVaultUnlockLifecycleLogs({
+      chainId,
+      vaultAddress,
+      ownerAddress,
+      logs: rawLogs,
+    }).filter((item) =>
+      isLogAfterCursor({
+        blockNumber: item.blockNumber,
+        logIndex: item.logIndex,
+        cursor: previousState,
+      }),
+    );
+    const events = sortEventRecords([...deposits, ...withdrawals, ...unlockLifecycleEvents]);
 
     for (const event of events) {
       await context.store.upsertEvent(event);
@@ -132,13 +149,24 @@ const syncVaultAddress = async ({
           ownerWallet: summary.owner,
           assetAddress: summary.asset,
           targetAmountAtomic: summary.targetAmount.toString(),
-          unlockDate: new Date(Number(summary.unlockAt) * 1000).toISOString(),
           totalDepositedAtomic: summary.totalDeposited.toString(),
           totalWithdrawnAtomic: summary.totalWithdrawn.toString(),
           currentBalanceAtomic: summary.currentBalance.toString(),
           lastActivityAt: events.at(-1)?.occurredAt ?? currentVault?.lastActivityAt ?? currentVault?.createdAt ?? null,
           lastIndexedAt: new Date().toISOString(),
           onchainFound: true,
+          ...getRuleStatePatchFromSummary({
+            summary: {
+              ruleType: summary.ruleType,
+              unlockAt: summary.unlockAt,
+              cooldownDuration: summary.cooldownDuration,
+              guardian: summary.guardian,
+              unlockRequestedAt: summary.unlockRequestedAt,
+              guardianDecision: summary.guardianDecision,
+              guardianDecisionAt: summary.guardianDecisionAt,
+              unlockEligibleAt: summary.unlockEligibleAt,
+            },
+          }),
         },
       });
       await context.store.upsertVault(nextVault);

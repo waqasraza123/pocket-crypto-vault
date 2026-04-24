@@ -19,7 +19,7 @@ export const UnlockCountdownCard = ({ eligibility }: { eligibility: WithdrawElig
           time: formatUnlockCountdownLabel(eligibility.countdown),
         })}
       </AppText>
-      <AppText weight="semibold">{formatLongDateTime(eligibility.unlockDate)}</AppText>
+      {eligibility.unlockDate ? <AppText weight="semibold">{formatLongDateTime(eligibility.unlockDate)}</AppText> : null}
     </SurfaceCard>
   );
 };

@@ -305,21 +305,88 @@ export default function CreateVaultScreen() {
                           gap: spacing[2],
                         }}
                       >
-                        <AppText weight="semibold">{messages.pages.createVault.timeLockOnly}</AppText>
+                        <AppText weight="semibold">
+                          {values.ruleType === "timeLock"
+                            ? "Time lock"
+                            : values.ruleType === "cooldownUnlock"
+                              ? "Cooldown unlock"
+                              : "Guardian approval"}
+                        </AppText>
                         <AppText tone="secondary">
-                          {messages.pages.createVault.timeLockDescription}
+                          {values.ruleType === "timeLock"
+                            ? messages.pages.createVault.timeLockDescription
+                            : values.ruleType === "cooldownUnlock"
+                              ? "The owner must request unlock first. Funds become withdrawable after the cooldown ends."
+                              : "The owner requests unlock and the assigned guardian must approve before withdrawal is allowed."}
                         </AppText>
                       </View>
                     }
                   >
-                    <TextField
-                      errorMessage={errors.unlockDate}
-                      helperText={messages.pages.createVault.fields.unlockDateHelper}
-                      label={messages.pages.createVault.fields.unlockDate}
-                      onChangeText={(value) => setFieldValue("unlockDate", value)}
-                      placeholder={messages.pages.createVault.fields.unlockDatePlaceholder}
-                      value={values.unlockDate}
-                    />
+                    <View style={{ gap: spacing[3] }}>
+                      <AppText size="sm" tone="secondary" weight="medium">
+                        Protection rule
+                      </AppText>
+                      <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
+                        {[
+                          ["timeLock", "Time Lock"],
+                          ["cooldownUnlock", "Cooldown Unlock"],
+                          ["guardianApproval", "Guardian Approval"],
+                        ].map(([ruleType, label]) => {
+                          const isSelected = values.ruleType === ruleType;
+
+                          return (
+                            <Pressable
+                              key={ruleType}
+                              accessibilityRole="button"
+                              onPress={() => setFieldValue("ruleType", ruleType as typeof values.ruleType)}
+                              style={{
+                                borderRadius: radii.pill,
+                                borderWidth: 1,
+                                borderColor: isSelected ? colors.accentStrong : colors.border,
+                                backgroundColor: isSelected ? colors.accentSoft : colors.surface,
+                                paddingHorizontal: spacing[4],
+                                paddingVertical: spacing[3],
+                              }}
+                            >
+                              <AppText weight="semibold">{label}</AppText>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    </View>
+
+                    {values.ruleType === "timeLock" ? (
+                      <TextField
+                        errorMessage={errors.unlockDate}
+                        helperText={messages.pages.createVault.fields.unlockDateHelper}
+                        label={messages.pages.createVault.fields.unlockDate}
+                        onChangeText={(value) => setFieldValue("unlockDate", value)}
+                        placeholder={messages.pages.createVault.fields.unlockDatePlaceholder}
+                        value={values.unlockDate}
+                      />
+                    ) : null}
+
+                    {values.ruleType === "cooldownUnlock" ? (
+                      <TextField
+                        errorMessage={errors.cooldownDays}
+                        helperText="Choose how long the unlock request should wait before withdrawal becomes eligible."
+                        label="Cooldown days"
+                        onChangeText={(value) => setFieldValue("cooldownDays", value)}
+                        placeholder="7"
+                        value={values.cooldownDays}
+                      />
+                    ) : null}
+
+                    {values.ruleType === "guardianApproval" ? (
+                      <TextField
+                        errorMessage={errors.guardianAddress}
+                        helperText="Enter the wallet address that must approve unlock requests."
+                        label="Guardian wallet"
+                        onChangeText={(value) => setFieldValue("guardianAddress", value)}
+                        placeholder="0x..."
+                        value={values.guardianAddress}
+                      />
+                    ) : null}
                   </FormSection>
                 ) : null}
 

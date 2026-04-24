@@ -6,24 +6,81 @@ import type { SyncFreshnessSnapshot, VaultReconciliationStatus } from "./sync";
 
 export type VaultAddress = Address;
 
-export type VaultRuleType = "timeLock";
+export type VaultRuleType = "timeLock" | "cooldownUnlock" | "guardianApproval";
 
-export type VaultStatus = "active" | "locked" | "unlocked" | "withdrawn" | "closed";
+export type VaultStatus = "active" | "locked" | "unlocking" | "unlocked" | "withdrawn" | "closed";
 
 export type VaultAccentTheme = "sand" | "sage" | "sky" | "terracotta";
 
 export type VaultMetadataStatus = "pending" | "saved" | "failed";
 
-export type VaultActivityEventType = "created" | "deposit" | "withdrawal" | "milestone";
+export type VaultActivityEventType =
+  | "created"
+  | "deposit"
+  | "withdrawal"
+  | "unlock_requested"
+  | "unlock_canceled"
+  | "guardian_approved"
+  | "guardian_rejected"
+  | "milestone";
+
 export type VaultLockState = "locked" | "unlocked";
+
+export type UnlockRequestStatus = "not_requested" | "pending" | "canceled" | "approved" | "rejected" | "matured";
+
+export type GuardianApprovalState = "not_required" | "not_requested" | "pending" | "approved" | "rejected";
+
 export type WithdrawalAvailability =
   | "locked"
+  | "unlock_request_required"
+  | "cooldown_pending"
+  | "guardian_pending"
+  | "guardian_rejected"
   | "ready"
   | "empty"
   | "owner_only"
+  | "guardian_only"
   | "disconnected"
   | "unsupported_network"
   | "unavailable";
+
+export type NextVaultAction =
+  | "deposit"
+  | "request_unlock"
+  | "cancel_unlock_request"
+  | "guardian_approve"
+  | "guardian_reject"
+  | "withdraw"
+  | "wait"
+  | "none";
+
+export interface TimeLockRule {
+  type: "timeLock";
+  unlockDate: string;
+  unlockTimestampMs: number;
+}
+
+export interface CooldownRule {
+  type: "cooldownUnlock";
+  cooldownDurationSeconds: number;
+  cooldownDurationDays: number;
+  cooldownDurationLabel: string;
+  unlockRequestedAt: string | null;
+  unlockEligibleAt: string | null;
+  unlockEligibleTimestampMs: number | null;
+}
+
+export interface GuardianRule {
+  type: "guardianApproval";
+  guardianAddress: Address;
+  guardianLabel: string;
+  unlockRequestedAt: string | null;
+  guardianDecision: GuardianApprovalState;
+  guardianDecisionAt: string | null;
+}
+
+export type VaultRuleConfig = TimeLockRule | CooldownRule | GuardianRule;
+export type VaultRuleSummary = VaultRuleConfig;
 
 export interface Vault {
   address: VaultAddress;
@@ -33,8 +90,9 @@ export interface Vault {
   note?: string;
   targetAmount: number;
   savedAmount: number;
-  unlockDate: string;
+  unlockDate: string | null;
   ruleType: VaultRuleType;
+  ruleSummary: VaultRuleSummary;
   status: VaultStatus;
   accentTheme?: VaultAccentTheme;
   accentTone: string;
@@ -82,25 +140,43 @@ export interface WithdrawableAmountState {
   hasFunds: boolean;
 }
 
-export interface WithdrawEligibility {
+export interface WithdrawalEligibilityState {
   lockState: VaultLockState;
   availability: WithdrawalAvailability;
   message: string;
-  unlockDate: string;
-  unlockTimestampMs: number;
+  unlockDate: string | null;
+  unlockTimestampMs: number | null;
   availableAmount: number;
   availableAmountAtomic: bigint;
   withdrawableAmount: WithdrawableAmountState;
   countdown: UnlockCountdown | null;
   isOwner: boolean;
+  isGuardian: boolean;
   connectedAddress: Address | null;
   ownerAddress: Address;
+  guardianAddress: Address | null;
   isConnected: boolean;
   isSupportedNetwork: boolean;
   canWithdraw: boolean;
+  canRequestUnlock: boolean;
+  canCancelUnlockRequest: boolean;
+  canGuardianApprove: boolean;
+  canGuardianReject: boolean;
+  unlockRequestStatus: UnlockRequestStatus;
+  guardianApprovalState: GuardianApprovalState;
+  unlockRequestedAt: string | null;
+  unlockEligibleAt: string | null;
+  nextAction: NextVaultAction;
+  ruleType: VaultRuleType;
 }
 
+export type WithdrawEligibility = WithdrawalEligibilityState;
 export type VaultEligibility = WithdrawEligibility;
+export type GuardianActionEligibility = "allowed" | "not_guardian" | "no_pending_request" | "already_decided";
+export type CooldownState = "not_requested" | "pending" | "matured" | "canceled";
+export type GuardianDecisionState = GuardianApprovalState;
+export type GuardianRequestState = UnlockRequestStatus;
+export type RuleProtectedVaultViewModel = VaultDetail;
 
 export interface DepositPreview {
   depositAmount: number;
@@ -209,7 +285,10 @@ export interface CreateVaultInput {
   note: string;
   targetAmount: string;
   accentTheme: VaultAccentTheme | "";
+  ruleType: VaultRuleType;
   unlockDate: string;
+  cooldownDays: string;
+  guardianAddress: string;
 }
 
 export type CreateVaultFormInput = CreateVaultInput;
@@ -225,9 +304,14 @@ export interface CreateVaultReviewModel {
   targetAmountDisplay: string;
   assetSymbol: string;
   networkLabel: string;
-  unlockDate: string;
-  unlockDateLabel: string;
-  unlockTimestamp: bigint;
+  ruleType: VaultRuleType;
+  ruleSummary: VaultRuleSummary;
+  unlockDate: string | null;
+  unlockDateLabel: string | null;
+  unlockTimestamp: bigint | null;
+  cooldownDurationSeconds: bigint | null;
+  cooldownDurationLabel: string | null;
+  guardianAddress: Address | null;
   protectionCopy: string[];
 }
 
@@ -240,7 +324,10 @@ export interface VaultMetadataPayload {
   note?: string;
   accentTheme?: VaultAccentTheme;
   targetAmount: string;
-  unlockDate: string;
+  ruleType: VaultRuleType;
+  unlockDate?: string | null;
+  cooldownDurationSeconds?: number | null;
+  guardianAddress?: Address | null;
 }
 
 export interface VaultMetadataRecord extends VaultMetadataPayload {

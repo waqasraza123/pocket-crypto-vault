@@ -19,6 +19,38 @@ export interface WithdrawVaultWriteRequest {
   args: readonly [bigint, Address];
 }
 
+export interface RequestUnlockVaultWriteRequest {
+  chainId: SupportedChainId;
+  address: Address;
+  abi: typeof goalVaultAbi;
+  functionName: "requestUnlock";
+  args: readonly [];
+}
+
+export interface CancelUnlockVaultWriteRequest {
+  chainId: SupportedChainId;
+  address: Address;
+  abi: typeof goalVaultAbi;
+  functionName: "cancelUnlockRequest";
+  args: readonly [];
+}
+
+export interface ApproveUnlockVaultWriteRequest {
+  chainId: SupportedChainId;
+  address: Address;
+  abi: typeof goalVaultAbi;
+  functionName: "approveUnlock";
+  args: readonly [];
+}
+
+export interface RejectUnlockVaultWriteRequest {
+  chainId: SupportedChainId;
+  address: Address;
+  abi: typeof goalVaultAbi;
+  functionName: "rejectUnlock";
+  args: readonly [];
+}
+
 export const buildDepositVaultWriteRequest = ({
   chainId,
   vaultAddress,
@@ -51,4 +83,60 @@ export const buildWithdrawVaultWriteRequest = ({
   abi: goalVaultAbi,
   functionName: "withdraw",
   args: [amount, to],
+});
+
+export const buildRequestUnlockVaultWriteRequest = ({
+  chainId,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  vaultAddress: Address;
+}): RequestUnlockVaultWriteRequest => ({
+  chainId,
+  address: vaultAddress,
+  abi: goalVaultAbi,
+  functionName: "requestUnlock",
+  args: [],
+});
+
+export const buildCancelUnlockVaultWriteRequest = ({
+  chainId,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  vaultAddress: Address;
+}): CancelUnlockVaultWriteRequest => ({
+  chainId,
+  address: vaultAddress,
+  abi: goalVaultAbi,
+  functionName: "cancelUnlockRequest",
+  args: [],
+});
+
+export const buildApproveUnlockVaultWriteRequest = ({
+  chainId,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  vaultAddress: Address;
+}): ApproveUnlockVaultWriteRequest => ({
+  chainId,
+  address: vaultAddress,
+  abi: goalVaultAbi,
+  functionName: "approveUnlock",
+  args: [],
+});
+
+export const buildRejectUnlockVaultWriteRequest = ({
+  chainId,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  vaultAddress: Address;
+}): RejectUnlockVaultWriteRequest => ({
+  chainId,
+  address: vaultAddress,
+  abi: goalVaultAbi,
+  functionName: "rejectUnlock",
+  args: [],
 });

@@ -1,6 +1,12 @@
 import { parseUnits } from "viem";
 
-import type { VaultMetadataPayload, VaultMetadataStatus, VaultReconciliationStatus } from "@goal-vault/shared";
+import type {
+  GuardianApprovalState,
+  UnlockRequestStatus,
+  VaultMetadataPayload,
+  VaultMetadataStatus,
+  VaultReconciliationStatus,
+} from "@goal-vault/shared";
 import type { Address } from "viem";
 
 import { logObservabilitySignal } from "../../lib/observability/logger";
@@ -72,6 +78,9 @@ export const mergeVaultRecord = ({
   const nextAccentTheme = patch.accentTheme ?? current?.accentTheme ?? null;
   const hasMetadata = Boolean(nextDisplayName);
   const onchainFound = patch.onchainFound ?? current?.onchainFound ?? false;
+  const nextRuleType = patch.ruleType ?? current?.ruleType ?? "timeLock";
+  const nextUnlockRequestStatus = patch.unlockRequestStatus ?? current?.unlockRequestStatus ?? "not_requested";
+  const nextGuardianApprovalState = patch.guardianApprovalState ?? current?.guardianApprovalState ?? "not_required";
 
   return {
     key: current?.key ?? createVaultRecordKey(patch.chainId, patch.contractAddress),
@@ -80,7 +89,15 @@ export const mergeVaultRecord = ({
     ownerWallet: patch.ownerWallet ?? current?.ownerWallet ?? null,
     assetAddress: patch.assetAddress ?? current?.assetAddress ?? null,
     targetAmountAtomic: patch.targetAmountAtomic ?? current?.targetAmountAtomic ?? null,
+    ruleType: nextRuleType,
     unlockDate: patch.unlockDate ?? current?.unlockDate ?? null,
+    cooldownDurationSeconds: patch.cooldownDurationSeconds ?? current?.cooldownDurationSeconds ?? null,
+    guardianAddress: patch.guardianAddress ?? current?.guardianAddress ?? null,
+    unlockRequestedAt: patch.unlockRequestedAt ?? current?.unlockRequestedAt ?? null,
+    unlockEligibleAt: patch.unlockEligibleAt ?? current?.unlockEligibleAt ?? null,
+    unlockRequestStatus: nextUnlockRequestStatus as UnlockRequestStatus,
+    guardianApprovalState: nextGuardianApprovalState as GuardianApprovalState,
+    guardianDecisionAt: patch.guardianDecisionAt ?? current?.guardianDecisionAt ?? null,
     createdAt: patch.createdAt ?? current?.createdAt ?? null,
     createdTxHash: patch.createdTxHash ?? current?.createdTxHash ?? null,
     displayName: nextDisplayName,
@@ -140,7 +157,10 @@ export const saveVaultMetadata = async (context: IndexerContext, payload: VaultM
       contractAddress: payload.contractAddress,
       ownerWallet: payload.ownerWallet,
       targetAmountAtomic,
-      unlockDate: new Date(payload.unlockDate).toISOString(),
+      ruleType: payload.ruleType,
+      unlockDate: payload.unlockDate ? new Date(payload.unlockDate).toISOString() : null,
+      cooldownDurationSeconds: payload.cooldownDurationSeconds ?? null,
+      guardianAddress: payload.guardianAddress ?? null,
       displayName: payload.displayName.trim(),
       category: payload.category?.trim() || null,
       note: payload.note?.trim() || null,

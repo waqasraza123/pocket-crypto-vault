@@ -125,6 +125,70 @@ export const mapActivityItemToViewEvent = ({
     };
   }
 
+  if (item.eventType === "unlock_requested") {
+    return {
+      id: item.id,
+      vaultAddress: item.vaultAddress,
+      chainId: item.chainId,
+      type: "unlock_requested",
+      title: "Unlock requested",
+      subtitle: interpolate(messages.activityFeed.createdSubtitle, { goal: goalName }),
+      occurredAt: item.occurredAt,
+      txHash: item.txHash,
+      source: "indexed",
+      metadataReconciliation,
+      syncState,
+    };
+  }
+
+  if (item.eventType === "unlock_canceled") {
+    return {
+      id: item.id,
+      vaultAddress: item.vaultAddress,
+      chainId: item.chainId,
+      type: "unlock_canceled",
+      title: "Unlock request canceled",
+      subtitle: interpolate(messages.activityFeed.createdSubtitle, { goal: goalName }),
+      occurredAt: item.occurredAt,
+      txHash: item.txHash,
+      source: "indexed",
+      metadataReconciliation,
+      syncState,
+    };
+  }
+
+  if (item.eventType === "guardian_approved") {
+    return {
+      id: item.id,
+      vaultAddress: item.vaultAddress,
+      chainId: item.chainId,
+      type: "guardian_approved",
+      title: "Guardian approved",
+      subtitle: interpolate(messages.activityFeed.createdSubtitle, { goal: goalName }),
+      occurredAt: item.occurredAt,
+      txHash: item.txHash,
+      source: "indexed",
+      metadataReconciliation,
+      syncState,
+    };
+  }
+
+  if (item.eventType === "guardian_rejected") {
+    return {
+      id: item.id,
+      vaultAddress: item.vaultAddress,
+      chainId: item.chainId,
+      type: "guardian_rejected",
+      title: "Guardian rejected",
+      subtitle: interpolate(messages.activityFeed.createdSubtitle, { goal: goalName }),
+      occurredAt: item.occurredAt,
+      txHash: item.txHash,
+      source: "indexed",
+      metadataReconciliation,
+      syncState,
+    };
+  }
+
   return {
     id: item.id,
     vaultAddress: item.vaultAddress,

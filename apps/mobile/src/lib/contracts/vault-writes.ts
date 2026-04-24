@@ -1,5 +1,12 @@
 import {
+  buildApproveUnlockVaultWriteRequest,
+  buildCancelUnlockVaultWriteRequest,
+  buildRejectUnlockVaultWriteRequest,
+  buildRequestUnlockVaultWriteRequest,
+  parseGuardianApprovalEvent,
   parseVaultDepositEvent,
+  parseVaultUnlockCanceledEvent,
+  parseVaultUnlockRequestedEvent,
   parseVaultWithdrawalEvent,
   prepareDepositToVaultWriteRequest,
   prepareWithdrawFromVaultWriteRequest,
@@ -20,6 +27,18 @@ export interface WithdrawFromVaultResult {
   txHash: Hash;
   receipt: TransactionReceipt;
   event: ReturnType<typeof parseVaultWithdrawalEvent>;
+}
+
+export interface UnlockVaultResult {
+  txHash: Hash;
+  receipt: TransactionReceipt;
+  event: ReturnType<typeof parseVaultUnlockRequestedEvent>;
+}
+
+export interface GuardianDecisionResult {
+  txHash: Hash;
+  receipt: TransactionReceipt;
+  event: ReturnType<typeof parseGuardianApprovalEvent>;
 }
 
 export const depositToVault = async ({
@@ -142,6 +161,164 @@ export const withdrawFromVault = async ({
     event: parseVaultWithdrawalEvent({
       receipt,
       vaultAddress,
+    }),
+  };
+};
+
+export const requestUnlockFromVault = async ({
+  provider,
+  chainId,
+  actorAddress,
+  vaultAddress,
+  onSubmitted,
+}: {
+  provider: EIP1193Provider;
+  chainId: SupportedChainId;
+  actorAddress: Address;
+  vaultAddress: Address;
+  onSubmitted?: (txHash: Hash) => void;
+}): Promise<UnlockVaultResult> => {
+  const publicClient = getReadClient(chainId);
+
+  if (!publicClient) {
+    throw new Error("A Base RPC URL is required before unlock requests can run.");
+  }
+
+  const walletClient = createWalletClient({
+    chain: goalVaultSupportedViemChains[chainId],
+    transport: custom(provider),
+  });
+
+  const txHash = await walletClient.writeContract({
+    ...buildRequestUnlockVaultWriteRequest({
+      chainId,
+      vaultAddress,
+    }),
+    account: actorAddress,
+  });
+
+  onSubmitted?.(txHash);
+
+  const receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 1,
+    timeout: 120000,
+  });
+
+  return {
+    txHash,
+    receipt,
+    event: parseVaultUnlockCanceledEvent({
+      receipt,
+      vaultAddress,
+    }),
+  };
+};
+
+export const cancelUnlockRequestOnVault = async ({
+  provider,
+  chainId,
+  actorAddress,
+  vaultAddress,
+  onSubmitted,
+}: {
+  provider: EIP1193Provider;
+  chainId: SupportedChainId;
+  actorAddress: Address;
+  vaultAddress: Address;
+  onSubmitted?: (txHash: Hash) => void;
+}): Promise<UnlockVaultResult> => {
+  const publicClient = getReadClient(chainId);
+
+  if (!publicClient) {
+    throw new Error("A Base RPC URL is required before canceling unlock requests can run.");
+  }
+
+  const walletClient = createWalletClient({
+    chain: goalVaultSupportedViemChains[chainId],
+    transport: custom(provider),
+  });
+
+  const txHash = await walletClient.writeContract({
+    ...buildCancelUnlockVaultWriteRequest({
+      chainId,
+      vaultAddress,
+    }),
+    account: actorAddress,
+  });
+
+  onSubmitted?.(txHash);
+
+  const receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 1,
+    timeout: 120000,
+  });
+
+  return {
+    txHash,
+    receipt,
+    event: parseVaultUnlockRequestedEvent({
+      receipt,
+      vaultAddress,
+    }),
+  };
+};
+
+export const approveUnlockOnVault = async ({
+  provider,
+  chainId,
+  actorAddress,
+  vaultAddress,
+  eventName,
+  onSubmitted,
+}: {
+  provider: EIP1193Provider;
+  chainId: SupportedChainId;
+  actorAddress: Address;
+  vaultAddress: Address;
+  eventName: "GuardianApproved" | "GuardianRejected";
+  onSubmitted?: (txHash: Hash) => void;
+}): Promise<GuardianDecisionResult> => {
+  const publicClient = getReadClient(chainId);
+
+  if (!publicClient) {
+    throw new Error("A Base RPC URL is required before guardian actions can run.");
+  }
+
+  const walletClient = createWalletClient({
+    chain: goalVaultSupportedViemChains[chainId],
+    transport: custom(provider),
+  });
+
+  const txHash = await walletClient.writeContract({
+    ...(eventName === "GuardianApproved"
+      ? buildApproveUnlockVaultWriteRequest({
+          chainId,
+          vaultAddress,
+        })
+      : buildRejectUnlockVaultWriteRequest({
+          chainId,
+          vaultAddress,
+        })),
+    account: actorAddress,
+  });
+
+  onSubmitted?.(txHash);
+
+  const receipt = await publicClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 1,
+    timeout: 120000,
+  });
+
+  return {
+    txHash,
+    receipt,
+    event: parseGuardianApprovalEvent({
+      receipt,
+      vaultAddress,
+      eventName,
     }),
   };
 };

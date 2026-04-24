@@ -184,7 +184,12 @@ export const mergeVaultSummaries = ({
     }
   }
 
-  return Array.from(vaultMap.values()).sort((left, right) => (left.lastActivityAt ?? left.unlockDate) < (right.lastActivityAt ?? right.unlockDate) ? 1 : -1);
+  return Array.from(vaultMap.values()).sort((left, right) => {
+    const leftDate = left.lastActivityAt ?? left.unlockDate ?? new Date(0).toISOString();
+    const rightDate = right.lastActivityAt ?? right.unlockDate ?? new Date(0).toISOString();
+
+    return leftDate < rightDate ? 1 : -1;
+  });
 };
 
 const mergeActivityItems = ({

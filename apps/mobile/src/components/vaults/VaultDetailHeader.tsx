@@ -13,6 +13,16 @@ export interface VaultDetailHeaderProps {
 
 export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
   const { messages } = useI18n();
+  const protectionDescription =
+    vault.ruleType === "timeLock"
+      ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(vault.unlockDate ?? new Date().toISOString()) })
+      : vault.ruleType === "cooldownUnlock"
+        ? vault.ruleSummary.type === "cooldownUnlock"
+          ? `This vault uses a ${vault.ruleSummary.cooldownDurationLabel} cooldown unlock.`
+          : "This vault uses a cooldown unlock."
+        : vault.ruleSummary.type === "guardianApproval"
+          ? `Guardian approval required from ${vault.ruleSummary.guardianLabel}.`
+          : "Guardian approval required.";
 
   return (
     <SurfaceCard level="floating" style={{ backgroundColor: colors.backgroundElevated }}>
@@ -90,9 +100,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
           <AppText size="lg" weight="semibold">
             {interpolate(messages.vaults.detailSaved, { amount: formatUsdc(vault.savedAmount) })}
           </AppText>
-          <AppText tone="secondary">
-            {interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(vault.unlockDate) })}
-          </AppText>
+          <AppText tone="secondary">{protectionDescription}</AppText>
         </View>
       </View>
     </SurfaceCard>

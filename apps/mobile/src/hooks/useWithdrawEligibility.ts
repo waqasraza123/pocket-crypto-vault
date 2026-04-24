@@ -13,7 +13,12 @@ export const useWithdrawEligibility = (vault: VaultDetail | null) => {
       return;
     }
 
-    const nextUnlockMs = Date.parse(vault.unlockDate);
+    const nextUnlockMs =
+      vault.ruleSummary.type === "timeLock"
+        ? Date.parse(vault.ruleSummary.unlockDate)
+        : vault.ruleSummary.type === "cooldownUnlock"
+          ? vault.ruleSummary.unlockEligibleTimestampMs ?? 0
+          : 0;
 
     if (!Number.isFinite(nextUnlockMs) || nextUnlockMs <= nowMs) {
       return;

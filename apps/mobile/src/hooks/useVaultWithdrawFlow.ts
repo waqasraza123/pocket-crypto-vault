@@ -488,7 +488,7 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
           "withdraw_blocked_by_lock",
           {
             vaultAddress: vault.address,
-            unlockDate: vault.unlockDate,
+            unlockDate: vault.unlockDate ?? new Date().toISOString(),
           },
           {
             ...analyticsContext,

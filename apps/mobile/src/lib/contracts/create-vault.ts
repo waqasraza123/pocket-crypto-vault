@@ -34,7 +34,10 @@ export const buildCreateVaultMetadataPayload = ({
   note: review.note || undefined,
   accentTheme: review.accentTheme,
   targetAmount: review.targetAmount.toString(),
+  ruleType: review.ruleType,
   unlockDate: review.unlockDate,
+  cooldownDurationSeconds: review.cooldownDurationSeconds ? Number(review.cooldownDurationSeconds) : null,
+  guardianAddress: review.guardianAddress,
 });
 
 export const createVaultTransaction = async ({
@@ -64,7 +67,10 @@ export const createVaultTransaction = async ({
   const requestResult = prepareCreateVaultWriteRequest({
     chainId,
     targetAmount: review.targetAmountAtomic,
+    ruleType: review.ruleType,
     unlockAt: review.unlockTimestamp,
+    cooldownDuration: review.cooldownDurationSeconds,
+    guardian: review.guardianAddress,
   });
 
   if (requestResult.status !== "ready") {

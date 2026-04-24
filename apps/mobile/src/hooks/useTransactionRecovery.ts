@@ -124,7 +124,10 @@ export const useTransactionRecovery = ({
                 note: item.metadata.note ?? undefined,
                 accentTheme: item.metadata.accentTheme ?? undefined,
                 targetAmount: item.metadata.targetAmount ?? "0",
-                unlockDate: item.metadata.unlockDate ?? new Date().toISOString(),
+                ruleType: item.metadata.ruleType ?? "timeLock",
+                unlockDate: item.metadata.unlockDate ?? null,
+                cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
+                guardianAddress: item.metadata.guardianAddress ?? null,
                 txHash: item.txHash,
                 accentTone: item.metadata.accentTone ?? "#1E2B26",
               });
@@ -137,7 +140,10 @@ export const useTransactionRecovery = ({
                 note: item.metadata.note ?? undefined,
                 accentTheme: item.metadata.accentTheme ?? undefined,
                 targetAmount: item.metadata.targetAmount ?? "0",
-                unlockDate: item.metadata.unlockDate ?? new Date().toISOString(),
+                ruleType: item.metadata.ruleType ?? "timeLock",
+                unlockDate: item.metadata.unlockDate ?? null,
+                cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
+                guardianAddress: item.metadata.guardianAddress ?? null,
               });
               markSessionVaultMetadata({
                 chainId: item.chainId,

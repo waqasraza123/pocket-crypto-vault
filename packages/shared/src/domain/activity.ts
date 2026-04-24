@@ -3,7 +3,14 @@ import type { Address, Hash } from "viem";
 import type { SupportedChainId } from "./chain";
 import type { VaultAddress, VaultMetadataStatus } from "./vault";
 
-export type NormalizedVaultEventType = "vault_created" | "deposit_confirmed" | "withdrawal_confirmed";
+export type NormalizedVaultEventType =
+  | "vault_created"
+  | "deposit_confirmed"
+  | "withdrawal_confirmed"
+  | "unlock_requested"
+  | "unlock_canceled"
+  | "guardian_approved"
+  | "guardian_rejected";
 
 export interface NormalizedVaultEvent {
   id: string;

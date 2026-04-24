@@ -1,12 +1,17 @@
 import type { CreateVaultWriteRequest } from "./factory";
 import { buildCreateVaultWriteRequest } from "./factory";
 import { getGoalVaultFactoryAddress } from "../addresses";
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { Address } from "viem";
+
+import type { SupportedChainId, VaultRuleType } from "@goal-vault/shared";
 
 export interface CreateVaultContractWriteInput {
   chainId: SupportedChainId;
   targetAmount: bigint;
-  unlockAt: bigint;
+  ruleType: VaultRuleType;
+  unlockAt: bigint | null;
+  cooldownDuration: bigint | null;
+  guardian: Address | null;
 }
 
 export type CreateVaultWriteRequestResult =
@@ -24,7 +29,10 @@ export type CreateVaultWriteRequestResult =
 export const prepareCreateVaultWriteRequest = ({
   chainId,
   targetAmount,
+  ruleType,
   unlockAt,
+  cooldownDuration,
+  guardian,
 }: CreateVaultContractWriteInput): CreateVaultWriteRequestResult => {
   const factoryAddress = getGoalVaultFactoryAddress(chainId);
 
@@ -42,7 +50,10 @@ export const prepareCreateVaultWriteRequest = ({
       chainId,
       factoryAddress,
       targetAmount,
+      ruleType,
       unlockAt,
+      cooldownDuration,
+      guardian,
     }),
     message: null,
   };

@@ -7,17 +7,25 @@ import { colors, spacing } from "../../theme";
 import { AppText } from "../primitives";
 
 export interface VaultCardRuleProps {
-  unlockDate: string;
+  ruleType: "timeLock" | "cooldownUnlock" | "guardianApproval";
+  unlockDate: string | null;
+  description?: string;
 }
 
-export const VaultCardRule = ({ unlockDate }: VaultCardRuleProps) => {
+export const VaultCardRule = ({ ruleType, unlockDate, description }: VaultCardRuleProps) => {
   const { inlineDirection, messages } = useI18n();
+  const label =
+    ruleType === "timeLock"
+      ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(unlockDate ?? new Date().toISOString()) })
+      : ruleType === "cooldownUnlock"
+        ? description ?? "Cooldown unlock"
+        : description ?? "Guardian approval required";
 
   return (
     <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[2] }}>
       <MaterialCommunityIcons color={colors.accentStrong} name="calendar-clock-outline" size={18} />
       <AppText tone="secondary">
-        {interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(unlockDate) })}
+        {label}
       </AppText>
     </View>
   );

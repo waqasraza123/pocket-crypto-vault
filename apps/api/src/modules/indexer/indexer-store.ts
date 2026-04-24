@@ -1,7 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import type { VaultAccentTheme, VaultMetadataStatus, VaultReconciliationStatus } from "@goal-vault/shared";
+import type {
+  GuardianApprovalState,
+  VaultAccentTheme,
+  VaultMetadataStatus,
+  VaultReconciliationStatus,
+  VaultRuleType,
+  UnlockRequestStatus,
+} from "@goal-vault/shared";
 import type { Address, Hash } from "viem";
 
 import type { SupportedChainId } from "@goal-vault/shared";
@@ -13,7 +20,15 @@ export interface PersistedVaultRecord {
   ownerWallet: Address | null;
   assetAddress: Address | null;
   targetAmountAtomic: string | null;
+  ruleType: VaultRuleType;
   unlockDate: string | null;
+  cooldownDurationSeconds: number | null;
+  guardianAddress: Address | null;
+  unlockRequestedAt: string | null;
+  unlockEligibleAt: string | null;
+  unlockRequestStatus: UnlockRequestStatus;
+  guardianApprovalState: GuardianApprovalState;
+  guardianDecisionAt: string | null;
   createdAt: string | null;
   createdTxHash: Hash | null;
   displayName: string | null;
@@ -39,7 +54,14 @@ export interface PersistedVaultEventRecord {
   vaultAddress: Address;
   ownerAddress: Address | null;
   actorAddress: Address | null;
-  eventType: "vault_created" | "deposit_confirmed" | "withdrawal_confirmed";
+  eventType:
+    | "vault_created"
+    | "deposit_confirmed"
+    | "withdrawal_confirmed"
+    | "unlock_requested"
+    | "unlock_canceled"
+    | "guardian_approved"
+    | "guardian_rejected";
   amountAtomic: string | null;
   occurredAt: string;
   indexedAt: string;

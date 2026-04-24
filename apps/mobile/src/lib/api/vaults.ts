@@ -20,7 +20,10 @@ const normalizePayload = (payload: VaultMetadataPayload) => ({
   note: payload.note || null,
   accentTheme: payload.accentTheme || null,
   targetAmount: payload.targetAmount,
-  unlockDate: payload.unlockDate,
+  ruleType: payload.ruleType,
+  unlockDate: payload.unlockDate || null,
+  cooldownDurationSeconds: payload.cooldownDurationSeconds ?? null,
+  guardianAddress: payload.guardianAddress ?? null,
 });
 
 export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<MetadataSaveResult> => {

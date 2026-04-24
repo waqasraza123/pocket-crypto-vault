@@ -26,6 +26,9 @@ export const serializeVaultActivityItem = ({
   indexedAt: event.indexedAt,
   displayName: vault?.displayName ?? null,
   metadataStatus: vault?.metadataStatus ?? "pending",
+  ruleType: vault?.ruleType,
+  unlockRequestStatus: vault?.unlockRequestStatus,
+  guardianApprovalState: vault?.guardianApprovalState,
 });
 
 export const serializeVaultActivityResponse = ({

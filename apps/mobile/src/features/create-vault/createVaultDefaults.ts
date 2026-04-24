@@ -6,5 +6,8 @@ export const createVaultDefaults: CreateVaultInput = {
   note: "",
   targetAmount: "",
   accentTheme: "",
+  ruleType: "timeLock",
   unlockDate: "2026-08-30",
+  cooldownDays: "7",
+  guardianAddress: "",
 };

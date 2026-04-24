@@ -65,7 +65,19 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
       </MotionView>
       <VaultCardAmount savedAmount={vault.savedAmount} targetAmount={vault.targetAmount} />
       <VaultCardProgress progressRatio={vault.progressRatio} />
-      <VaultCardRule unlockDate={vault.unlockDate} />
+      <VaultCardRule
+        description={
+          vault.ruleType === "cooldownUnlock"
+            ? vault.ruleSummary.type === "cooldownUnlock"
+              ? `${vault.ruleSummary.cooldownDurationLabel} cooldown`
+              : "Cooldown unlock"
+            : vault.ruleType === "guardianApproval"
+              ? "Guardian approval required"
+              : undefined
+        }
+        ruleType={vault.ruleType}
+        unlockDate={vault.unlockDate}
+      />
       <View
         style={{
           borderRadius: radii.md,

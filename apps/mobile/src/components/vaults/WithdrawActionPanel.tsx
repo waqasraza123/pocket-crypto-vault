@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { formatUsdc } from "../../lib/format";
 import type { VaultDetail } from "../../types";
 import type { VaultWithdrawFlowController } from "../../hooks/useVaultWithdrawFlow";
+import type { useVaultUnlockFlow } from "../../hooks/useVaultUnlockFlow";
 import {
   OwnerOnlyNotice,
   TransactionStatusCard,
@@ -22,9 +23,11 @@ import { WithdrawSuccessCard } from "./WithdrawSuccessCard";
 export const WithdrawActionPanel = ({
   vault,
   flow,
+  unlockFlow,
 }: {
   vault: VaultDetail;
   flow: VaultWithdrawFlowController;
+  unlockFlow: ReturnType<typeof useVaultUnlockFlow>;
 }) => {
   const { messages } = useI18n();
   const eligibility = flow.eligibility;
@@ -45,6 +48,24 @@ export const WithdrawActionPanel = ({
       {eligibility.availability === "owner_only" ? <OwnerOnlyNotice description={eligibility.message} /> : null}
       {eligibility.availability === "locked" ? <UnlockCountdownCard eligibility={eligibility} /> : null}
       {eligibility.availability === "locked" ? <WithdrawalLockedNotice description={eligibility.message} /> : null}
+
+      {(eligibility.availability === "unlock_request_required" ||
+        eligibility.availability === "cooldown_pending" ||
+        eligibility.availability === "guardian_pending" ||
+        eligibility.availability === "guardian_rejected" ||
+        eligibility.availability === "guardian_only") && unlockFlow.message ? (
+        <TransactionStatusCard
+          description={unlockFlow.message}
+          details={unlockFlow.txHash ? [{ label: messages.common.labels.transactionHash, value: unlockFlow.txHash }] : []}
+          title={
+            unlockFlow.status === "failed"
+              ? messages.feedback.dataUnavailableTitle
+              : unlockFlow.status === "success"
+                ? "Rule state updated"
+                : "Updating vault rule"
+          }
+        />
+      ) : null}
 
       {eligibility.canWithdraw ? (
         <WithdrawAmountField
@@ -94,6 +115,42 @@ export const WithdrawActionPanel = ({
           icon="arrow-up-right"
           label={flow.primaryActionLabel}
           onPress={flow.requestConfirmation}
+        />
+      ) : null}
+
+      {eligibility.canRequestUnlock ? (
+        <PrimaryButton
+          disabled={unlockFlow.isBusy}
+          icon="shield-lock-open-outline"
+          label="Request unlock"
+          onPress={() => void unlockFlow.requestUnlock()}
+        />
+      ) : null}
+
+      {eligibility.canCancelUnlockRequest ? (
+        <PrimaryButton
+          disabled={unlockFlow.isBusy}
+          icon="close-circle-outline"
+          label="Cancel unlock request"
+          onPress={() => void unlockFlow.cancelUnlockRequest()}
+        />
+      ) : null}
+
+      {eligibility.canGuardianApprove ? (
+        <PrimaryButton
+          disabled={unlockFlow.isBusy}
+          icon="check-circle-outline"
+          label="Approve unlock"
+          onPress={() => void unlockFlow.approveUnlock()}
+        />
+      ) : null}
+
+      {eligibility.canGuardianReject ? (
+        <PrimaryButton
+          disabled={unlockFlow.isBusy}
+          icon="close-circle-outline"
+          label="Reject unlock"
+          onPress={() => void unlockFlow.rejectUnlock()}
         />
       ) : null}
     </SurfaceCard>

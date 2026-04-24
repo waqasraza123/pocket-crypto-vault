@@ -268,7 +268,10 @@ export const useCreateVaultMutation = () => {
                   accentTheme: recoveryReview.accentTheme ?? null,
                   accentTone: recoveryReview.accentTone,
                   targetAmount: recoveryReview.targetAmount.toString(),
+                  ruleType: recoveryReview.ruleType,
                   unlockDate: recoveryReview.unlockDate,
+                  cooldownDurationSeconds: recoveryReview.cooldownDurationSeconds ? Number(recoveryReview.cooldownDurationSeconds) : null,
+                  guardianAddress: recoveryReview.guardianAddress,
                 },
               }),
             );

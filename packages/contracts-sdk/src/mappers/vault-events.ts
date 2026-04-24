@@ -12,12 +12,19 @@ export const parseVaultCreatedResolution = ({
   factoryAddress?: `0x${string}` | null;
 }): VaultCreatedResolution => {
   try {
-    const [eventLog] = parseEventLogs({
+    const legacyLog = parseEventLogs({
       abi: goalVaultFactoryAbi,
       logs: receipt.logs,
       eventName: "VaultCreated",
       strict: false,
-    }).filter((log) => (factoryAddress ? log.address.toLowerCase() === factoryAddress.toLowerCase() : true));
+    }).find((log) => (factoryAddress ? log.address.toLowerCase() === factoryAddress.toLowerCase() : true));
+    const nextLog = parseEventLogs({
+      abi: goalVaultFactoryAbi,
+      logs: receipt.logs,
+      eventName: "VaultCreatedV2",
+      strict: false,
+    }).find((log) => (factoryAddress ? log.address.toLowerCase() === factoryAddress.toLowerCase() : true));
+    const eventLog = nextLog ?? legacyLog;
 
     if (!eventLog?.args.vault) {
       return {
@@ -58,6 +65,14 @@ export interface ParsedVaultWithdrawalEvent {
   amount: bigint | null;
   to: Address | null;
   occurredAt: string | null;
+  txHash: Hash | null;
+  message: string | null;
+}
+
+export interface ParsedVaultUnlockEvent {
+  status: "resolved" | "unresolved";
+  occurredAt: string | null;
+  actor: Address | null;
   txHash: Hash | null;
   message: string | null;
 }
@@ -150,6 +165,137 @@ export const parseVaultWithdrawalEvent = ({
       occurredAt: null,
       txHash: receipt.transactionHash,
       message: error instanceof Error ? error.message : "The withdrawal event could not be parsed.",
+    };
+  }
+};
+
+export const parseVaultUnlockRequestedEvent = ({
+  receipt,
+  vaultAddress,
+}: {
+  receipt: TransactionReceipt;
+  vaultAddress: Address;
+}): ParsedVaultUnlockEvent => {
+  try {
+    const [eventLog] = parseEventLogs({
+      abi: goalVaultAbi,
+      logs: receipt.logs,
+      eventName: "UnlockRequested",
+      strict: false,
+    }).filter((log) => log.address.toLowerCase() === vaultAddress.toLowerCase());
+
+    if (!eventLog?.args.timestamp || !eventLog.args.requestedBy) {
+      return {
+        status: "unresolved",
+        occurredAt: null,
+        actor: null,
+        txHash: receipt.transactionHash,
+        message: "The unlock request event could not be parsed from the receipt.",
+      };
+    }
+
+    return {
+      status: "resolved",
+      actor: eventLog.args.requestedBy,
+      occurredAt: new Date(Number(eventLog.args.timestamp) * 1000).toISOString(),
+      txHash: receipt.transactionHash,
+      message: null,
+    };
+  } catch (error) {
+    return {
+      status: "unresolved",
+      occurredAt: null,
+      actor: null,
+      txHash: receipt.transactionHash,
+      message: error instanceof Error ? error.message : "The unlock request event could not be parsed.",
+    };
+  }
+};
+
+export const parseVaultUnlockCanceledEvent = ({
+  receipt,
+  vaultAddress,
+}: {
+  receipt: TransactionReceipt;
+  vaultAddress: Address;
+}): ParsedVaultUnlockEvent => {
+  try {
+    const [eventLog] = parseEventLogs({
+      abi: goalVaultAbi,
+      logs: receipt.logs,
+      eventName: "UnlockCanceled",
+      strict: false,
+    }).filter((log) => log.address.toLowerCase() === vaultAddress.toLowerCase());
+
+    if (!eventLog?.args.timestamp || !eventLog.args.canceledBy) {
+      return {
+        status: "unresolved",
+        occurredAt: null,
+        actor: null,
+        txHash: receipt.transactionHash,
+        message: "The unlock cancel event could not be parsed from the receipt.",
+      };
+    }
+
+    return {
+      status: "resolved",
+      actor: eventLog.args.canceledBy,
+      occurredAt: new Date(Number(eventLog.args.timestamp) * 1000).toISOString(),
+      txHash: receipt.transactionHash,
+      message: null,
+    };
+  } catch (error) {
+    return {
+      status: "unresolved",
+      occurredAt: null,
+      actor: null,
+      txHash: receipt.transactionHash,
+      message: error instanceof Error ? error.message : "The unlock cancel event could not be parsed.",
+    };
+  }
+};
+
+export const parseGuardianApprovalEvent = ({
+  receipt,
+  vaultAddress,
+  eventName,
+}: {
+  receipt: TransactionReceipt;
+  vaultAddress: Address;
+  eventName: "GuardianApproved" | "GuardianRejected";
+}): ParsedVaultUnlockEvent => {
+  try {
+    const [eventLog] = parseEventLogs({
+      abi: goalVaultAbi,
+      logs: receipt.logs,
+      eventName,
+      strict: false,
+    }).filter((log) => log.address.toLowerCase() === vaultAddress.toLowerCase());
+
+    if (!eventLog?.args.timestamp || !eventLog.args.guardian) {
+      return {
+        status: "unresolved",
+        occurredAt: null,
+        actor: null,
+        txHash: receipt.transactionHash,
+        message: "The guardian decision event could not be parsed from the receipt.",
+      };
+    }
+
+    return {
+      status: "resolved",
+      actor: eventLog.args.guardian,
+      occurredAt: new Date(Number(eventLog.args.timestamp) * 1000).toISOString(),
+      txHash: receipt.transactionHash,
+      message: null,
+    };
+  } catch (error) {
+    return {
+      status: "unresolved",
+      occurredAt: null,
+      actor: null,
+      txHash: receipt.transactionHash,
+      message: error instanceof Error ? error.message : "The guardian decision event could not be parsed.",
     };
   }
 };

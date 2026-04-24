@@ -9,8 +9,8 @@ type CreateVaultField = keyof CreateVaultInput;
 
 const stepFields: Record<number, CreateVaultField[]> = {
   0: ["goalName", "category", "note", "targetAmount", "accentTheme"],
-  1: ["unlockDate"],
-  2: ["goalName", "category", "note", "targetAmount", "accentTheme", "unlockDate"],
+  1: ["ruleType", "unlockDate", "cooldownDays", "guardianAddress"],
+  2: ["goalName", "category", "note", "targetAmount", "accentTheme", "ruleType", "unlockDate", "cooldownDays", "guardianAddress"],
 };
 
 export const useCreateVaultForm = () => {
@@ -26,7 +26,11 @@ export const useCreateVaultForm = () => {
         categoryMax: messages.validation.createVault.categoryMax,
         noteMax: messages.validation.createVault.noteMax,
         targetAmount: messages.validation.createVault.targetAmount,
+        ruleType: messages.validation.createVault.ruleType,
         unlockDate: messages.validation.createVault.unlockDate,
+        cooldownDays: messages.validation.createVault.cooldownDays,
+        guardianAddress: messages.validation.createVault.guardianAddress,
+        guardianNotOwner: messages.validation.createVault.guardianNotOwner,
       }),
     [messages.validation.createVault],
   );
@@ -95,7 +99,10 @@ export const useCreateVaultForm = () => {
       note: values.note || messages.pages.createVault.preview.emptyNote,
       targetAmount: Number.isFinite(amount) ? amount : 0,
       accentTheme: values.accentTheme || "",
+      ruleType: values.ruleType,
       unlockDate: values.unlockDate,
+      cooldownDays: values.cooldownDays,
+      guardianAddress: values.guardianAddress,
     };
   }, [messages.pages.createVault.preview.emptyGoal, messages.pages.createVault.preview.emptyNote, values]);
 

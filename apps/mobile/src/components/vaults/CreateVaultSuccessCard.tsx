@@ -15,6 +15,12 @@ export const CreateVaultSuccessCard = ({
   onBackToVaults: () => void;
 }) => {
   const { messages } = useI18n();
+  const protectionLabel =
+    result.review.ruleType === "timeLock"
+      ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: result.review.unlockDateLabel ?? "" })
+      : result.review.ruleType === "cooldownUnlock"
+        ? `${result.review.cooldownDurationLabel} cooldown`
+        : result.review.guardianAddress ?? "Guardian approval required";
 
   return (
     <SurfaceCard tone="accent" level="floating" style={{ backgroundColor: colors.backgroundElevated }}>
@@ -59,9 +65,7 @@ export const CreateVaultSuccessCard = ({
             <AppText size="sm" tone="secondary">
               {messages.common.labels.protectionRule}
             </AppText>
-            <AppText weight="semibold">
-              {interpolate(messages.vaults.protectionRuleUnlocksOn, { date: result.review.unlockDateLabel })}
-            </AppText>
+            <AppText weight="semibold">{protectionLabel}</AppText>
           </View>
         </View>
         <View

@@ -361,6 +361,7 @@ const enMessages = {
     status: {
       active: "Your vault is active",
       locked: "Withdrawals locked",
+      unlocking: "Unlock in progress",
       unlocked: "Withdraw when eligible",
       withdrawn: "Funds withdrawn",
       closed: "Vault closed",
@@ -572,7 +573,11 @@ const enMessages = {
       categoryMax: "Keep the category under 32 characters.",
       noteMax: "Keep the note under 160 characters.",
       targetAmount: "Enter a target amount greater than 0.",
+      ruleType: "Choose how this vault unlocks.",
       unlockDate: "Choose a future unlock date.",
+      cooldownDays: "Choose a cooldown between 1 and 365 days.",
+      guardianAddress: "Enter a valid guardian wallet address.",
+      guardianNotOwner: "Choose a guardian wallet that is different from the owner wallet.",
     },
   },
 };
@@ -920,6 +925,7 @@ const arMessages: AppMessages = {
     status: {
       active: "الخزنة نشطة",
       locked: "السحوبات مقفلة",
+      unlocking: "جاري فتح السحب",
       unlocked: "اسحب عند الاستحقاق",
       withdrawn: "تم سحب الأموال",
       closed: "الخزنة مغلقة",
@@ -1129,7 +1135,11 @@ const arMessages: AppMessages = {
       categoryMax: "اجعل الفئة أقل من 32 حرفاً.",
       noteMax: "اجعل الملاحظة أقل من 160 حرفاً.",
       targetAmount: "أدخل مبلغاً مستهدفاً أكبر من 0.",
+      ruleType: "اختر كيف تُفتح هذه الخزنة.",
       unlockDate: "اختر تاريخ فتح مستقبلياً.",
+      cooldownDays: "اختر مدة تهدئة بين يوم و365 يوماً.",
+      guardianAddress: "أدخل عنوان محفظة وصي صالح.",
+      guardianNotOwner: "اختر محفظة وصي مختلفة عن محفظة المالك.",
     },
   },
 };

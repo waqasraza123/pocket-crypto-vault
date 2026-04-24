@@ -38,6 +38,30 @@ export const formatUnlockCountdownLabel = (countdown: UnlockCountdown) => {
     .join(" ");
 };
 
+const buildRuleCountdown = ({
+  vault,
+  nowMs,
+}: {
+  vault: VaultDetail;
+  nowMs: number;
+}) => {
+  if (vault.ruleSummary.type === "timeLock") {
+    return buildUnlockCountdown({
+      unlockDate: vault.ruleSummary.unlockDate,
+      nowMs,
+    });
+  }
+
+  if (vault.ruleSummary.type === "cooldownUnlock" && vault.ruleSummary.unlockEligibleAt) {
+    return buildUnlockCountdown({
+      unlockDate: vault.ruleSummary.unlockEligibleAt,
+      nowMs,
+    });
+  }
+
+  return null;
+};
+
 export const buildWithdrawEligibility = ({
   vault,
   connectionStatus,
@@ -62,26 +86,61 @@ export const buildWithdrawEligibility = ({
   }
 
   const messages = getCurrentMessages().withdraw;
-  const unlockTimestampMs = getUnlockTimestampMs(vault.unlockDate);
-  const countdown = buildUnlockCountdown({
-    unlockDate: vault.unlockDate,
+  const countdown = buildRuleCountdown({
+    vault,
     nowMs,
   });
-  const isUnlocked = countdown.isComplete;
   const isConnected = connectionStatus === "ready";
   const isSupportedNetwork = connectionStatus !== "unsupportedNetwork";
   const normalizedConnectedAddress = connectedAddress ?? null;
   const isOwner = isConnected && normalizedConnectedAddress !== null && normalizedConnectedAddress.toLowerCase() === vault.ownerAddress.toLowerCase();
+  const guardianAddress = vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianAddress : null;
+  const isGuardian =
+    isConnected && guardianAddress !== null && normalizedConnectedAddress !== null && normalizedConnectedAddress.toLowerCase() === guardianAddress.toLowerCase();
+  const unlockTimestampMs =
+    vault.ruleSummary.type === "timeLock"
+      ? vault.ruleSummary.unlockTimestampMs
+      : vault.ruleSummary.type === "cooldownUnlock"
+        ? vault.ruleSummary.unlockEligibleTimestampMs
+        : null;
+  const isUnlocked =
+    vault.ruleSummary.type === "timeLock"
+      ? (countdown?.isComplete ?? false)
+      : vault.ruleSummary.type === "cooldownUnlock"
+        ? Boolean(vault.ruleSummary.unlockEligibleTimestampMs && vault.ruleSummary.unlockEligibleTimestampMs <= nowMs)
+        : vault.ruleSummary.guardianDecision === "approved";
   const availableAmountAtomic = isUnlocked ? vault.currentBalanceAtomic : 0n;
   const availableAmount = isUnlocked ? vault.savedAmount : 0;
-  const exactUnlockDate = formatLongDate(vault.unlockDate);
+  const unlockRequestStatus =
+    vault.ruleSummary.type === "timeLock"
+      ? isUnlocked
+        ? "approved"
+        : "not_requested"
+      : vault.ruleSummary.type === "cooldownUnlock"
+        ? vault.ruleSummary.unlockRequestedAt
+          ? isUnlocked
+            ? "matured"
+            : "pending"
+          : "not_requested"
+        : vault.ruleSummary.guardianDecision === "approved"
+          ? "approved"
+          : vault.ruleSummary.guardianDecision === "rejected"
+            ? "rejected"
+            : vault.ruleSummary.guardianDecision === "pending"
+              ? "pending"
+              : "not_requested";
 
   if (!isConnected) {
     return {
       lockState: isUnlocked ? "unlocked" : "locked",
       availability: connectionStatus === "unsupportedNetwork" ? "unsupported_network" : "disconnected",
       message: connectionStatus === "unsupportedNetwork" ? messages.switchNetwork : messages.connectWallet,
-      unlockDate: vault.unlockDate,
+      unlockDate:
+        vault.ruleSummary.type === "timeLock"
+          ? vault.ruleSummary.unlockDate
+          : vault.ruleSummary.type === "cooldownUnlock"
+            ? vault.ruleSummary.unlockEligibleAt
+            : null,
       unlockTimestampMs,
       availableAmount,
       availableAmountAtomic,
@@ -92,11 +151,23 @@ export const buildWithdrawEligibility = ({
       },
       countdown: isUnlocked ? null : countdown,
       isOwner: false,
+      isGuardian: false,
       connectedAddress: normalizedConnectedAddress,
       ownerAddress: vault.ownerAddress,
+      guardianAddress,
       isConnected: false,
       isSupportedNetwork,
       canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+      unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+      nextAction: "none",
+      ruleType: vault.ruleType,
     };
   }
 
@@ -115,16 +186,64 @@ export const buildWithdrawEligibility = ({
         hasFunds: availableAmountAtomic > 0n,
       },
       countdown: isUnlocked ? null : countdown,
-      isOwner: false,
+      isOwner,
+      isGuardian,
       connectedAddress: normalizedConnectedAddress,
       ownerAddress: vault.ownerAddress,
+      guardianAddress,
       isConnected: true,
       isSupportedNetwork: false,
       canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+      unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+      nextAction: "none",
+      ruleType: vault.ruleType,
     };
   }
 
-  if (!isOwner) {
+  if (vault.ruleSummary.type === "guardianApproval" && !isOwner && !isGuardian) {
+    return {
+      lockState: isUnlocked ? "unlocked" : "locked",
+      availability: "guardian_only",
+      message: "Only the owner or assigned guardian can act on this vault.",
+      unlockDate: null,
+      unlockTimestampMs: null,
+      availableAmount,
+      availableAmountAtomic,
+      withdrawableAmount: {
+        amount: availableAmount,
+        amountAtomic: availableAmountAtomic,
+        hasFunds: availableAmountAtomic > 0n,
+      },
+      countdown: null,
+      isOwner: false,
+      isGuardian: false,
+      connectedAddress: normalizedConnectedAddress,
+      ownerAddress: vault.ownerAddress,
+      guardianAddress,
+      isConnected: true,
+      isSupportedNetwork: true,
+      canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.guardianDecision,
+      unlockRequestedAt: vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: null,
+      nextAction: "none",
+      ruleType: vault.ruleType,
+    };
+  }
+
+  if (!isOwner && !isGuardian) {
     return {
       lockState: isUnlocked ? "unlocked" : "locked",
       availability: "owner_only",
@@ -140,22 +259,255 @@ export const buildWithdrawEligibility = ({
       },
       countdown: isUnlocked ? null : countdown,
       isOwner: false,
+      isGuardian: false,
       connectedAddress: normalizedConnectedAddress,
       ownerAddress: vault.ownerAddress,
+      guardianAddress,
       isConnected: true,
       isSupportedNetwork: true,
       canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+      unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+      nextAction: "none",
+      ruleType: vault.ruleType,
     };
   }
 
+  if (vault.ruleSummary.type === "cooldownUnlock" && !vault.ruleSummary.unlockRequestedAt) {
+    return {
+      lockState: "locked",
+      availability: "unlock_request_required",
+      message: "Request unlock first. Funds become withdrawable after the cooldown ends.",
+      unlockDate: null,
+      unlockTimestampMs: null,
+      availableAmount: 0,
+      availableAmountAtomic: 0n,
+      withdrawableAmount: {
+        amount: 0,
+        amountAtomic: 0n,
+        hasFunds: false,
+      },
+      countdown: null,
+      isOwner: true,
+      isGuardian: false,
+      connectedAddress: normalizedConnectedAddress,
+      ownerAddress: vault.ownerAddress,
+      guardianAddress: null,
+      isConnected: true,
+      isSupportedNetwork: true,
+      canWithdraw: false,
+      canRequestUnlock: true,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus: "not_requested",
+      guardianApprovalState: "not_required",
+      unlockRequestedAt: null,
+      unlockEligibleAt: null,
+      nextAction: "request_unlock",
+      ruleType: vault.ruleType,
+    };
+  }
+
+  if (vault.ruleSummary.type === "cooldownUnlock" && !isUnlocked) {
+    const countdownLabel = countdown ? formatUnlockCountdownLabel(countdown) : null;
+
+    return {
+      lockState: "locked",
+      availability: "cooldown_pending",
+      message: countdownLabel ? `Funds become withdrawable in ${countdownLabel}.` : "Funds become withdrawable after the cooldown ends.",
+      unlockDate: vault.ruleSummary.unlockEligibleAt,
+      unlockTimestampMs,
+      availableAmount: 0,
+      availableAmountAtomic: 0n,
+      withdrawableAmount: {
+        amount: 0,
+        amountAtomic: 0n,
+        hasFunds: false,
+      },
+      countdown,
+      isOwner: true,
+      isGuardian: false,
+      connectedAddress: normalizedConnectedAddress,
+      ownerAddress: vault.ownerAddress,
+      guardianAddress: null,
+      isConnected: true,
+      isSupportedNetwork: true,
+      canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: true,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus: "pending",
+      guardianApprovalState: "not_required",
+      unlockRequestedAt: vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.unlockEligibleAt,
+      nextAction: "wait",
+      ruleType: vault.ruleType,
+    };
+  }
+
+  if (vault.ruleSummary.type === "guardianApproval") {
+    if (isGuardian && vault.ruleSummary.guardianDecision === "pending") {
+      return {
+        lockState: "locked",
+        availability: "guardian_pending",
+        message: "This vault is waiting for your decision.",
+        unlockDate: null,
+        unlockTimestampMs: null,
+        availableAmount: 0,
+        availableAmountAtomic: 0n,
+        withdrawableAmount: {
+          amount: 0,
+          amountAtomic: 0n,
+          hasFunds: false,
+        },
+        countdown: null,
+        isOwner: false,
+        isGuardian: true,
+        connectedAddress: normalizedConnectedAddress,
+        ownerAddress: vault.ownerAddress,
+        guardianAddress,
+        isConnected: true,
+        isSupportedNetwork: true,
+        canWithdraw: false,
+        canRequestUnlock: false,
+        canCancelUnlockRequest: false,
+        canGuardianApprove: true,
+        canGuardianReject: true,
+        unlockRequestStatus: "pending",
+        guardianApprovalState: "pending",
+        unlockRequestedAt: vault.ruleSummary.unlockRequestedAt,
+        unlockEligibleAt: null,
+        nextAction: "guardian_approve",
+        ruleType: vault.ruleType,
+      };
+    }
+
+    if (isOwner && vault.ruleSummary.guardianDecision === "not_requested") {
+      return {
+        lockState: "locked",
+        availability: "unlock_request_required",
+        message: "Request unlock to send this vault to the guardian for approval.",
+        unlockDate: null,
+        unlockTimestampMs: null,
+        availableAmount: 0,
+        availableAmountAtomic: 0n,
+        withdrawableAmount: {
+          amount: 0,
+          amountAtomic: 0n,
+          hasFunds: false,
+        },
+        countdown: null,
+        isOwner: true,
+        isGuardian: false,
+        connectedAddress: normalizedConnectedAddress,
+        ownerAddress: vault.ownerAddress,
+        guardianAddress,
+        isConnected: true,
+        isSupportedNetwork: true,
+        canWithdraw: false,
+        canRequestUnlock: true,
+        canCancelUnlockRequest: false,
+        canGuardianApprove: false,
+        canGuardianReject: false,
+        unlockRequestStatus: "not_requested",
+        guardianApprovalState: "not_requested",
+        unlockRequestedAt: null,
+        unlockEligibleAt: null,
+        nextAction: "request_unlock",
+        ruleType: vault.ruleType,
+      };
+    }
+
+    if (isOwner && vault.ruleSummary.guardianDecision === "pending") {
+      return {
+        lockState: "locked",
+        availability: "guardian_pending",
+        message: "Waiting for guardian approval.",
+        unlockDate: null,
+        unlockTimestampMs: null,
+        availableAmount: 0,
+        availableAmountAtomic: 0n,
+        withdrawableAmount: {
+          amount: 0,
+          amountAtomic: 0n,
+          hasFunds: false,
+        },
+        countdown: null,
+        isOwner: true,
+        isGuardian: false,
+        connectedAddress: normalizedConnectedAddress,
+        ownerAddress: vault.ownerAddress,
+        guardianAddress,
+        isConnected: true,
+        isSupportedNetwork: true,
+        canWithdraw: false,
+        canRequestUnlock: false,
+        canCancelUnlockRequest: true,
+        canGuardianApprove: false,
+        canGuardianReject: false,
+        unlockRequestStatus: "pending",
+        guardianApprovalState: "pending",
+        unlockRequestedAt: vault.ruleSummary.unlockRequestedAt,
+        unlockEligibleAt: null,
+        nextAction: "wait",
+        ruleType: vault.ruleType,
+      };
+    }
+
+    if (isOwner && vault.ruleSummary.guardianDecision === "rejected") {
+      return {
+        lockState: "locked",
+        availability: "guardian_rejected",
+        message: "The guardian rejected the latest unlock request.",
+        unlockDate: null,
+        unlockTimestampMs: null,
+        availableAmount: 0,
+        availableAmountAtomic: 0n,
+        withdrawableAmount: {
+          amount: 0,
+          amountAtomic: 0n,
+          hasFunds: false,
+        },
+        countdown: null,
+        isOwner: true,
+        isGuardian: false,
+        connectedAddress: normalizedConnectedAddress,
+        ownerAddress: vault.ownerAddress,
+        guardianAddress,
+        isConnected: true,
+        isSupportedNetwork: true,
+        canWithdraw: false,
+        canRequestUnlock: true,
+        canCancelUnlockRequest: true,
+        canGuardianApprove: false,
+        canGuardianReject: false,
+        unlockRequestStatus: "rejected",
+        guardianApprovalState: "rejected",
+        unlockRequestedAt: vault.ruleSummary.unlockRequestedAt,
+        unlockEligibleAt: null,
+        nextAction: "request_unlock",
+        ruleType: vault.ruleType,
+      };
+    }
+  }
+
   if (!isUnlocked) {
-    const countdownLabel = formatUnlockCountdownLabel(countdown);
+    const exactUnlockDate = vault.unlockDate ? formatLongDate(vault.unlockDate) : "later";
+    const countdownLabel = countdown ? formatUnlockCountdownLabel(countdown) : null;
 
     return {
       lockState: "locked",
       availability: "locked",
       message:
-        countdown.totalSeconds > 0
+        countdownLabel
           ? interpolate(messages.lockedCountdownDescription, { time: countdownLabel })
           : interpolate(messages.lockedDescriptionExact, { date: exactUnlockDate }),
       unlockDate: vault.unlockDate,
@@ -168,12 +520,24 @@ export const buildWithdrawEligibility = ({
         hasFunds: false,
       },
       countdown,
-      isOwner: true,
+      isOwner,
+      isGuardian,
       connectedAddress: normalizedConnectedAddress,
       ownerAddress: vault.ownerAddress,
+      guardianAddress,
       isConnected: true,
       isSupportedNetwork: true,
       canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+      unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+      nextAction: "wait",
+      ruleType: vault.ruleType,
     };
   }
 
@@ -192,12 +556,24 @@ export const buildWithdrawEligibility = ({
         hasFunds: false,
       },
       countdown: null,
-      isOwner: true,
+      isOwner,
+      isGuardian,
       connectedAddress: normalizedConnectedAddress,
       ownerAddress: vault.ownerAddress,
+      guardianAddress,
       isConnected: true,
       isSupportedNetwork: true,
       canWithdraw: false,
+      canRequestUnlock: false,
+      canCancelUnlockRequest: false,
+      canGuardianApprove: false,
+      canGuardianReject: false,
+      unlockRequestStatus,
+      guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+      unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+      unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+      nextAction: "none",
+      ruleType: vault.ruleType,
     };
   }
 
@@ -217,12 +593,24 @@ export const buildWithdrawEligibility = ({
       hasFunds: true,
     },
     countdown: null,
-    isOwner: true,
-      connectedAddress: normalizedConnectedAddress,
+    isOwner,
+    isGuardian,
+    connectedAddress: normalizedConnectedAddress,
     ownerAddress: vault.ownerAddress,
+    guardianAddress,
     isConnected: true,
     isSupportedNetwork: true,
-    canWithdraw: true,
+    canWithdraw: isOwner,
+    canRequestUnlock: false,
+    canCancelUnlockRequest: false,
+    canGuardianApprove: false,
+    canGuardianReject: false,
+    unlockRequestStatus,
+    guardianApprovalState: vault.ruleSummary.type === "guardianApproval" ? vault.ruleSummary.guardianDecision : "not_required",
+    unlockRequestedAt: vault.ruleSummary.type === "timeLock" ? null : vault.ruleSummary.unlockRequestedAt,
+    unlockEligibleAt: vault.ruleSummary.type === "cooldownUnlock" ? vault.ruleSummary.unlockEligibleAt : null,
+    nextAction: isOwner ? "withdraw" : "none",
+    ruleType: vault.ruleType,
   };
 };
 

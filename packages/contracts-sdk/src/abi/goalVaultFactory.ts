@@ -24,6 +24,19 @@ export const goalVaultFactoryAbi = [
     outputs: [{ name: "vault", type: "address" }],
   },
   {
+    type: "function",
+    stateMutability: "nonpayable",
+    name: "createVault",
+    inputs: [
+      { name: "targetAmount", type: "uint256" },
+      { name: "ruleType", type: "uint8" },
+      { name: "unlockAt", type: "uint64" },
+      { name: "cooldownDuration", type: "uint64" },
+      { name: "guardian", type: "address" },
+    ],
+    outputs: [{ name: "vault", type: "address" }],
+  },
+  {
     type: "event",
     name: "VaultCreated",
     inputs: [
@@ -32,6 +45,21 @@ export const goalVaultFactoryAbi = [
       { indexed: true, name: "asset", type: "address" },
       { indexed: false, name: "targetAmount", type: "uint256" },
       { indexed: false, name: "unlockAt", type: "uint64" },
+      { indexed: false, name: "createdAt", type: "uint256" },
+    ],
+  },
+  {
+    type: "event",
+    name: "VaultCreatedV2",
+    inputs: [
+      { indexed: true, name: "owner", type: "address" },
+      { indexed: true, name: "vault", type: "address" },
+      { indexed: true, name: "asset", type: "address" },
+      { indexed: false, name: "targetAmount", type: "uint256" },
+      { indexed: false, name: "ruleType", type: "uint8" },
+      { indexed: false, name: "unlockAt", type: "uint64" },
+      { indexed: false, name: "cooldownDuration", type: "uint64" },
+      { indexed: false, name: "guardian", type: "address" },
       { indexed: false, name: "createdAt", type: "uint256" },
     ],
   },

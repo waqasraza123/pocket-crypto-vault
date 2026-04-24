@@ -13,6 +13,14 @@ export interface CreateVaultPreviewCardProps {
 
 export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPreviewCardProps) => {
   const { messages } = useI18n();
+  const protectionLabel =
+    values.ruleType === "timeLock"
+      ? values.unlockDate
+        ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(values.unlockDate) })
+        : messages.pages.createVault.preview.chooseUnlockDate
+      : values.ruleType === "cooldownUnlock"
+        ? `${values.cooldownDays || "7"} day cooldown`
+        : values.guardianAddress || "Guardian approval";
 
   return (
     <SurfaceCard tone="accent" level="floating" style={{ borderColor: getVaultAccentTone(values.accentTheme), backgroundColor: colors.backgroundElevated }}>
@@ -59,11 +67,7 @@ export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPrev
             <AppText size="sm" tone="secondary">
               {messages.common.labels.protectionRule}
             </AppText>
-            <AppText weight="semibold">
-              {values.unlockDate
-                ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(values.unlockDate) })
-                : messages.pages.createVault.preview.chooseUnlockDate}
-            </AppText>
+            <AppText weight="semibold">{protectionLabel}</AppText>
           </View>
         </View>
 

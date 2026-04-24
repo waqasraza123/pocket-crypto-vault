@@ -23,7 +23,10 @@ const vaultMetadataSchema = z.object({
   note: z.string().trim().optional().nullable(),
   accentTheme: z.enum(["sand", "sage", "sky", "terracotta"]).optional().nullable(),
   targetAmount: z.string().trim().min(1),
-  unlockDate: z.string().trim().min(1),
+  ruleType: z.enum(["timeLock", "cooldownUnlock", "guardianApproval"]),
+  unlockDate: z.string().trim().optional().nullable(),
+  cooldownDurationSeconds: z.number().int().optional().nullable(),
+  guardianAddress: z.string().trim().optional().nullable(),
 });
 
 export const registerVaultRoutes = (app: FastifyInstance) => {

@@ -6,7 +6,49 @@ const deploymentTargetSchema = z.enum(["local", "staging", "production"]);
 const syncFreshnessStateSchema = z.enum(["current", "syncing", "lagging", "unavailable"]);
 const vaultMetadataStatusSchema = z.enum(["pending", "saved", "failed"]);
 const vaultReconciliationStatusSchema = z.enum(["metadata_complete", "metadata_pending", "metadata_orphaned"]);
-const normalizedVaultEventTypeSchema = z.enum(["vault_created", "deposit_confirmed", "withdrawal_confirmed"]);
+const vaultRuleTypeSchema = z.enum(["timeLock", "cooldownUnlock", "guardianApproval"]);
+const guardianApprovalStateSchema = z.enum(["not_required", "not_requested", "pending", "approved", "rejected"]);
+const unlockRequestStatusSchema = z.enum(["not_requested", "pending", "canceled", "approved", "rejected", "matured"]);
+const normalizedVaultEventTypeSchema = z.enum([
+  "vault_created",
+  "deposit_confirmed",
+  "withdrawal_confirmed",
+  "unlock_requested",
+  "unlock_canceled",
+  "guardian_approved",
+  "guardian_rejected",
+]);
+
+const TimeLockRuleSummarySchema = z.object({
+  type: z.literal("timeLock"),
+  unlockDate: z.string(),
+  unlockTimestampMs: z.number(),
+});
+
+const CooldownRuleSummarySchema = z.object({
+  type: z.literal("cooldownUnlock"),
+  cooldownDurationSeconds: z.number().int(),
+  cooldownDurationDays: z.number(),
+  cooldownDurationLabel: z.string(),
+  unlockRequestedAt: z.string().nullable(),
+  unlockEligibleAt: z.string().nullable(),
+  unlockEligibleTimestampMs: z.number().nullable(),
+});
+
+const GuardianRuleSummarySchema = z.object({
+  type: z.literal("guardianApproval"),
+  guardianAddress: z.string(),
+  guardianLabel: z.string(),
+  unlockRequestedAt: z.string().nullable(),
+  guardianDecision: guardianApprovalStateSchema,
+  guardianDecisionAt: z.string().nullable(),
+});
+
+const vaultRuleSummarySchema = z.union([
+  TimeLockRuleSummarySchema,
+  CooldownRuleSummarySchema,
+  GuardianRuleSummarySchema,
+]);
 
 export const SyncFreshnessSnapshotSchema = z.object({
   freshness: syncFreshnessStateSchema,
@@ -26,9 +68,10 @@ export const ApiVaultSummaryItemSchema = z.object({
   note: z.string().optional(),
   targetAmount: z.number(),
   savedAmount: z.number(),
-  unlockDate: z.string(),
-  ruleType: z.literal("timeLock"),
-  status: z.enum(["active", "locked", "unlocked", "withdrawn", "closed"]),
+  unlockDate: z.string().nullable(),
+  ruleType: vaultRuleTypeSchema,
+  ruleSummary: vaultRuleSummarySchema,
+  status: z.enum(["active", "locked", "unlocking", "unlocked", "withdrawn", "closed"]),
   accentTheme: z.enum(["sand", "sage", "sky", "terracotta"]).optional(),
   accentTone: z.string(),
   metadataStatus: vaultMetadataStatusSchema.optional(),
@@ -60,6 +103,9 @@ export const ApiVaultActivityItemSchema = z.object({
   indexedAt: z.string(),
   displayName: z.string().nullable(),
   metadataStatus: vaultMetadataStatusSchema,
+  ruleType: vaultRuleTypeSchema.optional(),
+  unlockRequestStatus: unlockRequestStatusSchema.optional(),
+  guardianApprovalState: guardianApprovalStateSchema.optional(),
 });
 
 export const ApiVaultDetailItemSchema = ApiVaultSummaryItemSchema.extend({

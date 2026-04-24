@@ -37,8 +37,8 @@ Still not implemented:
 
 ## Planned Release Order
 - `v1`: time-lock vaults only, followed by release hardening, staging readiness, launch-candidate presentation polish, deployment packaging, and final demo or case-study support
-- `v1.5`: cooldown unlock
-- `v2`: guardian approval
+- `v1.5`: complete the planned rule system with cooldown unlock and guardian approval
+- `v2`: infrastructure and expansion work beyond the original one-goal vault rule set
 
 ## Core MVP Actions
 - Create a vault
@@ -84,8 +84,8 @@ Still not implemented:
 - Phase 12: motion-system upgrade, modern visual refresh, and animated product polish
 - Phase 13: full backend or API wiring, typed data flow, and completion of the end-to-end core loop
 - Phase 14: final production cleanup, dead-code removal, duplicate-path consolidation, and repository hardening
-- Phase 15: cooldown unlock
-- Phase 16: guardian approval
+- Phase 15: cooldown unlock plus guardian approval, with rule-system completion across contracts, backend, and app flows
+- Phase 16: later infrastructure or expansion work after the original rule system is complete
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -121,6 +121,8 @@ Still not implemented:
 - Phase 13 makes the API-backed read model the default product path for dashboard, detail, and activity, while keeping chain reads limited to correctness fallbacks and session overlays limited to in-flight recovery.
 - Phase 13 centralizes frontend merge logic for backend, chain, and session state so create, deposit, withdraw, and recovery refresh the same product surfaces consistently.
 - Phase 14 removes unused authenticated mocks, dead wrapper modules, and duplicate backend freshness helpers so the repository reads as a cleaner production codebase instead of layered phase scaffolding.
+- Phase 15 completes the original Goal Vault rule system with generalized rule typing, backward-aware vault reads, cooldown unlock, guardian approval, and rule-aware activity or API responses.
+- Phase 15 keeps the existing legacy time-lock summary read path available while introducing richer rule-state reads and `VaultCreatedV2` for new deployments so old time-lock vaults can still be rendered cleanly.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -144,6 +146,8 @@ Still not implemented:
 - The Phase 12 theme refresh note lives at `docs/plans/goal-vault-theme-refresh-notes.md`.
 - The Phase 13 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-13.md`.
 - The Phase 14 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-14.md`.
+- The Phase 15 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-15.md`.
+- The Phase 15 rule-system note lives at `docs/plans/goal-vault-rule-system.md`.
 
 ## Deferred / Not Yet Implemented
 - External database infrastructure for the backend beyond the current file-backed persistent store

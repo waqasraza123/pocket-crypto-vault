@@ -1,7 +1,15 @@
 import { mapVaultDetail, mapVaultSummary } from "@goal-vault/contracts-sdk";
-import type { CreateVaultFormInput, CreateVaultReviewModel, VaultAccentTheme, VaultDetail, VaultMetadataRecord, VaultSummary } from "@goal-vault/shared";
+import type {
+  CreateVaultFormInput,
+  CreateVaultReviewModel,
+  VaultAccentTheme,
+  VaultDetail,
+  VaultMetadataRecord,
+  VaultRuleSummary,
+  VaultSummary,
+} from "@goal-vault/shared";
 import { parseAmountInput } from "@goal-vault/shared";
-import { parseUnits } from "viem";
+import { parseUnits, isAddress } from "viem";
 
 import { formatLongDate, formatUsdc } from "../format";
 import { getCurrentMessages } from "../i18n";
@@ -14,6 +22,46 @@ const vaultAccentThemeTones: Record<VaultAccentTheme, string> = {
   sage: "#66735c",
   sky: "#5f7f96",
   terracotta: "#9a5f4d",
+};
+
+const formatCooldownDurationLabel = (days: number) => `${days} day${days === 1 ? "" : "s"}`;
+
+const buildCreateRuleSummary = (values: CreateVaultFormInput): VaultRuleSummary => {
+  if (values.ruleType === "cooldownUnlock") {
+    const cooldownDays = Math.max(Number.parseInt(values.cooldownDays, 10) || 0, 0);
+    const cooldownDurationSeconds = cooldownDays * 86_400;
+
+    return {
+      type: "cooldownUnlock",
+      cooldownDurationSeconds,
+      cooldownDurationDays: cooldownDays,
+      cooldownDurationLabel: formatCooldownDurationLabel(cooldownDays),
+      unlockRequestedAt: null,
+      unlockEligibleAt: null,
+      unlockEligibleTimestampMs: null,
+    };
+  }
+
+  if (values.ruleType === "guardianApproval") {
+    const guardianAddress = isAddress(values.guardianAddress as `0x${string}`)
+      ? (values.guardianAddress as `0x${string}`)
+      : "0x0000000000000000000000000000000000000000";
+
+    return {
+      type: "guardianApproval",
+      guardianAddress,
+      guardianLabel: `${guardianAddress.slice(0, 6)}…${guardianAddress.slice(-4)}`,
+      unlockRequestedAt: null,
+      guardianDecision: "not_requested",
+      guardianDecisionAt: null,
+    };
+  }
+
+  return {
+    type: "timeLock",
+    unlockDate: values.unlockDate,
+    unlockTimestampMs: Date.parse(values.unlockDate),
+  };
 };
 
 export const getVaultAccentThemeOptions = (): Array<{ value: VaultAccentTheme; label: string; tone: string }> => {
@@ -43,9 +91,8 @@ export const buildCreateVaultReviewModel = ({
   const messages = getCurrentMessages();
   const normalizedTargetAmount = values.targetAmount.replaceAll(",", "").trim();
   const targetAmount = parseAmountInput(normalizedTargetAmount);
-  const unlockTimestamp = BigInt(Math.floor(Date.parse(values.unlockDate) / 1000));
-  const unlockDateLabel = formatLongDate(values.unlockDate);
   const networkLabel = chainId === 84532 ? messages.common.networkBaseSepolia : messages.common.networkBase;
+  const ruleSummary = buildCreateRuleSummary(values);
 
   return {
     goalName: values.goalName.trim(),
@@ -58,14 +105,28 @@ export const buildCreateVaultReviewModel = ({
     targetAmountDisplay: formatUsdc(targetAmount),
     assetSymbol: "USDC",
     networkLabel,
-    unlockDate: values.unlockDate,
-    unlockDateLabel,
-    unlockTimestamp,
+    ruleType: values.ruleType,
+    ruleSummary,
+    unlockDate: ruleSummary.type === "timeLock" ? values.unlockDate : null,
+    unlockDateLabel: ruleSummary.type === "timeLock" ? formatLongDate(values.unlockDate) : null,
+    unlockTimestamp: ruleSummary.type === "timeLock" ? BigInt(Math.floor(Date.parse(values.unlockDate) / 1000)) : null,
+    cooldownDurationSeconds:
+      ruleSummary.type === "cooldownUnlock" ? BigInt(ruleSummary.cooldownDurationSeconds) : null,
+    cooldownDurationLabel: ruleSummary.type === "cooldownUnlock" ? ruleSummary.cooldownDurationLabel : null,
+    guardianAddress: ruleSummary.type === "guardianApproval" ? ruleSummary.guardianAddress : null,
     protectionCopy: [
       messages.pages.createVault.stateBanner,
       `${messages.common.labels.networkAndAsset}: ${networkLabel} • USDC`,
-      messages.pages.createVault.timeLockDescription,
-      `${messages.common.labels.unlockDate}: ${unlockDateLabel}`,
+      ruleSummary.type === "timeLock"
+        ? messages.pages.createVault.timeLockDescription
+        : ruleSummary.type === "cooldownUnlock"
+          ? "Request unlock first. Funds become withdrawable after the cooldown ends."
+          : "A guardian must approve unlock before this vault can be withdrawn.",
+      ruleSummary.type === "timeLock"
+        ? `${messages.common.labels.unlockDate}: ${formatLongDate(values.unlockDate)}`
+        : ruleSummary.type === "cooldownUnlock"
+          ? `Cooldown: ${ruleSummary.cooldownDurationLabel}`
+          : `Guardian: ${ruleSummary.guardianLabel}`,
     ],
   };
 };
@@ -89,6 +150,36 @@ export const mergeVaultSummaryWithMetadata = ({
     accentTheme: metadata.accentTheme,
     accentTone: metadata.accentTone,
     metadataStatus: metadata.metadataStatus,
+    ruleType: metadata.ruleType,
+    unlockDate:
+      metadata.ruleType === "timeLock" ? new Date(metadata.unlockDate ?? new Date().toISOString()).toISOString() : null,
+    ruleSummary:
+      metadata.ruleType === "timeLock"
+        ? {
+            type: "timeLock",
+            unlockDate: new Date(metadata.unlockDate ?? new Date().toISOString()).toISOString(),
+            unlockTimestampMs: Date.parse(metadata.unlockDate ?? new Date().toISOString()),
+          }
+        : metadata.ruleType === "cooldownUnlock"
+          ? {
+              type: "cooldownUnlock",
+              cooldownDurationSeconds: metadata.cooldownDurationSeconds ?? 0,
+              cooldownDurationDays: Math.round((metadata.cooldownDurationSeconds ?? 0) / 86_400),
+              cooldownDurationLabel: formatCooldownDurationLabel(Math.round((metadata.cooldownDurationSeconds ?? 0) / 86_400)),
+              unlockRequestedAt: null,
+              unlockEligibleAt: null,
+              unlockEligibleTimestampMs: null,
+            }
+          : {
+              type: "guardianApproval",
+              guardianAddress: metadata.guardianAddress ?? "0x0000000000000000000000000000000000000000",
+              guardianLabel: metadata.guardianAddress
+                ? `${metadata.guardianAddress.slice(0, 6)}…${metadata.guardianAddress.slice(-4)}`
+                : "Guardian",
+              unlockRequestedAt: null,
+              guardianDecision: "not_requested",
+              guardianDecisionAt: null,
+            },
   };
 };
 
@@ -96,6 +187,33 @@ export const createSessionVaultSummary = (metadata: VaultMetadataRecord): VaultS
   const contractConfig = getContractConfigForChain(metadata.chainId);
   const targetAmount = parseAmountInput(metadata.targetAmount);
   const targetAmountAtomic = parseUnits(metadata.targetAmount.replaceAll(",", "").trim(), 6);
+  const ruleSummary =
+    metadata.ruleType === "timeLock"
+      ? {
+          type: "timeLock" as const,
+          unlockDate: new Date(metadata.unlockDate ?? new Date().toISOString()).toISOString(),
+          unlockTimestampMs: Date.parse(metadata.unlockDate ?? new Date().toISOString()),
+        }
+      : metadata.ruleType === "cooldownUnlock"
+        ? {
+            type: "cooldownUnlock" as const,
+            cooldownDurationSeconds: metadata.cooldownDurationSeconds ?? 0,
+            cooldownDurationDays: Math.round((metadata.cooldownDurationSeconds ?? 0) / 86_400),
+            cooldownDurationLabel: formatCooldownDurationLabel(Math.round((metadata.cooldownDurationSeconds ?? 0) / 86_400)),
+            unlockRequestedAt: null,
+            unlockEligibleAt: null,
+            unlockEligibleTimestampMs: null,
+          }
+        : {
+            type: "guardianApproval" as const,
+            guardianAddress: metadata.guardianAddress ?? "0x0000000000000000000000000000000000000000",
+            guardianLabel: metadata.guardianAddress
+              ? `${metadata.guardianAddress.slice(0, 6)}…${metadata.guardianAddress.slice(-4)}`
+              : "Guardian",
+            unlockRequestedAt: null,
+            guardianDecision: "not_requested" as const,
+            guardianDecisionAt: null,
+          };
 
   return {
     address: metadata.contractAddress,
@@ -107,8 +225,9 @@ export const createSessionVaultSummary = (metadata: VaultMetadataRecord): VaultS
     note: metadata.note,
     targetAmount,
     savedAmount: 0,
-    unlockDate: new Date(metadata.unlockDate).toISOString(),
-    ruleType: "timeLock",
+    unlockDate: metadata.ruleType === "timeLock" ? new Date(metadata.unlockDate ?? new Date().toISOString()).toISOString() : null,
+    ruleType: metadata.ruleType,
+    ruleSummary,
     status: "active",
     accentTheme: metadata.accentTheme,
     accentTone: metadata.accentTone,

@@ -13,6 +13,7 @@ import {
 import { useTransactionRecovery } from "../../../hooks/useTransactionRecovery";
 import { useVaultDepositFlow } from "../../../hooks/useVaultDepositFlow";
 import { useVaultDetail } from "../../../hooks/useVaultDetail";
+import { useVaultUnlockFlow } from "../../../hooks/useVaultUnlockFlow";
 import { useVaultWithdrawFlow } from "../../../hooks/useVaultWithdrawFlow";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useI18n } from "../../../lib/i18n";
@@ -54,6 +55,7 @@ export default function VaultDetailScreen() {
   const { messages } = useI18n();
   const depositFlow = useVaultDepositFlow(vault);
   const withdrawFlow = useVaultWithdrawFlow(vault);
+  const unlockFlow = useVaultUnlockFlow(vault);
   const activeRecovery = items[0] ?? null;
   const analyticsContext = useMemo(
     () => createConnectionAnalyticsContext(connectionState),
@@ -242,7 +244,7 @@ export default function VaultDetailScreen() {
             </MotionView>
             <MotionView delay={180} style={{ flex: 1, gap: spacing[4] }}>
               <DepositActionPanel flow={depositFlow} vault={vault} />
-              <WithdrawActionPanel flow={withdrawFlow} vault={vault} />
+              <WithdrawActionPanel flow={withdrawFlow} unlockFlow={unlockFlow} vault={vault} />
             </MotionView>
           </View>
         ) : null}

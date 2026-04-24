@@ -7,6 +7,12 @@ import { AppHeading, AppText, MotionView, SurfaceCard } from "../primitives";
 
 export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewModel }) => {
   const { messages } = useI18n();
+  const ruleValue =
+    review.ruleType === "timeLock"
+      ? review.unlockDateLabel
+      : review.ruleType === "cooldownUnlock"
+        ? review.cooldownDurationLabel
+        : review.guardianAddress;
 
   return (
     <SurfaceCard>
@@ -49,8 +55,8 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
               padding: spacing[4],
             }}
           >
-            <AppText size="sm" tone="secondary">{messages.common.labels.unlockDate}</AppText>
-            <AppText weight="semibold">{review.unlockDateLabel}</AppText>
+            <AppText size="sm" tone="secondary">{messages.common.labels.protectionRule}</AppText>
+            <AppText weight="semibold">{ruleValue}</AppText>
           </View>
         </View>
         <View style={{ gap: spacing[1] }}>

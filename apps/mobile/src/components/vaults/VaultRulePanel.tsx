@@ -13,7 +13,19 @@ export interface VaultRulePanelProps {
 
 export const VaultRulePanel = ({ vault, eligibility }: VaultRulePanelProps) => {
   const { messages } = useI18n();
-  const ruleMessage = eligibility?.availability === "locked" ? eligibility.message : vault.withdrawEligibility.message;
+  const ruleMessage = eligibility?.message ?? vault.withdrawEligibility.message;
+  const ruleLabel =
+    vault.ruleType === "timeLock"
+      ? messages.common.labels.timeLock
+      : vault.ruleType === "cooldownUnlock"
+        ? "Cooldown unlock"
+        : "Guardian approval";
+  const ruleDescription =
+    vault.ruleType === "timeLock"
+      ? interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(vault.unlockDate ?? new Date().toISOString()) })
+      : vault.ruleType === "cooldownUnlock"
+        ? `Funds become withdrawable ${vault.ruleSummary.type === "cooldownUnlock" ? `after a ${vault.ruleSummary.cooldownDurationLabel} cooldown.` : "after the cooldown ends."}`
+        : `Guardian approval is required before withdrawal becomes eligible.`;
 
   return (
     <SurfaceCard tone="muted">
@@ -29,11 +41,11 @@ export const VaultRulePanel = ({ vault, eligibility }: VaultRulePanelProps) => {
         }}
       >
         <AppText size="sm" tone="secondary" weight="semibold">
-          {messages.common.labels.timeLock}
+          {ruleLabel}
         </AppText>
       </MotionView>
       <AppHeading size="md">{messages.common.labels.protectionRule}</AppHeading>
-      <AppText>{interpolate(messages.vaults.protectionRuleUnlocksOn, { date: formatLongDate(vault.unlockDate) })}</AppText>
+      <AppText>{ruleDescription}</AppText>
       <View
         style={{
           borderRadius: radii.lg,

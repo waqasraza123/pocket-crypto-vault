@@ -2,7 +2,7 @@ import type { Address, Hash } from "viem";
 
 import type { SupportedChainId } from "./chain";
 import type { UserFacingRecoveryAction } from "./app-readiness";
-import type { VaultAccentTheme, VaultAddress } from "./vault";
+import type { VaultAccentTheme, VaultAddress, VaultRuleType } from "./vault";
 
 export type TransactionRecoveryKind = "create_vault" | "deposit" | "withdraw";
 export type TransactionRecoveryLifecycle = "submitted" | "confirming" | "confirmed" | "syncing" | "failed" | "completed";
@@ -15,7 +15,10 @@ export interface TransactionRecoveryMetadata {
   accentTheme: VaultAccentTheme | null;
   accentTone: string | null;
   targetAmount: string | null;
+  ruleType: VaultRuleType | null;
   unlockDate: string | null;
+  cooldownDurationSeconds: number | null;
+  guardianAddress: Address | null;
 }
 
 export interface TransactionRecoveryRecord {
