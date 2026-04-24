@@ -2,7 +2,7 @@ import { View } from "react-native";
 
 import { formatUsdc } from "../../lib/format";
 import { useI18n } from "../../lib/i18n";
-import { AppText } from "../primitives";
+import { AnimatedNumberText, AppText } from "../primitives";
 
 export interface VaultCardAmountProps {
   savedAmount: number;
@@ -17,9 +17,7 @@ export const VaultCardAmount = ({ savedAmount, targetAmount }: VaultCardAmountPr
       <AppText size="sm" tone="secondary">
         {messages.common.labels.totalSaved}
       </AppText>
-      <AppText size="xl" weight="semibold">
-        {formatUsdc(savedAmount)}
-      </AppText>
+      <AnimatedNumberText formatValue={formatUsdc} size="xl" value={savedAmount} weight="semibold" />
       <AppText size="sm" tone="muted">
         {messages.common.labels.of} {formatUsdc(targetAmount)}
       </AppText>

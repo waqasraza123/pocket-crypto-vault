@@ -4,21 +4,24 @@ import { View } from "react-native";
 import { formatLongDate, formatProgress, formatUsdc } from "../../lib/format";
 import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, ProgressBar, StatusChip, SurfaceCard } from "../primitives";
+import { AnimatedNumberText, AppHeading, AppText, MotionView, ProgressBar, StatusChip, SurfaceCard } from "../primitives";
 
 export const HeroVaultPreviewCard = () => {
   const { messages } = useI18n();
+  const savedAmount = 7450;
+  const targetAmount = 12000;
+  const progress = 0.62;
 
   return (
-    <SurfaceCard tone="default" style={{ backgroundColor: colors.backgroundElevated, gap: spacing[5] }}>
+    <SurfaceCard tone="default" level="floating" style={{ backgroundColor: colors.backgroundElevated, gap: spacing[5] }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>
-        <View style={{ gap: spacing[2], flex: 1 }}>
+        <MotionView style={{ gap: spacing[2], flex: 1 }} preset="rise" intensity="emphasis">
           <AppText size="sm" tone="accent" weight="semibold">
             {messages.landing.heroPreviewLabel}
           </AppText>
           <AppHeading size="lg">{messages.landing.heroPreviewGoal}</AppHeading>
           <AppText tone="secondary">{messages.landing.heroPreviewDescription}</AppText>
-        </View>
+        </MotionView>
         <StatusChip label={messages.vaults.status.active} />
       </View>
       <View
@@ -33,52 +36,52 @@ export const HeroVaultPreviewCard = () => {
             flex: 1,
             minWidth: 150,
             gap: spacing[1],
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
           }}
         >
             <AppText size="sm" tone="secondary">
               {messages.common.labels.totalSaved}
             </AppText>
-            <AppHeading size="md">{formatUsdc(7450)}</AppHeading>
+            <AnimatedNumberText formatValue={formatUsdc} size="xl" value={savedAmount} weight="semibold" />
         </View>
         <View
           style={{
             flex: 1,
             minWidth: 150,
             gap: spacing[1],
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
           }}
         >
             <AppText size="sm" tone="secondary">
               {messages.common.labels.targetAmount}
             </AppText>
-            <AppHeading size="md">{formatUsdc(12000)}</AppHeading>
+            <AnimatedNumberText formatValue={formatUsdc} size="xl" value={targetAmount} weight="semibold" />
         </View>
       </View>
       <View style={{ gap: spacing[2] }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <AppText tone="secondary">{messages.common.labels.progress}</AppText>
-          <AppText weight="semibold">{formatProgress(0.62)}</AppText>
+          <AppText weight="semibold">{formatProgress(progress)}</AppText>
         </View>
-        <ProgressBar progress={0.62} />
+        <ProgressBar progress={progress} />
         <AppText size="sm" tone="muted">
-          {formatProgress(0.62)} of {formatUsdc(12000)}
+          {formatProgress(progress)} of {formatUsdc(targetAmount)}
         </AppText>
       </View>
       <View
         style={{
-          borderRadius: radii.md,
+          borderRadius: radii.lg,
           borderWidth: 1,
           borderColor: colors.border,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.surfaceGlass,
           padding: spacing[4],
           gap: spacing[3],
         }}
@@ -94,10 +97,10 @@ export const HeroVaultPreviewCard = () => {
       </View>
       <View
         style={{
-          borderRadius: radii.md,
+          borderRadius: radii.lg,
           borderWidth: 1,
           borderColor: colors.border,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.surfaceGlass,
           padding: spacing[4],
           gap: spacing[3],
         }}

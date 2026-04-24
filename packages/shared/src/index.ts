@@ -1,5 +1,6 @@
 export * from "./domain/chain";
 export * from "./domain/activity";
+export * from "./domain/analytics";
 export * from "./domain/app-readiness";
 export * from "./domain/deployment";
 export * from "./domain/recovery";

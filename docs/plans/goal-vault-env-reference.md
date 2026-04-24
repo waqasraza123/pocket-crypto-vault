@@ -11,6 +11,8 @@
   - public API base URL used by the app
 - `EXPO_PUBLIC_API_TIMEOUT_MS`
   - app-side backend timeout in milliseconds
+- `EXPO_PUBLIC_ANALYTICS_ENABLED`
+  - `true` or `false`; when enabled the app emits typed product events through the analytics boundary
 - `EXPO_PUBLIC_REOWN_PROJECT_ID`
   - wallet project ID for real wallet flows
 - `EXPO_PUBLIC_WALLETCONNECT_METADATA_URL`
@@ -39,6 +41,8 @@
   - background sync interval in milliseconds
 - `API_ENABLE_INDEXER`
   - `true` or `false`
+- `API_ENABLE_ANALYTICS`
+  - `true` or `false`; stores app analytics batches to the API-side NDJSON file for post-launch review
 - `API_LOG_LEVEL`
   - one of `fatal`, `error`, `warn`, `info`, `debug`, `trace`
 - `API_BASE_START_BLOCK`
@@ -56,10 +60,13 @@
 - Development:
   - local URLs are acceptable
   - API base URL and wallet project ID can remain optional for UI work
+  - analytics can be disabled or left on local-log mode while product flows are still being built
 - Staging:
   - expect Base Sepolia RPC and factory address
   - require public app and API URLs
+  - analytics should be enabled so funnel and degraded-state events are measurable during smoke tests
 - Production:
   - expect Base mainnet RPC and factory address
   - do not use localhost URLs
   - require public HTTPS app and API URLs
+  - analytics should remain enabled unless a privacy or incident response decision explicitly disables it

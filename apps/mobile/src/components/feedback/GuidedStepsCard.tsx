@@ -3,7 +3,7 @@ import { View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, SurfaceCard } from "../primitives";
+import { AppHeading, AppText, MotionView, SurfaceCard } from "../primitives";
 
 export interface GuidedStepsCardProps {
   title: string;
@@ -25,19 +25,28 @@ export const GuidedStepsCard = ({
     <SurfaceCard tone="muted" style={{ backgroundColor: colors.backgroundElevated }}>
       <View style={{ gap: spacing[4] }}>
         <View style={{ flexDirection: "row", alignItems: "flex-start", gap: spacing[3] }}>
-          <View
-            style={{
-              width: 52,
-              height: 52,
-              borderRadius: 26,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: colors.accentSoft,
-            }}
-          >
-            <MaterialCommunityIcons color={colors.accentStrong} name={icon} size={24} />
-          </View>
-          <View style={{ flex: 1, gap: spacing[2] }}>
+          <MotionView preset="scale" intensity="emphasis">
+            <View
+              style={{
+                width: 58,
+                height: 58,
+                borderRadius: 29,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colors.accentSoft,
+                borderWidth: 1,
+                borderColor: colors.borderStrong,
+                shadowColor: colors.accentGlow,
+                shadowOpacity: 0.24,
+                shadowRadius: 18,
+                shadowOffset: { width: 0, height: 10 },
+                elevation: 3,
+              }}
+            >
+              <MaterialCommunityIcons color={colors.accentStrong} name={icon} size={24} />
+            </View>
+          </MotionView>
+          <MotionView delay={70} style={{ flex: 1, gap: spacing[2] }}>
             {eyebrow ? (
               <AppText size="sm" tone="accent" weight="semibold">
                 {eyebrow}
@@ -45,12 +54,13 @@ export const GuidedStepsCard = ({
             ) : null}
             <AppHeading size="md">{title}</AppHeading>
             <AppText tone="secondary">{description}</AppText>
-          </View>
+          </MotionView>
         </View>
         <View style={{ gap: spacing[3] }}>
           {steps.map((step, index) => (
-            <View
+            <MotionView
               key={step}
+              delay={120 + index * 55}
               style={{
                 flexDirection: "row",
                 alignItems: "flex-start",
@@ -79,7 +89,7 @@ export const GuidedStepsCard = ({
               <AppText style={{ flex: 1 }} tone="secondary">
                 {step}
               </AppText>
-            </View>
+            </MotionView>
           ))}
         </View>
         {children}

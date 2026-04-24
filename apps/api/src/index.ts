@@ -1,5 +1,6 @@
 import { buildApp } from "./app";
 import { readApiRuntimeEnv } from "./env";
+import { logObservabilitySignal } from "./lib/observability/logger";
 import { createIndexerContext } from "./modules/indexer/context";
 import { runFullIndexerSync } from "./modules/indexer/indexer.routes";
 
@@ -16,7 +17,19 @@ const start = async () => {
   const app = buildApp({ context, env });
   const runSync = async () => {
     try {
+      logObservabilitySignal(app.log, {
+        domain: "indexer",
+        action: "full_sync",
+        status: "started",
+        message: "Goal Vault indexer sync started.",
+      });
       await runFullIndexerSync(context);
+      logObservabilitySignal(app.log, {
+        domain: "indexer",
+        action: "full_sync",
+        status: "succeeded",
+        message: "Goal Vault indexer sync completed.",
+      });
     } catch (error) {
       app.log.error(error, "Goal Vault indexer sync failed.");
     }
@@ -28,6 +41,7 @@ const start = async () => {
       deploymentTarget: env.deploymentTarget,
       publicBaseUrl: env.publicBaseUrl,
       indexerEnabled: env.indexerEnabled,
+      analyticsEnabled: env.analyticsEnabled,
       syncIntervalMs: env.syncIntervalMs,
       chains: Object.values(env.chains).map((chain) => ({
         chainId: chain.chainId,

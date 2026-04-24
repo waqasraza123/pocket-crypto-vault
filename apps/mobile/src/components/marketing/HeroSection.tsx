@@ -5,7 +5,7 @@ import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, PrimaryButton, SecondaryButton, SectionContainer } from "../primitives";
+import { AppHeading, AppText, MotionView, PrimaryButton, SecondaryButton, SectionContainer } from "../primitives";
 import { HeroVaultPreviewCard } from "./HeroVaultPreviewCard";
 
 export const HeroSection = () => {
@@ -19,14 +19,17 @@ export const HeroSection = () => {
         flexDirection: adaptiveLayout.useSplitLayout ? "row" : "column",
         alignItems: adaptiveLayout.useSplitLayout ? "stretch" : "flex-start",
         justifyContent: "space-between",
+        gap: spacing[8],
       }}
     >
-      <View style={{ flex: 1, gap: spacing[5], paddingVertical: spacing[8] }}>
+      <MotionView style={{ flex: 1, gap: spacing[5], paddingVertical: spacing[8] }} preset="hero" intensity="emphasis">
         <View
           style={{
             alignSelf: "flex-start",
             borderRadius: radii.pill,
             backgroundColor: colors.accentSoft,
+            borderWidth: 1,
+            borderColor: colors.borderStrong,
             paddingHorizontal: spacing[3],
             paddingVertical: spacing[2],
           }}
@@ -35,13 +38,13 @@ export const HeroSection = () => {
             {messages.landing.heroBadge}
           </AppText>
         </View>
-        <View style={{ gap: spacing[3] }}>
+        <MotionView delay={70} style={{ gap: spacing[3] }}>
           <AppHeading size={adaptiveLayout.isCompact ? "xl" : "display"}>{messages.landing.heroTitle}</AppHeading>
           <AppText size="lg" tone="secondary">
             {messages.landing.heroSubtitle}
           </AppText>
-        </View>
-        <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
+        </MotionView>
+        <MotionView delay={130} style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
           {messages.landing.heroHighlights.map((item) => (
             <View
               key={item}
@@ -59,15 +62,21 @@ export const HeroSection = () => {
               </AppText>
             </View>
           ))}
-        </View>
-        <View
+        </MotionView>
+        <MotionView
+          delay={190}
           style={{
             gap: spacing[2],
-            borderRadius: radii.lg,
+            borderRadius: radii.xl,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
+            shadowColor: colors.overlayStrong,
+            shadowOpacity: 0.08,
+            shadowRadius: 18,
+            shadowOffset: { width: 0, height: 12 },
+            elevation: 2,
           }}
         >
           <AppText size="sm" tone="accent" weight="semibold">
@@ -76,8 +85,8 @@ export const HeroSection = () => {
           <AppText tone="secondary">
             {messages.landing.demoPathDescription}
           </AppText>
-        </View>
-        <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
+        </MotionView>
+        <MotionView delay={250} style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
           <PrimaryButton
             icon="arrow-right"
             label={messages.common.buttons.openAppShell}
@@ -88,11 +97,11 @@ export const HeroSection = () => {
             label={messages.common.buttons.seeHowItWorks}
             onPress={() => router.push(routes.howItWorks)}
           />
-        </View>
-      </View>
-      <View style={{ flex: 1, justifyContent: "center", paddingBottom: spacing[8] }}>
+        </MotionView>
+      </MotionView>
+      <MotionView delay={180} intensity="emphasis" style={{ flex: 1, justifyContent: "center", paddingBottom: spacing[8] }}>
         <HeroVaultPreviewCard />
-      </View>
+      </MotionView>
     </SectionContainer>
   );
 };

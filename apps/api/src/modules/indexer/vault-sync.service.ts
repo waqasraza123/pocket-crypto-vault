@@ -3,6 +3,8 @@ import type { Address } from "viem";
 import type { SupportedChainId } from "@goal-vault/shared";
 
 import { readGoalVaultSummaryForIndexer } from "../../lib/contracts";
+import { classifyObservedError } from "../../lib/observability/event-classification";
+import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
 import { normalizeVaultDepositLogs, normalizeVaultWithdrawalLogs } from "./event-normalizer";
 import type { PersistedVaultEventRecord } from "./indexer-store";
@@ -48,6 +50,15 @@ const syncVaultAddress = async ({
       latestChainBlock,
       lastSyncedAt: previousState?.lastSyncedAt ?? null,
       errorMessage: "RPC URL is missing for this chain.",
+    });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "vault_sync",
+      status: "failed",
+      message: "Vault sync is blocked by missing RPC configuration.",
+      chainId,
+      vaultAddress,
+      errorClass: "config_missing",
     });
     return;
   }
@@ -146,6 +157,18 @@ const syncVaultAddress = async ({
       lastSyncedAt: new Date().toISOString(),
       errorMessage: null,
     });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "vault_sync",
+      status: "succeeded",
+      message: "Vault sync completed.",
+      chainId,
+      vaultAddress,
+      count: events.length,
+      metadata: {
+        latestChainBlock,
+      },
+    });
   } catch (error) {
     await context.store.upsertSyncState({
       key: stateKey,
@@ -158,6 +181,18 @@ const syncVaultAddress = async ({
       latestChainBlock,
       lastSyncedAt: previousState?.lastSyncedAt ?? null,
       errorMessage: error instanceof Error ? error.message : "Vault sync failed.",
+    });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "vault_sync",
+      status: "failed",
+      message: "Vault sync failed.",
+      chainId,
+      vaultAddress,
+      errorClass: classifyObservedError(error),
+      metadata: {
+        latestChainBlock,
+      },
     });
   }
 };
@@ -175,6 +210,15 @@ export const syncVaultEventsForChain = async (context: IndexerContext, chainId: 
     .filter((vault) => vault.chainId === chainId && vault.onchainFound)
     .sort((left, right) => left.contractAddress.localeCompare(right.contractAddress));
 
+  logObservabilitySignal(context.logger, {
+    domain: "indexer",
+    action: "vault_sync_batch",
+    status: "started",
+    message: "Vault sync batch started.",
+    chainId,
+    count: vaults.length,
+  });
+
   for (const vault of vaults) {
     await syncVaultAddress({
       context,
@@ -184,4 +228,13 @@ export const syncVaultEventsForChain = async (context: IndexerContext, chainId: 
       ownerAddress: vault.ownerWallet,
     });
   }
+
+  logObservabilitySignal(context.logger, {
+    domain: "indexer",
+    action: "vault_sync_batch",
+    status: "succeeded",
+    message: "Vault sync batch completed.",
+    chainId,
+    count: vaults.length,
+  });
 };

@@ -4,7 +4,7 @@ import type { VaultDetail } from "../../types";
 import { formatLongDate, formatUsdc } from "../../lib/format";
 import { interpolate, useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, SurfaceCard } from "../primitives";
+import { AnimatedNumberText, AppHeading, AppText, MotionView, SurfaceCard } from "../primitives";
 import { VaultCardStatus } from "./VaultCardStatus";
 
 export interface VaultDetailHeaderProps {
@@ -15,7 +15,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
   const { messages } = useI18n();
 
   return (
-    <SurfaceCard style={{ backgroundColor: colors.backgroundElevated }}>
+    <SurfaceCard level="floating" style={{ backgroundColor: colors.backgroundElevated }}>
       <View style={{ gap: spacing[4] }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>
           <VaultCardStatus status={vault.status} />
@@ -24,7 +24,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
               borderRadius: radii.pill,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               paddingHorizontal: spacing[3],
               paddingVertical: spacing[2],
             }}
@@ -34,55 +34,55 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
             </AppText>
           </View>
         </View>
-        <View style={{ gap: spacing[2] }}>
+        <MotionView style={{ gap: spacing[2] }}>
           <AppHeading size="xl">{vault.goalName}</AppHeading>
           {vault.note ? <AppText tone="secondary">{vault.note}</AppText> : null}
           <AppText size="sm" tone="accent" weight="semibold">
             {messages.vaults.status[vault.status]}
           </AppText>
-        </View>
+        </MotionView>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[3] }}>
           <View
             style={{
               flex: 1,
               minWidth: 180,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               padding: spacing[4],
             }}
           >
             <AppText size="sm" tone="secondary">
               {messages.common.labels.totalSaved}
             </AppText>
-            <AppHeading size="md">{formatUsdc(vault.savedAmount)}</AppHeading>
+            <AnimatedNumberText formatValue={formatUsdc} size="xl" value={vault.savedAmount} weight="semibold" />
           </View>
           <View
             style={{
               flex: 1,
               minWidth: 180,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               padding: spacing[4],
             }}
           >
             <AppText size="sm" tone="secondary">
               {messages.common.labels.targetAmount}
             </AppText>
-            <AppText weight="semibold">{formatUsdc(vault.targetAmount)}</AppText>
+            <AnimatedNumberText formatValue={formatUsdc} value={vault.targetAmount} weight="semibold" />
           </View>
         </View>
         <View
           style={{
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
             gap: spacing[2],
           }}

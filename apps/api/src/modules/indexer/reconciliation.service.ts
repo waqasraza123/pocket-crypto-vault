@@ -3,6 +3,7 @@ import { parseUnits } from "viem";
 import type { VaultMetadataPayload, VaultMetadataStatus, VaultReconciliationStatus } from "@goal-vault/shared";
 import type { Address } from "viem";
 
+import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
 import type { PersistedVaultRecord } from "./indexer-store";
 
@@ -98,6 +99,7 @@ export const mergeVaultRecord = ({
 };
 
 export const reconcileVaultMetadata = async (context: IndexerContext) => {
+  let updatedCount = 0;
   for (const vault of context.store.listVaults()) {
     const nextRecord = mergeVaultRecord({
       current: vault,
@@ -115,7 +117,16 @@ export const reconcileVaultMetadata = async (context: IndexerContext) => {
       },
     });
     await context.store.upsertVault(nextRecord);
+    updatedCount += 1;
   }
+
+  logObservabilitySignal(context.logger, {
+    domain: "indexer",
+    action: "metadata_reconcile",
+    status: "succeeded",
+    message: "Metadata reconciliation completed.",
+    count: updatedCount,
+  });
 };
 
 export const saveVaultMetadata = async (context: IndexerContext, payload: VaultMetadataPayload) => {
@@ -144,5 +155,13 @@ export const saveVaultMetadata = async (context: IndexerContext, payload: VaultM
   });
 
   await context.store.upsertVault(nextRecord);
+  logObservabilitySignal(context.logger, {
+    domain: "indexer",
+    action: "metadata_save",
+    status: "succeeded",
+    message: "Metadata save completed.",
+    chainId: payload.chainId,
+    vaultAddress: payload.contractAddress,
+  });
   return nextRecord;
 };

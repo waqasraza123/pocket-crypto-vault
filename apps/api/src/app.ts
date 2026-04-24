@@ -1,6 +1,7 @@
 import Fastify from "fastify";
 
 import type { ApiRuntimeEnv } from "./env";
+import { registerAnalyticsRoutes } from "./modules/analytics/analytics.routes";
 import type { IndexerContext } from "./modules/indexer/context";
 import { registerHealthRoutes } from "./modules/health/health.routes";
 import { registerIndexerRoutes } from "./modules/indexer/indexer.routes";
@@ -14,6 +15,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
     },
   });
 
+  context.logger = app.log;
   app.decorate("goalVaultContext", context);
 
   app.get("/", async () => ({
@@ -37,6 +39,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
   });
 
   registerHealthRoutes(app, context, env);
+  registerAnalyticsRoutes(app, env);
   registerIndexerRoutes(app, context);
   registerVaultRoutes(app);
   registerVaultEventRoutes(app);

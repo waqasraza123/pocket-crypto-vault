@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { VaultDetail, WithdrawFlowState } from "../types";
+import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { triggerIndexerSync } from "../lib/api/sync-status";
+import { useAnalytics } from "./useAnalytics";
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
+import { classifyAnalyticsError } from "../lib/errors/analytics";
 import { getCurrentMessages, useI18n } from "../lib/i18n";
 import { buildTransactionRecoveryRecord, createRecoveryId } from "../lib/recovery/records";
 import { removeTransactionRecoveryRecord, updateTransactionRecoveryRecord, upsertTransactionRecoveryRecord } from "../lib/recovery/store";
@@ -44,18 +47,48 @@ const getWithdrawErrorMessage = (error: unknown) => {
 
 export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
   const { messages } = useI18n();
+  const { track } = useAnalytics();
   const { connectionState } = useWalletConnection();
   const provider = useWalletWriteProvider();
   const eligibility = useWithdrawEligibility(vault);
   const mountedRef = useRef(true);
+  const previousConnectionStatusRef = useRef(connectionState.status);
   const [amountInput, setAmountInputState] = useState("");
   const [flowState, setFlowState] = useState<WithdrawFlowState>(initialWithdrawFlowState);
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
 
   useEffect(() => {
     return () => {
       mountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      previousConnectionStatusRef.current === "ready" &&
+      (connectionState.status === "disconnected" || connectionState.status === "walletUnavailable") &&
+      (flowState.status === "awaiting_wallet_confirmation" ||
+        flowState.status === "submitting" ||
+        flowState.status === "confirming")
+    ) {
+      track(
+        "degraded_state_viewed",
+        {
+          surface: "vault_detail",
+          degradedEvent: "wallet_disconnected_mid_flow",
+        },
+        {
+          ...analyticsContext,
+          vaultAddress: vault?.address ?? null,
+        },
+      );
+    }
+
+    previousConnectionStatusRef.current = connectionState.status;
+  }, [analyticsContext, connectionState.status, flowState.status, track, vault?.address]);
 
   useEffect(() => {
     setAmountInputState("");
@@ -210,6 +243,16 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
         intentConfirmed: true,
       }),
     );
+    trackTransactionLifecycle({
+      track,
+      flow: "withdraw",
+      lifecycle: "wallet_confirmation_requested",
+      vaultAddress: vault.address,
+      context: {
+        ...analyticsContext,
+        chainId: connectionState.session.chain.id,
+      },
+    });
 
     try {
       const withdrawal = await withdrawFromVault({
@@ -246,6 +289,17 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
               intentConfirmed: true,
             }),
           );
+          trackTransactionLifecycle({
+            track,
+            flow: "withdraw",
+            lifecycle: "submitted",
+            vaultAddress: vault.address,
+            txHash,
+            context: {
+              ...analyticsContext,
+              chainId: connectionState.session!.chain!.id,
+            },
+          });
         },
         onConfirming: (txHash) => {
           void updateTransactionRecoveryRecord(createRecoveryId({ kind: "withdraw", txHash }), (current) => ({
@@ -254,6 +308,17 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
             syncStatus: "pending",
             updatedAt: new Date().toISOString(),
           }));
+          trackTransactionLifecycle({
+            track,
+            flow: "withdraw",
+            lifecycle: "confirming",
+            vaultAddress: vault.address,
+            txHash,
+            context: {
+              ...analyticsContext,
+              chainId: connectionState.session!.chain!.id,
+            },
+          });
           applyState(
             createWithdrawFlowState({
               status: "confirming",
@@ -287,6 +352,18 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
         ownerAddress: connectionState.session.address,
         event: activityEvent,
       });
+      trackTransactionLifecycle({
+        track,
+        flow: "withdraw",
+        lifecycle: "syncing",
+        vaultAddress: vault.address,
+        txHash: withdrawal.txHash,
+        context: {
+          ...analyticsContext,
+          chainId: connectionState.session.chain.id,
+        },
+        syncFreshness: "syncing",
+      });
       await triggerIndexerSync({
         chainId: connectionState.session.chain.id,
         mode: "all",
@@ -312,6 +389,31 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
           result,
         }),
       );
+      track(
+        "withdraw_confirmed",
+        {
+          vaultAddress: vault.address,
+          withdrawTxHash: withdrawal.txHash,
+        },
+        {
+          ...analyticsContext,
+          chainId: connectionState.session.chain.id,
+          vaultAddress: vault.address,
+          txHash: withdrawal.txHash,
+        },
+      );
+      trackTransactionLifecycle({
+        track,
+        flow: "withdraw",
+        lifecycle: "completed",
+        vaultAddress: vault.address,
+        txHash: withdrawal.txHash,
+        context: {
+          ...analyticsContext,
+          chainId: connectionState.session.chain.id,
+        },
+        syncFreshness: "current",
+      });
 
       void removeTransactionRecoveryRecord(createRecoveryId({ kind: "withdraw", txHash: withdrawal.txHash }));
       return result;
@@ -333,12 +435,25 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
           errorMessage: getWithdrawErrorMessage(error),
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "withdraw",
+        lifecycle: "failed",
+        vaultAddress: vault.address,
+        txHash: submittedTxHash,
+        errorClass: classifyAnalyticsError(error),
+        context: {
+          ...analyticsContext,
+          chainId: connectionState.session?.chain?.id ?? null,
+        },
+      });
 
       return null;
     }
   }, [
     amountAtomic,
     amountDecimal,
+    analyticsContext,
     applyState,
     connectionState.session?.address,
     connectionState.session?.chain,
@@ -349,6 +464,7 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
     messages.withdraw.errors.providerUnavailable,
     messages.withdraw.flow.invalidDescription,
     provider,
+    track,
     validationMessage,
     vault,
   ]);
@@ -365,6 +481,19 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
     }
 
     if (derivedState.status === "locked") {
+      if (vault && eligibility?.availability === "locked") {
+        track(
+          "withdraw_blocked_by_lock",
+          {
+            vaultAddress: vault.address,
+            unlockDate: vault.unlockDate,
+          },
+          {
+            ...analyticsContext,
+            vaultAddress: vault.address,
+          },
+        );
+      }
       applyState(
         createWithdrawFlowState({
           status: "locked",
@@ -383,13 +512,17 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
       }),
     );
   }, [
+    analyticsContext,
     amountAtomic,
     applyState,
     derivedState.status,
     eligibility?.message,
+    eligibility?.availability,
     messages.withdraw.flow.invalidDescription,
     messages.withdraw.flow.lockedDescription,
+    track,
     validationMessage,
+    vault,
   ]);
 
   const cancelConfirmation = useCallback(() => {
@@ -402,13 +535,25 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
   }, [amountAtomic, amountInput, applyState]);
 
   const retry = useCallback(async () => {
+    track(
+      "transaction_recovery_action",
+      {
+        flow: "withdraw",
+        action: "retry",
+      },
+      {
+        ...analyticsContext,
+        vaultAddress: vault?.address ?? null,
+      },
+    );
+
     if (eligibility?.canWithdraw && amountAtomic !== null) {
       return executeWithdraw();
     }
 
     requestConfirmation();
     return null;
-  }, [amountAtomic, eligibility?.canWithdraw, executeWithdraw, requestConfirmation]);
+  }, [amountAtomic, analyticsContext, eligibility?.canWithdraw, executeWithdraw, requestConfirmation, track, vault?.address]);
 
   const reset = useCallback(() => {
     setAmountInputState("");

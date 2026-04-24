@@ -14,7 +14,7 @@ export const VaultCardProgress = ({ progressRatio }: VaultCardProgressProps) => 
 
   return (
     <View style={{ gap: spacing[2] }}>
-      <ProgressBar progress={progressRatio} />
+      <ProgressBar progress={progressRatio} tone={progressRatio >= 1 ? "positive" : "accent"} />
       <AppText size="sm" tone="muted">
         {formatProgress(progressRatio)} {messages.common.labels.funded}
       </AppText>

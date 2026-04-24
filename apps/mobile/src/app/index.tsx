@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { View } from "react-native";
 
 import { useWalletConnection } from "../hooks/useWalletConnection";
+import { useScreenTracking } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { GuidedStepsCard } from "../components/feedback";
 import { MarketingShell } from "../components/layout";
@@ -13,6 +14,18 @@ import { spacing } from "../theme";
 export default function LandingScreen() {
   const { connectionState } = useWalletConnection();
   const { messages } = useI18n();
+
+  useScreenTracking(
+    "landing_viewed",
+    {
+      entry: connectionState.status === "ready" ? "returning" : "direct",
+    },
+    `landing:${connectionState.status}`,
+    {
+      chainId: connectionState.session?.chain?.id ?? connectionState.session?.chainId ?? null,
+      walletStatus: connectionState.status,
+    },
+  );
 
   return (
     <MarketingShell>

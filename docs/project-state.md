@@ -80,8 +80,10 @@ Still not implemented:
 - Phase 8: onboarding polish, demo readiness, packaging polish, and portfolio presentation improvements
 - Phase 9: deployment readiness, launch packaging, and operator-facing checklist support
 - Phase 10: final presentation polish, guided demo support, and case-study artifacts
-- Phase 11: cooldown unlock
-- Phase 12: guardian approval
+- Phase 11: post-launch instrumentation, analytics, and observability
+- Phase 12: motion-system upgrade, modern visual refresh, and animated product polish
+- Phase 13: cooldown unlock
+- Phase 14: guardian approval
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -111,6 +113,9 @@ Still not implemented:
 - Phase 8 updates the near-term roadmap order so demo polish and packaging land before cooldown unlock and guardian expansion.
 - Phase 9 centralizes deployment env handling, moves Expo packaging to environment-aware app config, separates API liveness from readiness, and adds repo-local launch documentation.
 - Phase 10 keeps real product behavior honest while adding guided presentation paths, stronger screenshot states, and repo-local demo artifacts.
+- Phase 12 refreshes the universal app with brighter layered tokens, app-owned motion primitives, reduced-motion handling, and Apple-like polish translated into an original Goal Vault visual system.
+- Phase 12 intentionally keeps the existing Expo React Native styling model and uses a small shared `Animated`-based motion layer instead of introducing a heavier styling or animation stack late in the cycle.
+- Phase 11 adds a typed analytics boundary in the universal app, lean API-side event ingestion, structured backend observability signals, and post-launch metric definitions without collecting freeform private vault content.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -126,6 +131,12 @@ Still not implemented:
 - The Phase 8 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-8.md`.
 - The Phase 9 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-9.md`.
 - The Phase 10 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-10.md`.
+- The Phase 11 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-11.md`.
+- The Phase 11 event taxonomy note lives at `docs/plans/goal-vault-analytics-event-taxonomy.md`.
+- The Phase 11 post-launch metrics note lives at `docs/plans/goal-vault-post-launch-metrics.md`.
+- The Phase 12 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-12.md`.
+- The Phase 12 motion system note lives at `docs/plans/goal-vault-motion-system.md`.
+- The Phase 12 theme refresh note lives at `docs/plans/goal-vault-theme-refresh-notes.md`.
 
 ## Deferred / Not Yet Implemented
 - External database infrastructure for the backend beyond the current file-backed persistent store

@@ -4,7 +4,7 @@ import { formatLongDate, formatUsdc } from "../../lib/format";
 import { interpolate, useI18n } from "../../lib/i18n";
 import { getVaultAccentThemeLabel, getVaultAccentTone } from "../../lib/contracts/mappers";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, ProgressBar, SurfaceCard } from "../primitives";
+import { AnimatedNumberText, AppHeading, AppText, MotionView, ProgressBar, SurfaceCard } from "../primitives";
 
 export interface CreateVaultPreviewCardProps {
   values: CreateVaultInput;
@@ -15,16 +15,16 @@ export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPrev
   const { messages } = useI18n();
 
   return (
-    <SurfaceCard tone="accent" style={{ borderColor: getVaultAccentTone(values.accentTheme), backgroundColor: colors.backgroundElevated }}>
+    <SurfaceCard tone="accent" level="floating" style={{ borderColor: getVaultAccentTone(values.accentTheme), backgroundColor: colors.backgroundElevated }}>
       <View style={{ gap: spacing[4] }}>
-        <View style={{ gap: spacing[2] }}>
+        <MotionView style={{ gap: spacing[2] }}>
           <AppText size="sm" tone="accent" weight="semibold">
             {messages.common.labels.livePreview}
           </AppText>
           <AppHeading size="lg">{values.goalName || messages.pages.createVault.preview.emptyGoal}</AppHeading>
           <AppText tone="secondary">{values.note || messages.pages.createVault.preview.emptyNote}</AppText>
           {values.category ? <AppText tone="secondary">{values.category}</AppText> : null}
-        </View>
+        </MotionView>
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[3] }}>
           <View
@@ -32,27 +32,27 @@ export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPrev
               flex: 1,
               minWidth: 140,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               padding: spacing[4],
             }}
           >
             <AppText size="sm" tone="secondary">
               {messages.common.labels.targetAmount}
             </AppText>
-            <AppText weight="semibold">{formatUsdc(targetAmount || 0)}</AppText>
+            <AnimatedNumberText formatValue={formatUsdc} value={targetAmount || 0} weight="semibold" />
           </View>
           <View
             style={{
               flex: 1,
               minWidth: 140,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               padding: spacing[4],
             }}
           >
@@ -79,10 +79,10 @@ export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPrev
 
         <View
           style={{
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
             gap: spacing[2],
           }}
@@ -92,10 +92,10 @@ export const CreateVaultPreviewCard = ({ values, targetAmount }: CreateVaultPrev
         </View>
         <View
           style={{
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
             gap: spacing[2],
           }}

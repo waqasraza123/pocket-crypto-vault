@@ -2,6 +2,8 @@ import type { FastifyInstance } from "fastify";
 import { isAddress } from "viem";
 import { z } from "zod";
 
+import { classifyObservedError } from "../../lib/observability/event-classification";
+import { logObservabilitySignal } from "../../lib/observability/logger";
 import { serializeActivityFeedResponse, serializeVaultActivityItem, serializeVaultActivityResponse } from "./vault-events.serializers";
 import { getOwnerActivity, getVaultActivity } from "./vault-events.service";
 
@@ -38,9 +40,29 @@ export const registerVaultEventRoutes = (app: FastifyInstance) => {
           vault: context.store.getVault(event.chainId, event.vaultAddress),
         }),
       );
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "activity_feed_read",
+        status: "succeeded",
+        message: "Activity feed served.",
+        route: "/activity",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        count: items.length,
+      });
 
       return serializeActivityFeedResponse({ items });
-    } catch {
+    } catch (error) {
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "activity_feed_read",
+        status: "failed",
+        message: "Activity feed failed.",
+        route: "/activity",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        errorClass: classifyObservedError(error),
+      });
       return reply.status(503).send({
         message: "Activity is temporarily unavailable.",
       });
@@ -68,6 +90,17 @@ export const registerVaultEventRoutes = (app: FastifyInstance) => {
         chainId: parsed.data.chainId,
         vaultAddress: params.vaultAddress as `0x${string}`,
       });
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_activity_read",
+        status: "succeeded",
+        message: "Vault activity served.",
+        route: "/vaults/:vaultAddress/activity",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        vaultAddress: params.vaultAddress as `0x${string}`,
+        count: activity.items.length,
+      });
 
       return serializeVaultActivityResponse({
         chainId: parsed.data.chainId,
@@ -80,7 +113,18 @@ export const registerVaultEventRoutes = (app: FastifyInstance) => {
           }),
         ),
       });
-    } catch {
+    } catch (error) {
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_activity_read",
+        status: "failed",
+        message: "Vault activity failed.",
+        route: "/vaults/:vaultAddress/activity",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        vaultAddress: params.vaultAddress as `0x${string}`,
+        errorClass: classifyObservedError(error),
+      });
       return reply.status(503).send({
         message: "Vault activity is temporarily unavailable.",
       });

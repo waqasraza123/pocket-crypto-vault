@@ -1,4 +1,4 @@
-import { useMemo, type PropsWithChildren } from "react";
+import { useEffect, useMemo, useRef, type PropsWithChildren } from "react";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -15,6 +15,7 @@ import type { Network, Storage } from "@reown/appkit-common-react-native";
 
 import { walletMetadata, walletRuntimeConfig } from "../config";
 import { goalVaultSupportedViemChainList, goalVaultSupportedViemChains } from "../chains";
+import { useAnalyticsContext } from "../../analytics";
 import { clientEnv } from "../../env/client";
 import { createConnectionState, createWalletSession, getPreferredSupportedChainId } from "./helpers";
 import { WalletContext } from "./state";
@@ -116,10 +117,12 @@ const UnconfiguredWalletProvider = ({ children }: PropsWithChildren) => {
 };
 
 const ConnectedWalletBridge = ({ children }: PropsWithChildren) => {
+  const { trackEvent } = useAnalyticsContext();
   const { address, chainId, isConnected } = useAccount();
   const { open, disconnect, switchNetwork } = useAppKit();
   const { isLoading } = useAppKitState();
   const { walletInfo } = useWalletInfo();
+  const previousStatusRef = useRef<WalletContextValue["connectionState"]["status"] | null>(null);
 
   const session = useMemo(
     () =>
@@ -131,6 +134,16 @@ const ConnectedWalletBridge = ({ children }: PropsWithChildren) => {
     [address, chainId, isConnected],
   );
 
+  const connectionState = useMemo(
+    () =>
+      createConnectionState({
+        isWalletEnabled: true,
+        walletStatus: isLoading ? "connecting" : isConnected && address ? "connected" : "disconnected",
+        session,
+      }),
+    [address, isConnected, isLoading, session],
+  );
+
   const value = useMemo<WalletContextValue>(
     () => ({
       session,
@@ -139,12 +152,18 @@ const ConnectedWalletBridge = ({ children }: PropsWithChildren) => {
         projectId: walletRuntimeConfig.projectId ?? undefined,
         metadataUrl: walletRuntimeConfig.metadataUrl ?? undefined,
       },
-      connectionState: createConnectionState({
-        isWalletEnabled: true,
-        walletStatus: isLoading ? "connecting" : isConnected && address ? "connected" : "disconnected",
-        session,
-      }),
+      connectionState,
       connect: async () => {
+        trackEvent(
+          "wallet_connect_started",
+          {
+            source: "unknown",
+          },
+          {
+            chainId: session?.chain?.id ?? session?.chainId ?? null,
+            walletStatus: connectionState.status,
+          },
+        );
         await open({ view: "Connect" });
       },
       disconnect: async () => {
@@ -155,8 +174,40 @@ const ConnectedWalletBridge = ({ children }: PropsWithChildren) => {
         await switchNetwork(`eip155:${goalVaultSupportedViemChains[targetChainId].id}`);
       },
     }),
-    [address, disconnect, isConnected, isLoading, open, session, switchNetwork, walletInfo],
+    [connectionState, disconnect, open, session, switchNetwork, trackEvent, walletInfo],
   );
+
+  useEffect(() => {
+    const previousStatus = previousStatusRef.current;
+
+    if (connectionState.status === "ready" && previousStatus !== "ready") {
+      trackEvent(
+        "wallet_connect_succeeded",
+        {
+          chainId: session?.chain?.id ?? session?.chainId ?? null,
+        },
+        {
+          chainId: session?.chain?.id ?? session?.chainId ?? null,
+          walletStatus: connectionState.status,
+        },
+      );
+    }
+
+    if (connectionState.status === "unsupportedNetwork" && previousStatus !== "unsupportedNetwork") {
+      trackEvent(
+        "unsupported_network_encountered",
+        {
+          connectedChainId: session?.chain?.id ?? session?.chainId ?? null,
+        },
+        {
+          chainId: session?.chain?.id ?? session?.chainId ?? null,
+          walletStatus: connectionState.status,
+        },
+      );
+    }
+
+    previousStatusRef.current = connectionState.status;
+  }, [connectionState.status, session?.chain?.id, session?.chainId, trackEvent]);
 
   return (
     <WalletContext.Provider value={value}>

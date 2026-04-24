@@ -3,8 +3,9 @@ import { View } from "react-native";
 import type { VaultSummary } from "../../types";
 import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
 import { useI18n } from "../../lib/i18n";
+import { getStaggerDelay } from "../../lib/motion/list-motion";
 import { spacing } from "../../theme";
-import { EmptyState } from "../primitives";
+import { EmptyState, MotionView } from "../primitives";
 import { VaultCard } from "./VaultCard";
 
 export interface VaultGridProps {
@@ -33,11 +34,15 @@ export const VaultGrid = ({ vaults }: VaultGridProps) => {
         flexWrap: "wrap",
         gap: spacing[4],
       }}
-    >
-      {vaults.map((vault) => (
-        <View key={vault.address} style={{ flexBasis: adaptiveLayout.useSplitLayout ? "48%" : "100%", flexGrow: 1 }}>
+      >
+      {vaults.map((vault, index) => (
+        <MotionView
+          key={vault.address}
+          delay={getStaggerDelay(index)}
+          style={{ flexBasis: adaptiveLayout.useSplitLayout ? "48%" : "100%", flexGrow: 1 }}
+        >
           <VaultCard vault={vault} />
-        </View>
+        </MotionView>
       ))}
     </View>
   );

@@ -1,8 +1,8 @@
 export const radii = {
-  xs: 8,
-  sm: 12,
-  md: 18,
-  lg: 24,
-  xl: 32,
+  xs: 10,
+  sm: 14,
+  md: 22,
+  lg: 30,
+  xl: 38,
   pill: 999,
 } as const;

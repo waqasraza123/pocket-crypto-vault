@@ -3,14 +3,14 @@ import { View } from "react-native";
 import { useI18n } from "../../lib/i18n";
 import type { CreateVaultReviewModel } from "../../types";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, SurfaceCard } from "../primitives";
+import { AppHeading, AppText, MotionView, SurfaceCard } from "../primitives";
 
 export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewModel }) => {
   const { messages } = useI18n();
 
   return (
     <SurfaceCard>
-      <View style={{ gap: spacing[3] }}>
+      <MotionView style={{ gap: spacing[3] }}>
         <View style={{ gap: spacing[1] }}>
           <AppText size="sm" tone="secondary">{messages.common.labels.goal}</AppText>
           <AppText weight="semibold">{review.goalName}</AppText>
@@ -27,7 +27,7 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
               flex: 1,
               minWidth: 180,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
               backgroundColor: colors.backgroundElevated,
@@ -42,7 +42,7 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
               flex: 1,
               minWidth: 180,
               gap: spacing[1],
-              borderRadius: radii.md,
+              borderRadius: radii.lg,
               borderWidth: 1,
               borderColor: colors.border,
               backgroundColor: colors.backgroundElevated,
@@ -61,7 +61,7 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
         </View>
         <View
           style={{
-            borderRadius: 18,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
             backgroundColor: colors.surfaceMuted,
@@ -78,10 +78,10 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
         <View
           style={{
             gap: spacing[3],
-            borderRadius: radii.md,
+            borderRadius: radii.lg,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.surfaceGlass,
             padding: spacing[4],
           }}
         >
@@ -111,7 +111,7 @@ export const CreateVaultReviewPanel = ({ review }: { review: CreateVaultReviewMo
             ))}
           </View>
         </View>
-      </View>
+      </MotionView>
     </SurfaceCard>
   );
 };

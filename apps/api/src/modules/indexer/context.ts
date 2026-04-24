@@ -1,3 +1,4 @@
+import type { FastifyBaseLogger } from "fastify";
 import { createPublicClient, http } from "viem";
 import { base, baseSepolia } from "viem/chains";
 
@@ -8,6 +9,7 @@ export interface IndexerContext {
   env: ApiRuntimeEnv;
   store: IndexerStore;
   clients: Partial<Record<8453 | 84532, ReturnType<typeof createPublicClient> | null>>;
+  logger: FastifyBaseLogger | null;
 }
 
 export const createIndexerContext = async (env: ApiRuntimeEnv): Promise<IndexerContext> => {
@@ -34,5 +36,6 @@ export const createIndexerContext = async (env: ApiRuntimeEnv): Promise<IndexerC
     env,
     store,
     clients,
+    logger: null,
   };
 };

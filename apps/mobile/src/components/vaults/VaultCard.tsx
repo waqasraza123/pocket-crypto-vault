@@ -5,7 +5,7 @@ import type { VaultSummary } from "../../types";
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, SecondaryButton, SurfaceCard } from "../primitives";
+import { AppHeading, AppText, MotionView, SecondaryButton, SurfaceCard } from "../primitives";
 import { VaultCardAmount } from "./VaultCardAmount";
 import { VaultCardProgress } from "./VaultCardProgress";
 import { VaultCardRule } from "./VaultCardRule";
@@ -20,8 +20,15 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
   const { messages } = useI18n();
 
   return (
-    <SurfaceCard style={{ flex: 1, minWidth: 280, backgroundColor: vault.savedAmount > 0 ? colors.backgroundElevated : colors.surface }}>
-      <View style={{ gap: spacing[3] }}>
+    <SurfaceCard
+      level="floating"
+      style={{
+        flex: 1,
+        minWidth: 280,
+        backgroundColor: vault.savedAmount > 0 ? colors.backgroundElevated : colors.surfaceGlass,
+      }}
+    >
+      <MotionView style={{ gap: spacing[3] }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>
           <VaultCardStatus status={vault.status} />
           <View
@@ -29,7 +36,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
               borderRadius: radii.pill,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceGlass,
               paddingHorizontal: spacing[3],
               paddingVertical: spacing[2],
             }}
@@ -47,7 +54,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
                 borderRadius: radii.md,
                 borderWidth: 1,
                 borderColor: colors.border,
-                backgroundColor: colors.surface,
+                backgroundColor: colors.surfaceGlass,
                 padding: spacing[4],
               }}
             >
@@ -55,7 +62,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
             </View>
           ) : null}
         </View>
-      </View>
+      </MotionView>
       <VaultCardAmount savedAmount={vault.savedAmount} targetAmount={vault.targetAmount} />
       <VaultCardProgress progressRatio={vault.progressRatio} />
       <VaultCardRule unlockDate={vault.unlockDate} />
@@ -64,7 +71,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
           borderRadius: radii.md,
           borderWidth: 1,
           borderColor: colors.border,
-          backgroundColor: colors.surface,
+          backgroundColor: colors.surfaceGlass,
           padding: spacing[4],
         }}
       >

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Pressable, View } from "react-native";
 import { Stack, useRouter } from "expo-router";
 
@@ -9,10 +9,12 @@ import { useCreateVaultMutation } from "../../../hooks/useCreateVaultMutation";
 import { useTransactionRecovery } from "../../../hooks/useTransactionRecovery";
 import { useContractConfig } from "../../../hooks/useContractConfig";
 import { defaultGoalVaultChainId } from "../../../lib/blockchain/chains";
+import { createConnectionAnalyticsContext, getAmountBucket, getUnlockLeadDaysBucket, useScreenTracking } from "../../../lib/analytics";
 import { buildCreateVaultReviewModel, getVaultAccentThemeOptions } from "../../../lib/contracts/mappers";
 import { interpolate, useI18n } from "../../../lib/i18n";
 import { routes } from "../../../lib/routing";
 import { colors, radii, spacing } from "../../../theme";
+import { useAnalytics } from "../../../hooks/useAnalytics";
 import { FormSection, StepPills } from "../../../components/forms";
 import { ScreenHeader } from "../../../components/layout";
 import {
@@ -28,6 +30,7 @@ import { NetworkStatusBanner } from "../../../components/layout/NetworkStatusBan
 import {
   AmountField,
   AppText,
+  MotionView,
   PageContainer,
   PrimaryButton,
   Screen,
@@ -39,6 +42,7 @@ import { CreateVaultPreviewCard, CreateVaultReviewPanel, CreateVaultSuccessCard 
 export default function CreateVaultScreen() {
   const router = useRouter();
   const { inlineDirection, messages } = useI18n();
+  const { track } = useAnalytics();
   const { values, errors, step, setFieldValue, nextStep, previousStep, validateAll, reset } = useCreateVaultForm();
   const { chainId, config } = useContractConfig();
   const { readiness } = useAppReadiness();
@@ -69,6 +73,36 @@ export default function CreateVaultScreen() {
   const showRuleStep = step === 1;
   const showReviewStep = step === 2;
   const canSubmit = connectionState.status === "ready" && factoryConfigured && Boolean(review) && !isBusy;
+  const stepTrackingRef = useRef<Set<number>>(new Set());
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
+
+  useScreenTracking(
+    "create_vault_started",
+    {
+      entry: "dashboard",
+    },
+    "create-vault",
+    analyticsContext,
+  );
+
+  useEffect(() => {
+    if (stepTrackingRef.current.has(step)) {
+      return;
+    }
+
+    stepTrackingRef.current.add(step);
+    track(
+      "create_vault_step_progressed",
+      {
+        stepIndex: step,
+        stepName: stepLabels[step] ?? `step_${step}`,
+      },
+      analyticsContext,
+    );
+  }, [analyticsContext, step, stepLabels, track]);
 
   const handleCreate = async () => {
     const isValid = validateAll();
@@ -90,6 +124,16 @@ export default function CreateVaultScreen() {
       return;
     }
 
+    track(
+      "create_vault_submitted",
+      {
+        hasCategory: Boolean(values.category.trim()),
+        hasNote: Boolean(values.note.trim()),
+        targetAmountBucket: getAmountBucket(Number.parseFloat(values.targetAmount || "0")),
+        unlockLeadDaysBucket: getUnlockLeadDaysBucket(values.unlockDate),
+      },
+      analyticsContext,
+    );
     await submit(values);
   };
 
@@ -170,10 +214,12 @@ export default function CreateVaultScreen() {
           <CreateVaultSuccessCard onBackToVaults={handleBackToVaults} onViewVault={handleViewVault} result={result} />
         ) : (
           <>
-            <StepPills currentStep={step} steps={stepLabels} />
+            <MotionView intensity="subtle">
+              <StepPills currentStep={step} steps={stepLabels} />
+            </MotionView>
 
             <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[6], alignItems: "flex-start" }}>
-              <View style={{ flex: 1, minWidth: 320, gap: spacing[6] }}>
+              <MotionView key={`create-step-${step}`} intensity="structural" style={{ flex: 1, minWidth: 320, gap: spacing[6] }}>
                 {showGoalStep ? (
                   <FormSection
                     title={messages.pages.createVault.goalSectionTitle}
@@ -315,14 +361,14 @@ export default function CreateVaultScreen() {
                     />
                   )}
                 </View>
-              </View>
+              </MotionView>
 
-              <View style={{ flex: 1, minWidth: 280, gap: spacing[4] }}>
+              <MotionView delay={120} intensity="subtle" style={{ flex: 1, minWidth: 280, gap: spacing[4] }}>
                 <CreateVaultPreviewCard targetAmount={Number.isFinite(targetAmount) ? targetAmount : 0} values={values} />
                 {result && state.status !== "success" && state.didOnchainSucceed ? (
                   <SecondaryButton icon="shield-check-outline" label={messages.common.buttons.viewVault} onPress={handleViewVault} />
                 ) : null}
-              </View>
+              </MotionView>
             </View>
           </>
         )}

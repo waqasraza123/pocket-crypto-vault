@@ -3,7 +3,7 @@ import { View } from "react-native";
 
 import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
 import { spacing } from "../../theme";
-import { AppHeading, AppText } from "../primitives";
+import { AppHeading, AppText, MotionView } from "../primitives";
 
 export interface ScreenHeaderProps {
   eyebrow?: string;
@@ -24,7 +24,7 @@ export const ScreenHeader = ({ eyebrow, title, description, action }: ScreenHead
         justifyContent: "space-between",
       }}
     >
-      <View style={{ flex: 1, gap: spacing[3] }}>
+      <MotionView intensity="structural" style={{ flex: 1, gap: spacing[3] }}>
         {eyebrow ? (
           <AppText size="sm" tone="accent" weight="semibold">
             {eyebrow}
@@ -34,8 +34,12 @@ export const ScreenHeader = ({ eyebrow, title, description, action }: ScreenHead
           <AppHeading size="xl">{title}</AppHeading>
           {description ? <AppText tone="secondary">{description}</AppText> : null}
         </View>
-      </View>
-      {action}
+      </MotionView>
+      {action ? (
+        <MotionView delay={80} intensity="subtle">
+          {action}
+        </MotionView>
+      ) : null}
     </View>
   );
 };

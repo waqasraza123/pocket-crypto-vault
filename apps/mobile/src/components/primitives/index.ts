@@ -1,4 +1,5 @@
 export * from "./AmountField";
+export * from "./AnimatedNumberText";
 export * from "./AppHeading";
 export * from "./AppText";
 export * from "./Divider";
@@ -8,6 +9,7 @@ export * from "./LoadingBlock";
 export * from "./PageContainer";
 export * from "./PrimaryButton";
 export * from "./ProgressBar";
+export * from "./MotionView";
 export * from "./Screen";
 export * from "./SectionContainer";
 export * from "./SecondaryButton";

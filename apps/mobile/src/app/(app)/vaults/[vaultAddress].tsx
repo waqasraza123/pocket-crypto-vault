@@ -1,6 +1,15 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo } from "react";
 import { View } from "react-native";
 
+import {
+  createConnectionAnalyticsContext,
+  getSavedAmountBucket,
+  normalizeAnalyticsDataSource,
+  normalizeWithdrawAvailability,
+  useScreenTracking,
+  useTrackEventWhen,
+} from "../../../lib/analytics";
 import { useTransactionRecovery } from "../../../hooks/useTransactionRecovery";
 import { useVaultDepositFlow } from "../../../hooks/useVaultDepositFlow";
 import { useVaultDetail } from "../../../hooks/useVaultDetail";
@@ -19,7 +28,7 @@ import {
   StateBanner,
 } from "../../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
-import { EmptyState, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
+import { EmptyState, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
 import {
   DepositActionPanel,
   VaultActivityPreview,
@@ -46,6 +55,93 @@ export default function VaultDetailScreen() {
   const depositFlow = useVaultDepositFlow(vault);
   const withdrawFlow = useVaultWithdrawFlow(vault);
   const activeRecovery = items[0] ?? null;
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
+
+  useScreenTracking(
+    "vault_detail_viewed",
+    {
+      vaultAddress,
+      vaultStatus: vault?.status ?? "unknown",
+      dataSource: normalizeAnalyticsDataSource(dataSource),
+      activityCount: vault?.activityPreview.length ?? 0,
+    },
+    `vault-detail:${vaultAddress}:${vault?.status ?? "unknown"}:${dataSource ?? "none"}`,
+    {
+      ...analyticsContext,
+      vaultAddress,
+    },
+  );
+
+  useTrackEventWhen({
+    name: "deposit_flow_opened",
+    payload: {
+      vaultAddress,
+      vaultStatus: vault?.status ?? "unknown",
+      savedAmountBucket: getSavedAmountBucket(vault?.savedAmount ?? 0),
+    },
+    when: Boolean(vault),
+    key: `deposit-opened:${vaultAddress}`,
+    context: {
+      ...analyticsContext,
+      vaultAddress,
+    },
+  });
+
+  useTrackEventWhen({
+    name: "withdraw_flow_opened",
+    payload: {
+      vaultAddress,
+      availability: normalizeWithdrawAvailability(withdrawFlow.eligibility?.availability),
+    },
+    when: Boolean(vault),
+    key: `withdraw-opened:${vaultAddress}:${withdrawFlow.eligibility?.availability ?? "unavailable"}`,
+    context: {
+      ...analyticsContext,
+      vaultAddress,
+    },
+  });
+
+  useTrackEventWhen({
+    name: "empty_state_viewed",
+    payload: {
+      surface: "vault_detail",
+      kind: "vault_not_found",
+    },
+    when: connectionState.status === "ready" && !isLoading && queryStatus !== "success" && degradedState === "not_found",
+    key: `vault-not-found:${vaultAddress}`,
+    context: {
+      ...analyticsContext,
+      vaultAddress,
+    },
+  });
+
+  useTrackEventWhen({
+    name: "degraded_state_viewed",
+    payload: {
+      surface: "vault_detail",
+      degradedEvent:
+        degradedState === "missing_metadata"
+          ? "metadata_missing"
+          : degradedState === "partial"
+            ? "partial_data"
+            : degradedState === "syncing"
+              ? "index_lag_visible"
+              : "chain_read_failed",
+    },
+    when:
+      connectionState.status === "ready" &&
+      !isLoading &&
+      degradedState !== "healthy" &&
+      degradedState !== "not_found",
+    key: `vault-degraded:${vaultAddress}:${degradedState}`,
+    context: {
+      ...analyticsContext,
+      vaultAddress,
+    },
+  });
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
@@ -119,29 +215,35 @@ export default function VaultDetailScreen() {
           </EmptyState>
         ) : null}
 
-        {vault ? <VaultDetailHeader vault={vault} /> : null}
+        {vault ? (
+          <MotionView intensity="structural">
+            <VaultDetailHeader vault={vault} />
+          </MotionView>
+        ) : null}
 
         {vault && (vault.savedAmount <= 0 || vault.activityPreview.length === 0) ? (
-          <GuidedStepsCard
-            description={messages.pages.vaultDetail.startHereDescription}
-            eyebrow={messages.pages.vaultDetail.startHereEyebrow}
-            icon="play-circle-outline"
-            steps={messages.pages.vaultDetail.startHereSteps}
-            title={messages.pages.vaultDetail.startHereTitle}
-          />
+          <MotionView delay={80}>
+            <GuidedStepsCard
+              description={messages.pages.vaultDetail.startHereDescription}
+              eyebrow={messages.pages.vaultDetail.startHereEyebrow}
+              icon="play-circle-outline"
+              steps={messages.pages.vaultDetail.startHereSteps}
+              title={messages.pages.vaultDetail.startHereTitle}
+            />
+          </MotionView>
         ) : null}
 
         {vault ? (
           <View style={{ flexDirection: adaptiveLayout.useSplitLayout ? "row" : "column", gap: spacing[4] }}>
-            <View style={{ flex: 1, gap: spacing[4] }}>
+            <MotionView delay={120} style={{ flex: 1, gap: spacing[4] }}>
               <VaultProgressPanel vault={vault} />
               <VaultRulePanel eligibility={withdrawFlow.eligibility} vault={vault} />
               <VaultActivityPreview events={vault.activityPreview} onOpenTimeline={() => router.push(routes.activity)} />
-            </View>
-            <View style={{ flex: 1, gap: spacing[4] }}>
+            </MotionView>
+            <MotionView delay={180} style={{ flex: 1, gap: spacing[4] }}>
               <DepositActionPanel flow={depositFlow} vault={vault} />
               <WithdrawActionPanel flow={withdrawFlow} vault={vault} />
-            </View>
+            </MotionView>
           </View>
         ) : null}
       </PageContainer>

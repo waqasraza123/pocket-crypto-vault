@@ -4,53 +4,58 @@
 2026-04-24
 
 ## Current Objective
-Implement Phase 10 as final presentation polish, guided demo readiness, seeded walkthrough support, and case-study artifact preparation.
+Integrate Phase 11 instrumentation and observability into the current in-progress Phase 12 tree, then verify the shared app and API still package cleanly.
 
 ## Last Completed Step
-Completed the presentation pass across landing, My Vaults, Create Vault, Vault Detail, and Activity, then added the repo-local demo and case-study docs.
+Completed the Phase 11 analytics and observability pass, including typed app events, transaction lifecycle tracking, API analytics ingestion, and structured backend sync or read logs.
 
 ## Current Step
-Phase 10 is in verification across TypeScript, API boot, health and readiness, and Expo web or native exports.
+Phase 11 is verified inside the existing dirty tree. The remaining uncommitted work outside this task is the pre-existing Phase 12 visual and motion pass.
 
 ## Why This Step Exists
-Phase 9 made Goal Vault easier to deploy. Phase 10 makes the same honest v1 easier to explain, present, record, and showcase without adding fake product behavior.
+Phase 11 makes the current honest v1 measurable and diagnosable after launch, while the repo already contains later-phase visual polish work that should not be conflated with the analytics layer.
 
 ## Files Touched
-- `apps/mobile/src/app/{index.tsx,(app)/index.tsx,(app)/activity.tsx,(app)/vaults/new.tsx,(app)/vaults/[vaultAddress].tsx}`
-- `apps/mobile/src/components/feedback/{GuidedStepsCard.tsx,index.ts}`
-- `apps/mobile/src/components/marketing/{HeroSection.tsx,HeroVaultPreviewCard.tsx}`
-- `apps/mobile/src/components/primitives/EmptyState.tsx`
-- `apps/mobile/src/components/vaults/{CreateVaultPreviewCard.tsx,CreateVaultReviewPanel.tsx,CreateVaultSuccessCard.tsx,VaultActivityPreview.tsx,VaultCard.tsx,VaultCardAmount.tsx,VaultDetailHeader.tsx,VaultGrid.tsx,VaultProgressPanel.tsx}`
-- `apps/mobile/src/lib/i18n/index.tsx`
-- `docs/plans/{goal-vault-universal-react-native-phase-10.md,goal-vault-demo-script.md,goal-vault-case-study-outline.md,goal-vault-screenshot-shot-list.md,goal-vault-demo-seed-guide.md}`
+- `packages/shared/src/{index.ts,domain/analytics.ts}`
+- `packages/config/src/env.ts`
+- `apps/mobile/src/app/{_layout.tsx,index.tsx,(marketing)/how-it-works.tsx,(marketing)/security.tsx,(app)/index.tsx,(app)/activity.tsx,(app)/vaults/new.tsx,(app)/vaults/[vaultAddress].tsx}`
+- `apps/mobile/src/hooks/{useAnalytics.ts,useCreateVaultMutation.ts,useTransactionRecovery.ts,useVaultDepositFlow.ts,useVaultWithdrawFlow.ts}`
+- `apps/mobile/src/lib/{analytics/,errors/analytics.ts,blockchain/wallet/provider.web.tsx,blockchain/wallet/provider.native.tsx}`
+- `apps/mobile/src/components/layout/AppShell.tsx`
+- `apps/api/src/{app.ts,env.ts,index.ts}`
+- `apps/api/src/lib/observability/`
+- `apps/api/src/modules/{analytics/,vaults/vaults.routes.ts,vault-events/vault-events.routes.ts,indexer/context.ts,indexer/factory-sync.service.ts,indexer/vault-sync.service.ts,indexer/reconciliation.service.ts}`
+- `docs/plans/{goal-vault-universal-react-native-phase-11.md,goal-vault-analytics-event-taxonomy.md,goal-vault-post-launch-metrics.md}`
+- `.env.example`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 
 ## Durable Decisions Captured
-- Phase 10 keeps demo support documentation-first and UI-guided instead of introducing hidden demo shortcuts.
-- Public-facing example content remains isolated to marketing surfaces and never pretends to be authenticated user data.
-- The roadmap now places final presentation and demo support before cooldown unlock and guardian expansion.
+- Goal Vault now uses a typed analytics boundary instead of direct provider calls from UI components.
+- Analytics stay optional, with disabled, local-log, and backend modes.
+- Post-launch measurement excludes freeform goal names and notes, and uses bounded product context plus coarse error classes.
 
 ## Scope Boundaries
 - No cooldown or guardian behavior lands here.
-- No fake onchain success, balances, or authenticated activity data was added.
-- Demo readiness stays within copy, composition, route guidance, and documentation support.
+- No in-app analytics dashboard or heavyweight analytics warehouse lands here.
+- No private vault text is collected in analytics payloads.
 
 ## Exact Next Steps
-1. Run API boot, `/health`, `/ready`, and Expo web plus native exports against the Phase 10 tree.
-2. Use the new demo script and seed guide to prepare a clean Base Sepolia walkthrough wallet.
-3. Capture the screenshot shot list once the funded and indexed demo vault states are ready.
-4. Resume the roadmap with cooldown unlock only after the presentation layer is signed off.
+1. Decide whether API-side NDJSON analytics storage should remain the staging and early-launch default.
+2. Point staging at real Base Sepolia RPC and factory config so degraded-state and funnel analytics can be observed under live conditions.
+3. Reconcile the existing Phase 12 presentation work with the new Phase 11 docs before the next commit.
+4. Resume the roadmap with cooldown unlock only after the analytics and visual layers are both accepted.
 
 ## Verification Commands
 - `pnpm typecheck`
 - `pnpm --filter @goal-vault/api start`
 - `curl -s http://127.0.0.1:3001/health`
 - `curl -s http://127.0.0.1:3001/ready`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-phase10`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-phase10`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform android --output-dir ../../dist-android-phase10`
+- `curl -s -X POST http://127.0.0.1:3001/analytics/events -H 'content-type: application/json' --data '{"events":[{"name":"landing_viewed","category":"marketing","occurredAt":"2026-04-24T12:00:00.000Z","context":{"platform":"web","route":"/","environment":"development","deploymentTarget":"local"},"payload":{"entry":"direct"}}]}'`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-phase11`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios-phase11`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform android --output-dir ../../dist-android-phase11`
 - `git status --short`
 
 ## Handoff Note
-Phase 10 is presentation and demo support, not new product logic. The best live walkthrough now uses the guided app states plus a prepared Base Sepolia wallet with one fresh vault, one funded vault, and optionally one eligible vault.
+Phase 11 is instrumentation and observability, not new product scope. The app now emits typed analytics from the key product flows, the API stores analytics batches when enabled, and backend sync or read paths log structured observability signals that are easier to review after launch.

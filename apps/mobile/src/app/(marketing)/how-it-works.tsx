@@ -3,11 +3,14 @@ import { Stack } from "expo-router";
 import { FinalCtaSection, HowItWorksSection } from "../../components/marketing";
 import { PageContainer, Screen } from "../../components/primitives";
 import { ScreenHeader } from "../../components/layout";
+import { useScreenTracking } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n";
 import { spacing } from "../../theme";
 
 export default function HowItWorksScreen() {
   const { messages } = useI18n();
+
+  useScreenTracking("how_it_works_viewed", {}, "how-it-works");
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>

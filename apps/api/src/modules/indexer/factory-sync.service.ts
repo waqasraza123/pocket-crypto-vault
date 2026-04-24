@@ -3,6 +3,8 @@ import { parseEventLogs } from "viem";
 import type { SupportedChainId } from "@goal-vault/shared";
 
 import { goalVaultFactoryAbi } from "../../lib/contracts";
+import { classifyObservedError } from "../../lib/observability/event-classification";
+import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
 import { normalizeVaultCreatedLogs } from "./event-normalizer";
 import { createFactorySyncStateKey, isLogAfterCursor } from "./sync-state.service";
@@ -26,8 +28,24 @@ export const syncFactoryEventsForChain = async (context: IndexerContext, chainId
       lastSyncedAt: previousState?.lastSyncedAt ?? null,
       errorMessage: "RPC URL or factory address is missing for this chain.",
     });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "factory_sync",
+      status: "failed",
+      message: "Factory sync is blocked by missing chain configuration.",
+      chainId,
+      errorClass: "config_missing",
+    });
     return;
   }
+
+  logObservabilitySignal(context.logger, {
+    domain: "indexer",
+    action: "factory_sync",
+    status: "started",
+    message: "Factory sync started.",
+    chainId,
+  });
 
   const latestChainBlock = Number(await client.getBlockNumber());
   await context.store.upsertSyncState({
@@ -98,6 +116,17 @@ export const syncFactoryEventsForChain = async (context: IndexerContext, chainId
       lastSyncedAt: new Date().toISOString(),
       errorMessage: null,
     });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "factory_sync",
+      status: "succeeded",
+      message: "Factory sync completed.",
+      chainId,
+      count: normalized.length,
+      metadata: {
+        latestChainBlock,
+      },
+    });
   } catch (error) {
     await context.store.upsertSyncState({
       key: stateKey,
@@ -110,6 +139,17 @@ export const syncFactoryEventsForChain = async (context: IndexerContext, chainId
       latestChainBlock,
       lastSyncedAt: previousState?.lastSyncedAt ?? null,
       errorMessage: error instanceof Error ? error.message : "Factory sync failed.",
+    });
+    logObservabilitySignal(context.logger, {
+      domain: "indexer",
+      action: "factory_sync",
+      status: "failed",
+      message: "Factory sync failed.",
+      chainId,
+      errorClass: classifyObservedError(error),
+      metadata: {
+        latestChainBlock,
+      },
     });
   }
 };

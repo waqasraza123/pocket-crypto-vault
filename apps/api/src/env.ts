@@ -35,6 +35,7 @@ const runtimeEnvSchema = z.object({
   API_DATA_DIR: z.string().trim().min(1).optional(),
   API_SYNC_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
   API_ENABLE_INDEXER: optionalBooleanSchema,
+  API_ENABLE_ANALYTICS: optionalBooleanSchema,
   API_LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).optional(),
   API_BASE_START_BLOCK: z.coerce.number().int().min(0).optional(),
   API_BASE_SEPOLIA_START_BLOCK: z.coerce.number().int().min(0).optional(),
@@ -57,6 +58,7 @@ export interface ApiRuntimeEnv {
   dataDir: string;
   syncIntervalMs: number;
   indexerEnabled: boolean;
+  analyticsEnabled: boolean;
   logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace";
   chains: Record<SupportedChainId, ApiChainRuntimeConfig>;
   validationErrors: string[];
@@ -126,6 +128,7 @@ export const readApiRuntimeEnv = (
       dataDir: path.resolve(process.cwd(), ".data"),
       syncIntervalMs: 30_000,
       indexerEnabled: true,
+      analyticsEnabled: true,
       logLevel: "info",
       chains: {
         8453: {
@@ -177,6 +180,7 @@ export const readApiRuntimeEnv = (
     dataDir: parsed.data.API_DATA_DIR || path.resolve(process.cwd(), ".data"),
     syncIntervalMs: parsed.data.API_SYNC_INTERVAL_MS ?? 30_000,
     indexerEnabled: parseBoolean(parsed.data.API_ENABLE_INDEXER) ?? true,
+    analyticsEnabled: parseBoolean(parsed.data.API_ENABLE_ANALYTICS) ?? true,
     logLevel: parsed.data.API_LOG_LEVEL || "info",
     chains: {
       8453: {

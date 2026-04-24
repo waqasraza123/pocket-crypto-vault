@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors, spacing } from "../../theme";
 import { AppHeading } from "./AppHeading";
 import { AppText } from "./AppText";
+import { MotionView } from "./MotionView";
 import { SurfaceCard } from "./SurfaceCard";
 
 export interface EmptyStateProps {
@@ -24,21 +25,30 @@ export const EmptyState = ({
   highlights = [],
 }: PropsWithChildren<EmptyStateProps>) => {
   return (
-    <SurfaceCard tone="muted" style={{ alignItems: "flex-start", overflow: "hidden", backgroundColor: colors.backgroundElevated }}>
+    <SurfaceCard tone="muted" style={{ alignItems: "flex-start", backgroundColor: colors.backgroundElevated }}>
       <View style={{ gap: spacing[4], width: "100%" }}>
-        <View
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: 30,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: colors.accentSoft,
-          }}
-        >
-          <MaterialCommunityIcons color={colors.accentStrong} name={icon} size={28} />
-        </View>
-        <View style={{ gap: spacing[2] }}>
+        <MotionView preset="hero" intensity="emphasis">
+          <View
+            style={{
+              width: 68,
+              height: 68,
+              borderRadius: 34,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: colors.accentSoft,
+              borderWidth: 1,
+              borderColor: colors.borderStrong,
+              shadowColor: colors.accentGlow,
+              shadowOpacity: 0.28,
+              shadowRadius: 24,
+              shadowOffset: { width: 0, height: 12 },
+              elevation: 4,
+            }}
+          >
+            <MaterialCommunityIcons color={colors.accentStrong} name={icon} size={30} />
+          </View>
+        </MotionView>
+        <MotionView delay={70} style={{ gap: spacing[2] }}>
           {eyebrow ? (
             <AppText size="sm" tone="accent" weight="semibold">
               {eyebrow}
@@ -46,12 +56,13 @@ export const EmptyState = ({
           ) : null}
           <AppHeading size="md">{title}</AppHeading>
           <AppText tone="secondary">{description}</AppText>
-        </View>
+        </MotionView>
         {highlights.length > 0 ? (
           <View style={{ gap: spacing[3], width: "100%" }}>
             {highlights.map((highlight, index) => (
-              <View
+              <MotionView
                 key={highlight}
+                delay={120 + index * 55}
                 style={{
                   flexDirection: "row",
                   alignItems: "flex-start",
@@ -80,7 +91,7 @@ export const EmptyState = ({
                 <AppText size="sm" style={{ flex: 1 }} tone="secondary">
                   {highlight}
                 </AppText>
-              </View>
+              </MotionView>
             ))}
           </View>
         ) : null}

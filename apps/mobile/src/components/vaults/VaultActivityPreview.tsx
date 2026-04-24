@@ -1,9 +1,10 @@
 import { View } from "react-native";
 
 import type { VaultActivityEvent } from "../../types";
+import { getStaggerDelay } from "../../lib/motion/list-motion";
 import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
-import { AppHeading, AppText, SecondaryButton, SurfaceCard } from "../primitives";
+import { AppHeading, AppText, MotionView, SecondaryButton, SurfaceCard } from "../primitives";
 
 export interface VaultActivityPreviewProps {
   events: VaultActivityEvent[];
@@ -25,8 +26,8 @@ export const VaultActivityPreview = ({ events, onOpenTimeline }: VaultActivityPr
         <AppText tone="secondary">{messages.vaults.activityEmpty}</AppText>
       ) : (
         <View style={{ gap: spacing[4] }}>
-          {events.map((event) => (
-            <View key={event.id} style={{ flexDirection: "row", gap: spacing[3] }}>
+          {events.map((event, index) => (
+            <MotionView key={event.id} delay={getStaggerDelay(index)} style={{ flexDirection: "row", gap: spacing[3] }}>
               <View
                 style={{
                   width: 12,
@@ -50,7 +51,7 @@ export const VaultActivityPreview = ({ events, onOpenTimeline }: VaultActivityPr
                   {new Date(event.occurredAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </AppText>
               </View>
-            </View>
+            </MotionView>
           ))}
         </View>
       )}

@@ -3,11 +3,14 @@ import { Stack } from "expo-router";
 import { FinalCtaSection, SecurityTrustSection } from "../../components/marketing";
 import { ScreenHeader } from "../../components/layout";
 import { PageContainer, Screen } from "../../components/primitives";
+import { useScreenTracking } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n";
 import { spacing } from "../../theme";
 
 export default function SecurityScreen() {
   const { messages } = useI18n();
+
+  useScreenTracking("security_viewed", {}, "security");
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>

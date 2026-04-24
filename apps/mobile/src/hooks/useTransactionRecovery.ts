@@ -2,6 +2,7 @@ import { useEffect, useMemo } from "react";
 
 import type { TransactionRecoveryRecord, TransactionRecoveryState } from "@goal-vault/shared";
 
+import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { saveVaultMetadata } from "../lib/api/vaults";
 import { getReadClient } from "../lib/blockchain/read-client";
 import { resolveCreatedVaultAddress } from "../lib/contracts/resolve-created-vault";
@@ -13,6 +14,7 @@ import {
   useHydrateTransactionRecoveryStore,
   useTransactionRecoveryStoreVersion,
 } from "../lib/recovery/store";
+import { useAnalytics } from "./useAnalytics";
 import { invalidateVaultQueries, markSessionVaultMetadata, upsertSessionVaultMetadata } from "../state";
 import { useWalletConnection } from "./useWalletConnection";
 
@@ -23,7 +25,12 @@ export const useTransactionRecovery = ({
   ownerAddress?: string | null;
   vaultAddress?: string | null;
 } = {}) => {
+  const { track } = useAnalytics();
   const { connectionState } = useWalletConnection();
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
   const version = useTransactionRecoveryStoreVersion();
   useHydrateTransactionRecoveryStore();
 
@@ -81,6 +88,23 @@ export const useTransactionRecovery = ({
             didConfirmOnchain: receipt.status === "success",
             updatedAt: new Date().toISOString(),
           }));
+          trackTransactionLifecycle({
+            track,
+            flow:
+              item.kind === "create_vault"
+                ? "create_vault"
+                : item.kind === "deposit"
+                  ? "deposit"
+                  : "withdraw",
+            lifecycle: "syncing",
+            vaultAddress: item.vaultAddress ?? null,
+            txHash: item.txHash,
+            context: {
+              ...analyticsContext,
+              chainId: item.chainId,
+            },
+            syncFreshness: "syncing",
+          });
 
           if (item.kind === "create_vault" && !item.vaultAddress) {
             const resolution = await resolveCreatedVaultAddress({
@@ -127,6 +151,19 @@ export const useTransactionRecovery = ({
                 status: metadataResult.status === "saved" ? "completed" : "syncing",
                 updatedAt: new Date().toISOString(),
               }));
+              trackTransactionLifecycle({
+                track,
+                flow: "create_vault",
+                lifecycle: metadataResult.status === "saved" ? "completed" : "partial_success",
+                vaultAddress: resolution.vaultAddress,
+                txHash: item.txHash,
+                context: {
+                  ...analyticsContext,
+                  chainId: item.chainId,
+                },
+                partialSuccess: metadataResult.status !== "saved",
+                syncFreshness: metadataResult.status === "saved" ? "current" : "syncing",
+              });
             }
           }
 
@@ -138,7 +175,7 @@ export const useTransactionRecovery = ({
     };
 
     void recover();
-  }, [connectionState, version]);
+  }, [analyticsContext, connectionState, track, version]);
 
   const state: TransactionRecoveryState = useMemo(() => {
     if (items.length === 0) {
@@ -171,7 +208,32 @@ export const useTransactionRecovery = ({
   return {
     state,
     items,
-    dismiss: async (id: string) => removeTransactionRecoveryRecord(id),
+    dismiss: async (id: string) => {
+      const item = getTransactionRecoveryRecords().find((record) => record.id === id) ?? null;
+
+      if (item) {
+        track(
+          "transaction_recovery_action",
+          {
+            flow:
+              item.kind === "create_vault"
+                ? "create_vault"
+                : item.kind === "deposit"
+                  ? "deposit"
+                  : "withdraw",
+            action: "dismiss",
+          },
+          {
+            ...analyticsContext,
+            chainId: item.chainId,
+            vaultAddress: item.vaultAddress ?? null,
+            txHash: item.txHash,
+          },
+        );
+      }
+
+      return removeTransactionRecoveryRecord(id);
+    },
     persist: async (record: TransactionRecoveryRecord) => upsertTransactionRecoveryRecord(record),
   };
 };

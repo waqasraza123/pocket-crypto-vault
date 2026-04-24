@@ -1,8 +1,10 @@
 import { Stack, useRouter } from "expo-router";
+import { useMemo } from "react";
 import { View } from "react-native";
 
 import { getUnlockedVaultCount, getTotalSaved } from "../../features/vault-list/selectors";
 import { formatUsdc } from "../../lib/format";
+import { createConnectionAnalyticsContext, normalizeAnalyticsDataSource, useScreenTracking, useTrackEventWhen } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
 import { colors, radii, spacing } from "../../theme";
@@ -18,7 +20,7 @@ import {
   StateBanner,
 } from "../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../components/layout";
-import { AppHeading, AppText, EmptyState, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../components/primitives";
+import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../components/primitives";
 import { VaultGrid } from "../../components/vaults";
 
 export default function MyVaultsScreen() {
@@ -29,8 +31,51 @@ export default function MyVaultsScreen() {
   const { messages } = useI18n();
   const totalSaved = getTotalSaved(vaults);
   const unlockedCount = getUnlockedVaultCount(vaults);
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
 
   const showVaultGrid = connectionState.status === "ready" && !isLoading && queryStatus === "success";
+
+  useScreenTracking(
+    "dashboard_viewed",
+    {
+      hasVaults: vaults.length > 0,
+      vaultCount: vaults.length,
+      unlockedVaultCount: unlockedCount,
+      dataSource: normalizeAnalyticsDataSource(dataSource),
+    },
+    `dashboard:${connectionState.status}:${queryStatus}:${vaults.length}:${unlockedCount}:${dataSource ?? "none"}`,
+    analyticsContext,
+  );
+
+  useTrackEventWhen({
+    name: "empty_state_viewed",
+    payload: {
+      surface: "dashboard",
+      kind: "no_vaults",
+    },
+    when: connectionState.status === "ready" && !isLoading && queryStatus === "empty",
+    key: `dashboard-empty:${connectionState.session?.address ?? "guest"}`,
+    context: analyticsContext,
+  });
+
+  useTrackEventWhen({
+    name: "degraded_state_viewed",
+    payload: {
+      surface: "dashboard",
+      degradedEvent:
+        degradedState === "partial"
+          ? "partial_data"
+          : dataSource === "fallback"
+            ? "api_fetch_failed"
+            : "chain_read_failed",
+    },
+    when: connectionState.status === "ready" && !isLoading && (queryStatus === "error" || queryStatus === "unavailable"),
+    key: `dashboard-degraded:${degradedState}:${dataSource ?? "none"}`,
+    context: analyticsContext,
+  });
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
@@ -78,31 +123,37 @@ export default function MyVaultsScreen() {
         ) : null}
 
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
-          <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
-            <AppText tone="secondary">{messages.common.labels.totalSaved}</AppText>
-            <AppHeading size="xl">{formatUsdc(totalSaved)}</AppHeading>
-          </SurfaceCard>
-          <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
-            <AppText tone="secondary">{messages.common.labels.vaultCount}</AppText>
-            <AppHeading size="xl">{vaults.length}</AppHeading>
-          </SurfaceCard>
-          <SurfaceCard tone="muted" style={{ flex: 1, minWidth: 220, backgroundColor: colors.accentSoft }}>
-            <AppText tone="secondary">{messages.common.labels.eligibleSoon}</AppText>
-            <AppHeading size="xl">{unlockedCount}</AppHeading>
-            <View
-              style={{
-                alignSelf: "flex-start",
-                borderRadius: radii.pill,
-                backgroundColor: colors.surface,
-                paddingHorizontal: spacing[3],
-                paddingVertical: spacing[2],
-              }}
-            >
-              <AppText size="sm" tone="secondary">
-                {messages.common.labels.withdrawWhenEligible}
-              </AppText>
-            </View>
-          </SurfaceCard>
+          <MotionView style={{ flex: 1, minWidth: 220 }}>
+            <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
+              <AppText tone="secondary">{messages.common.labels.totalSaved}</AppText>
+              <AnimatedNumberText formatValue={formatUsdc} size="xl" value={totalSaved} weight="semibold" />
+            </SurfaceCard>
+          </MotionView>
+          <MotionView delay={70} style={{ flex: 1, minWidth: 220 }}>
+            <SurfaceCard style={{ flex: 1, minWidth: 220 }}>
+              <AppText tone="secondary">{messages.common.labels.vaultCount}</AppText>
+              <AnimatedNumberText size="xl" value={vaults.length} weight="semibold" />
+            </SurfaceCard>
+          </MotionView>
+          <MotionView delay={140} style={{ flex: 1, minWidth: 220 }}>
+            <SurfaceCard tone="muted" style={{ flex: 1, minWidth: 220, backgroundColor: colors.accentSoft }}>
+              <AppText tone="secondary">{messages.common.labels.eligibleSoon}</AppText>
+              <AnimatedNumberText size="xl" value={unlockedCount} weight="semibold" />
+              <View
+                style={{
+                  alignSelf: "flex-start",
+                  borderRadius: radii.pill,
+                  backgroundColor: colors.surface,
+                  paddingHorizontal: spacing[3],
+                  paddingVertical: spacing[2],
+                }}
+              >
+                <AppText size="sm" tone="secondary">
+                  {messages.common.labels.withdrawWhenEligible}
+                </AppText>
+              </View>
+            </SurfaceCard>
+          </MotionView>
         </View>
 
         {connectionState.status === "ready" && !isLoading && queryStatus === "empty" ? (

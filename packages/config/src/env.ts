@@ -28,6 +28,11 @@ const optionalPositiveIntSchema = z.coerce
   .positive()
   .optional();
 
+const optionalBooleanSchema = z
+  .enum(["true", "false", "1", "0", "yes", "no"])
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
 const optionalAddressSchema = z
   .string()
   .trim()
@@ -47,6 +52,7 @@ const runtimeEnvSchema = z.object({
   EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: optionalAddressSchema,
   EXPO_PUBLIC_API_BASE_URL: optionalUrlSchema,
   EXPO_PUBLIC_API_TIMEOUT_MS: optionalPositiveIntSchema,
+  EXPO_PUBLIC_ANALYTICS_ENABLED: optionalBooleanSchema,
 });
 
 export interface GoalVaultDeploymentEnv {
@@ -70,6 +76,9 @@ export interface AppRuntimeEnv {
   factoryAddresses: Record<SupportedChainId, Address | null>;
   apiBaseUrl: string | null;
   apiTimeoutMs: number;
+  analyticsEnabled: boolean;
+  analyticsMode: "disabled" | "local_log" | "backend";
+  analyticsEndpoint: string | null;
   expectedLaunchChainId: SupportedChainId;
   configState: AppConfigState;
   releaseReadiness: ReleaseReadinessState;
@@ -99,6 +108,14 @@ const isHttpsUrl = (value: string | null) => {
   } catch {
     return false;
   }
+};
+
+const parseBoolean = (value: string | undefined) => {
+  if (!value) {
+    return undefined;
+  }
+
+  return ["true", "1", "yes"].includes(value);
 };
 
 const buildChainStates = ({
@@ -207,6 +224,14 @@ export const readAppRuntimeEnv = (
   const parsed = runtimeEnvSchema.safeParse(source);
   const validationErrors = [...deploymentEnv.validationErrors];
   const apiBaseUrl = parsed.success ? parsed.data.EXPO_PUBLIC_API_BASE_URL || null : null;
+  const analyticsEnabled = parsed.success ? parseBoolean(parsed.data.EXPO_PUBLIC_ANALYTICS_ENABLED) ?? Boolean(apiBaseUrl) : false;
+  const analyticsMode: AppRuntimeEnv["analyticsMode"] = !analyticsEnabled
+    ? "disabled"
+    : apiBaseUrl
+      ? "backend"
+      : deploymentEnv.environment === "development"
+        ? "local_log"
+        : "disabled";
 
   if (deploymentEnv.environment !== "development" && !deploymentEnv.appUrl) {
     validationErrors.push("EXPO_PUBLIC_APP_URL is required for staging and production packaging.");
@@ -356,6 +381,9 @@ export const readAppRuntimeEnv = (
     factoryAddresses: deploymentEnv.factoryAddresses,
     apiBaseUrl,
     apiTimeoutMs: parsed.success ? parsed.data.EXPO_PUBLIC_API_TIMEOUT_MS ?? 8_000 : 8_000,
+    analyticsEnabled,
+    analyticsMode,
+    analyticsEndpoint: analyticsMode === "backend" && apiBaseUrl ? `${apiBaseUrl.replace(/\/+$/, "")}/analytics/events` : null,
     expectedLaunchChainId,
     configState,
     releaseReadiness,

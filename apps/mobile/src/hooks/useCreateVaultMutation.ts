@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { CreateVaultInput, CreateVaultResult, CreateVaultTransactionState, MetadataSaveResult } from "../types";
+import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { useWalletConnection } from "./useWalletConnection";
+import { useAnalytics } from "./useAnalytics";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
 import { buildCreateVaultMetadataPayload, createVaultTransaction } from "../lib/contracts/create-vault";
 import { buildCreateVaultReviewModel } from "../lib/contracts/mappers";
@@ -20,6 +22,7 @@ import {
   upsertSessionVaultMetadata,
 } from "../state/vault-store";
 import { resolveCreatedVaultAddress } from "../lib/contracts/resolve-created-vault";
+import { classifyAnalyticsError } from "../lib/errors/analytics";
 import { getCurrentMessages } from "../lib/i18n";
 import type { Hash, TransactionReceipt } from "viem";
 
@@ -62,18 +65,46 @@ const getErrorMessage = (error: unknown) => {
 };
 
 export const useCreateVaultMutation = () => {
+  const { track } = useAnalytics();
   const { connectionState } = useWalletConnection();
   const provider = useWalletWriteProvider();
   const [state, setState] = useState<CreateVaultTransactionState>(initialCreateVaultTransactionState);
   const [result, setResult] = useState<CreateVaultResult | null>(null);
   const retryStateRef = useRef<RetryState>(null);
   const mountedRef = useRef(true);
+  const previousConnectionStatusRef = useRef(connectionState.status);
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
 
   useEffect(() => {
     return () => {
       mountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      previousConnectionStatusRef.current === "ready" &&
+      (connectionState.status === "disconnected" || connectionState.status === "walletUnavailable") &&
+      (state.status === "awaiting_wallet_confirmation" ||
+        state.status === "submitting" ||
+        state.status === "confirming" ||
+        state.status === "metadata_saving")
+    ) {
+      track(
+        "degraded_state_viewed",
+        {
+          surface: "create_vault",
+          degradedEvent: "wallet_disconnected_mid_flow",
+        },
+        analyticsContext,
+      );
+    }
+
+    previousConnectionStatusRef.current = connectionState.status;
+  }, [analyticsContext, connectionState.status, state.status, track]);
 
   const applyState = useCallback((nextState: CreateVaultTransactionState) => {
     if (mountedRef.current) {
@@ -106,6 +137,18 @@ export const useCreateVaultMutation = () => {
           didOnchainSucceed: true,
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "syncing",
+        vaultAddress: payload.contractAddress,
+        txHash,
+        context: {
+          ...analyticsContext,
+          chainId: payload.chainId,
+        },
+        syncFreshness: "syncing",
+      });
 
       const metadataSave = await saveVaultMetadata(payload);
 
@@ -122,7 +165,7 @@ export const useCreateVaultMutation = () => {
 
       return metadataSave;
     },
-    [applyState],
+    [analyticsContext, applyState, track],
   );
 
   const submit = useCallback(
@@ -177,6 +220,18 @@ export const useCreateVaultMutation = () => {
           status: "validating",
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "started",
+        context: analyticsContext,
+      });
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "wallet_confirmation_requested",
+        context: analyticsContext,
+      });
 
       try {
         const recoveryReview = buildCreateVaultReviewModel({
@@ -215,6 +270,16 @@ export const useCreateVaultMutation = () => {
                 },
               }),
             );
+            trackTransactionLifecycle({
+              track,
+              flow: "create_vault",
+              lifecycle: "submitted",
+              txHash,
+              context: {
+                ...analyticsContext,
+                chainId: connectionState.session!.chain!.id,
+              },
+            });
             applyState(
               createVaultTransactionState({
                 status: "submitting",
@@ -234,6 +299,16 @@ export const useCreateVaultMutation = () => {
               syncStatus: "pending",
               updatedAt: new Date().toISOString(),
             }));
+            trackTransactionLifecycle({
+              track,
+              flow: "create_vault",
+              lifecycle: "confirming",
+              txHash,
+              context: {
+                ...analyticsContext,
+                chainId: connectionState.session!.chain!.id,
+              },
+            });
             applyState(
               createVaultTransactionState({
                 status: "confirming",
@@ -271,6 +346,18 @@ export const useCreateVaultMutation = () => {
               errorMessage: txResult.resolution.message ?? messages.resolutionPending,
             }),
           );
+          trackTransactionLifecycle({
+            track,
+            flow: "create_vault",
+            lifecycle: "partial_success",
+            txHash: txResult.txHash,
+            errorClass: "onchain_resolution_failed",
+            partialSuccess: true,
+            context: {
+              ...analyticsContext,
+              chainId: connectionState.session.chain.id,
+            },
+          });
 
           void updateTransactionRecoveryRecord(createRecoveryId({ kind: "create_vault", txHash: txResult.txHash }), (current) => ({
             ...current,
@@ -305,6 +392,19 @@ export const useCreateVaultMutation = () => {
         };
 
         setResult(nextResult);
+        track(
+          "vault_created_confirmed",
+          {
+            vaultAddress: nextResult.vaultAddress,
+            metadataStatus: metadataSave.status === "saved" ? "saved" : "failed",
+          },
+          {
+            ...analyticsContext,
+            chainId: connectionState.session.chain.id,
+            vaultAddress: nextResult.vaultAddress,
+            txHash: nextResult.txHash,
+          },
+        );
 
         if (metadataSave.status === "failed") {
           const messages = getCurrentMessages().pages.createVault.runtime;
@@ -326,6 +426,20 @@ export const useCreateVaultMutation = () => {
               metadataSave,
             }),
           );
+          trackTransactionLifecycle({
+            track,
+            flow: "create_vault",
+            lifecycle: "partial_success",
+            vaultAddress: nextResult.vaultAddress,
+            txHash: nextResult.txHash,
+            errorClass: "metadata_sync_delayed",
+            partialSuccess: true,
+            context: {
+              ...analyticsContext,
+              chainId: connectionState.session.chain.id,
+            },
+            syncFreshness: "syncing",
+          });
 
           void updateTransactionRecoveryRecord(createRecoveryId({ kind: "create_vault", txHash: nextResult.txHash }), (current) => ({
             ...current,
@@ -349,6 +463,18 @@ export const useCreateVaultMutation = () => {
             metadataSave,
           }),
         );
+        trackTransactionLifecycle({
+          track,
+          flow: "create_vault",
+          lifecycle: "completed",
+          vaultAddress: nextResult.vaultAddress,
+          txHash: nextResult.txHash,
+          context: {
+            ...analyticsContext,
+            chainId: connectionState.session.chain.id,
+          },
+          syncFreshness: metadataSave.status === "saved" ? "current" : "syncing",
+        });
 
         return nextResult;
       } catch (error) {
@@ -367,11 +493,19 @@ export const useCreateVaultMutation = () => {
             isRetryable: true,
           }),
         );
+        trackTransactionLifecycle({
+          track,
+          flow: "create_vault",
+          lifecycle: "failed",
+          txHash: submittedTxHash,
+          errorClass: classifyAnalyticsError(error),
+          context: analyticsContext,
+        });
 
         return null;
       }
     },
-    [applyState, connectionState, persistMetadata, provider, state.status],
+    [analyticsContext, applyState, connectionState, persistMetadata, provider, state.status, track],
   );
 
   const retry = useCallback(async () => {
@@ -381,6 +515,15 @@ export const useCreateVaultMutation = () => {
     if (!retryState) {
       return null;
     }
+
+    track(
+      "transaction_recovery_action",
+      {
+        flow: "create_vault",
+        action: "retry",
+      },
+      analyticsContext,
+    );
 
     if (retryState.kind === "create") {
       return submit(retryState.values);
@@ -395,6 +538,13 @@ export const useCreateVaultMutation = () => {
           isRetryable: true,
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "failed",
+        errorClass: "wallet_unavailable",
+        context: analyticsContext,
+      });
 
       return null;
     }
@@ -424,6 +574,15 @@ export const useCreateVaultMutation = () => {
             errorMessage: resolution.message ?? messages.resolutionPending,
           }),
         );
+        trackTransactionLifecycle({
+          track,
+          flow: "create_vault",
+          lifecycle: "partial_success",
+          txHash: retryState.txHash,
+          errorClass: "onchain_resolution_failed",
+          partialSuccess: true,
+          context: analyticsContext,
+        });
 
         return null;
       }
@@ -450,6 +609,19 @@ export const useCreateVaultMutation = () => {
       };
 
       setResult(nextResult);
+      track(
+        "vault_created_confirmed",
+        {
+          vaultAddress: nextResult.vaultAddress,
+          metadataStatus: metadataSave.status === "saved" ? "saved" : "failed",
+        },
+        {
+          ...analyticsContext,
+          chainId: connectionState.session.chain.id,
+          vaultAddress: nextResult.vaultAddress,
+          txHash: retryState.txHash,
+        },
+      );
 
       if (metadataSave.status === "failed") {
         const { metadataSave: _metadataSave, ...resultWithoutMetadata } = nextResult;
@@ -470,6 +642,17 @@ export const useCreateVaultMutation = () => {
             metadataSave,
           }),
         );
+        trackTransactionLifecycle({
+          track,
+          flow: "create_vault",
+          lifecycle: "partial_success",
+          vaultAddress: nextResult.vaultAddress,
+          txHash: retryState.txHash,
+          errorClass: "metadata_sync_delayed",
+          partialSuccess: true,
+          context: analyticsContext,
+          syncFreshness: "syncing",
+        });
 
         return nextResult;
       }
@@ -484,6 +667,15 @@ export const useCreateVaultMutation = () => {
           metadataSave,
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "completed",
+        vaultAddress: nextResult.vaultAddress,
+        txHash: retryState.txHash,
+        context: analyticsContext,
+        syncFreshness: metadataSave.status === "saved" ? "current" : "syncing",
+      });
 
       return nextResult;
     }
@@ -512,6 +704,17 @@ export const useCreateVaultMutation = () => {
           metadataSave,
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "create_vault",
+        lifecycle: "partial_success",
+        vaultAddress: nextResult.vaultAddress,
+        txHash: nextResult.txHash,
+        errorClass: "metadata_sync_delayed",
+        partialSuccess: true,
+        context: analyticsContext,
+        syncFreshness: "syncing",
+      });
 
       return nextResult;
     }
@@ -527,9 +730,18 @@ export const useCreateVaultMutation = () => {
         metadataSave,
       }),
     );
+    trackTransactionLifecycle({
+      track,
+      flow: "create_vault",
+      lifecycle: "completed",
+      vaultAddress: nextResult.vaultAddress,
+      txHash: nextResult.txHash,
+      context: analyticsContext,
+      syncFreshness: "current",
+    });
 
     return nextResult;
-  }, [applyState, connectionState, persistMetadata, submit]);
+  }, [analyticsContext, applyState, connectionState, persistMetadata, submit, track]);
 
   const reset = useCallback(() => {
     retryStateRef.current = null;

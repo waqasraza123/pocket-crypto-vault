@@ -4,6 +4,8 @@ import { z } from "zod";
 
 import type { VaultMetadataPayload } from "@goal-vault/shared";
 
+import { classifyObservedError } from "../../lib/observability/event-classification";
+import { logObservabilitySignal } from "../../lib/observability/logger";
 import { serializeVaultDetail, serializeVaultDetailResponse, serializeVaultListResponse, serializeVaultSummary } from "./vaults.serializers";
 import { getVaultDetailByAddress, getVaultsByOwner, saveVaultMetadata } from "./vaults.service";
 
@@ -40,6 +42,16 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
         chainId: parsed.data.chainId,
         ownerWallet: parsed.data.ownerWallet as `0x${string}`,
       });
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_list_read",
+        status: "succeeded",
+        message: "Vault list served.",
+        route: "/vaults",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        count: result.items.length,
+      });
 
       return serializeVaultListResponse({
         items: result.items.map((item) =>
@@ -50,7 +62,17 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
           }),
         ),
       });
-    } catch {
+    } catch (error) {
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_list_read",
+        status: "failed",
+        message: "Vault list failed.",
+        route: "/vaults",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        errorClass: classifyObservedError(error),
+      });
       return reply.status(503).send({
         message: "Vault list is temporarily unavailable.",
       });
@@ -79,10 +101,33 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
       });
 
       if (!detail) {
+        logObservabilitySignal(app.log, {
+          domain: "api",
+          action: "vault_detail_read",
+          status: "degraded",
+          message: "Vault detail was not found.",
+          route: "/vaults/:vaultAddress",
+          requestId: request.id,
+          chainId: parsed.data.chainId,
+          metadata: {
+            notFound: true,
+          },
+        });
         return reply.status(404).send({
           message: "Vault was not found.",
         });
       }
+
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_detail_read",
+        status: "succeeded",
+        message: "Vault detail served.",
+        route: "/vaults/:vaultAddress",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        count: detail.events.length,
+      });
 
       return serializeVaultDetailResponse({
         item: serializeVaultDetail({
@@ -91,7 +136,17 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
           freshness: detail.freshness,
         }),
       });
-    } catch {
+    } catch (error) {
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_detail_read",
+        status: "failed",
+        message: "Vault detail failed.",
+        route: "/vaults/:vaultAddress",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        errorClass: classifyObservedError(error),
+      });
       return reply.status(503).send({
         message: "Vault details are temporarily unavailable.",
       });
@@ -109,13 +164,34 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
 
     try {
       const metadata = await saveVaultMetadata(app.goalVaultContext, parsed.data as VaultMetadataPayload);
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_metadata_save",
+        status: "succeeded",
+        message: "Vault metadata saved.",
+        route: "/vaults",
+        requestId: request.id,
+        chainId: metadata.chainId,
+        vaultAddress: metadata.contractAddress,
+      });
       return reply.status(201).send({
         contractAddress: metadata.contractAddress,
         chainId: metadata.chainId,
         metadataStatus: metadata.metadataStatus,
         reconciliationStatus: metadata.reconciliationStatus,
       });
-    } catch {
+    } catch (error) {
+      logObservabilitySignal(app.log, {
+        domain: "api",
+        action: "vault_metadata_save",
+        status: "failed",
+        message: "Vault metadata save failed.",
+        route: "/vaults",
+        requestId: request.id,
+        chainId: parsed.data.chainId,
+        vaultAddress: parsed.data.contractAddress as `0x${string}`,
+        errorClass: classifyObservedError(error),
+      });
       return reply.status(503).send({
         message: "Vault details could not be saved yet.",
       });

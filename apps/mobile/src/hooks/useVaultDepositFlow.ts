@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { DepositFlowState, VaultDetail } from "../types";
+import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { triggerIndexerSync } from "../lib/api/sync-status";
+import { useAnalytics } from "./useAnalytics";
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
+import { classifyAnalyticsError } from "../lib/errors/analytics";
 import { getCurrentMessages, useI18n } from "../lib/i18n";
 import { buildTransactionRecoveryRecord, createRecoveryId } from "../lib/recovery/records";
 import { removeTransactionRecoveryRecord, updateTransactionRecoveryRecord, upsertTransactionRecoveryRecord } from "../lib/recovery/store";
@@ -61,18 +64,50 @@ const getDepositErrorMessage = (error: unknown) => {
 
 export const useVaultDepositFlow = (vault: VaultDetail | null) => {
   const { messages } = useI18n();
+  const { track } = useAnalytics();
   const { connectionState } = useWalletConnection();
   const provider = useWalletWriteProvider();
   const mountedRef = useRef(true);
+  const approvalRequirementTrackedRef = useRef<Set<string>>(new Set());
+  const previousConnectionStatusRef = useRef(connectionState.status);
   const [amountInput, setAmountInputState] = useState("");
   const [flowState, setFlowState] = useState<DepositFlowState>(initialDepositFlowState);
   const [allowanceOverrideAtomic, setAllowanceOverrideAtomic] = useState<bigint | null>(null);
+  const analyticsContext = useMemo(
+    () => createConnectionAnalyticsContext(connectionState),
+    [connectionState],
+  );
 
   useEffect(() => {
     return () => {
       mountedRef.current = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (
+      previousConnectionStatusRef.current === "ready" &&
+      (connectionState.status === "disconnected" || connectionState.status === "walletUnavailable") &&
+      (flowState.status === "approving" ||
+        flowState.status === "approval_confirming" ||
+        flowState.status === "depositing" ||
+        flowState.status === "deposit_confirming")
+    ) {
+      track(
+        "degraded_state_viewed",
+        {
+          surface: "vault_detail",
+          degradedEvent: "wallet_disconnected_mid_flow",
+        },
+        {
+          ...analyticsContext,
+          vaultAddress: vault?.address ?? null,
+        },
+      );
+    }
+
+    previousConnectionStatusRef.current = connectionState.status;
+  }, [analyticsContext, connectionState.status, flowState.status, track, vault?.address]);
 
   const chainId = connectionState.status === "ready" && connectionState.session?.chain ? connectionState.session.chain.id : null;
   const ownerAddress = connectionState.status === "ready" ? connectionState.session?.address ?? null : null;
@@ -217,6 +252,37 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
 
   const statusCopy = useMemo(() => getDepositFlowStatusCopy(derivedState), [derivedState]);
 
+  useEffect(() => {
+    if (derivedState.status !== "ready_for_approval" || amountAtomic === null || !vault) {
+      return;
+    }
+
+    const key = `${vault.address}:${amountAtomic.toString()}`;
+
+    if (approvalRequirementTrackedRef.current.has(key)) {
+      return;
+    }
+
+    approvalRequirementTrackedRef.current.add(key);
+    track(
+      "deposit_approval_required",
+      {
+        vaultAddress: vault.address,
+      },
+      {
+        ...analyticsContext,
+        vaultAddress: vault.address,
+      },
+    );
+    trackTransactionLifecycle({
+      track,
+      flow: "deposit",
+      lifecycle: "approval_required",
+      vaultAddress: vault.address,
+      context: analyticsContext,
+    });
+  }, [amountAtomic, analyticsContext, derivedState.status, track, vault]);
+
   const applyState = useCallback((nextState: DepositFlowState) => {
     if (mountedRef.current) {
       setFlowState(nextState);
@@ -248,6 +314,16 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
         amountAtomic,
       }),
     );
+    trackTransactionLifecycle({
+      track,
+      flow: "deposit",
+      lifecycle: "wallet_confirmation_requested",
+      vaultAddress: vault.address,
+      context: {
+        ...analyticsContext,
+        chainId,
+      },
+    });
 
     try {
       const approval = await approveUsdcForVault({
@@ -278,6 +354,30 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
           approvalTxHash: approval.txHash,
         }),
       );
+      track(
+        "deposit_approved",
+        {
+          vaultAddress: vault.address,
+          approvalTxHash: approval.txHash,
+        },
+        {
+          ...analyticsContext,
+          chainId,
+          vaultAddress: vault.address,
+          txHash: approval.txHash,
+        },
+      );
+      trackTransactionLifecycle({
+        track,
+        flow: "deposit",
+        lifecycle: "approval_confirmed",
+        vaultAddress: vault.address,
+        txHash: approval.txHash,
+        context: {
+          ...analyticsContext,
+          chainId,
+        },
+      });
 
       return approval;
     } catch (error) {
@@ -289,10 +389,21 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
           errorMessage: getApprovalErrorMessage(error),
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "deposit",
+        lifecycle: "failed",
+        vaultAddress: vault.address,
+        errorClass: classifyAnalyticsError(error),
+        context: {
+          ...analyticsContext,
+          chainId,
+        },
+      });
 
       return null;
     }
-  }, [amountAtomic, applyState, chainId, connectionState.status, messages.deposit.errors.connectBeforeApprove, ownerAddress, provider, refetchBalances, vault]);
+  }, [amountAtomic, analyticsContext, applyState, chainId, connectionState.status, messages.deposit.errors.connectBeforeApprove, ownerAddress, provider, refetchBalances, track, vault]);
 
   const submitDeposit = useCallback(async () => {
     let submittedTxHash: `0x${string}` | null = null;
@@ -321,6 +432,16 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
         approvalTxHash: flowState.approvalTxHash,
       }),
     );
+    trackTransactionLifecycle({
+      track,
+      flow: "deposit",
+      lifecycle: "wallet_confirmation_requested",
+      vaultAddress: vault.address,
+      context: {
+        ...analyticsContext,
+        chainId,
+      },
+    });
 
     try {
       const deposit = await depositToVault({
@@ -357,6 +478,17 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
               depositTxHash: txHash,
             }),
           );
+          trackTransactionLifecycle({
+            track,
+            flow: "deposit",
+            lifecycle: "submitted",
+            vaultAddress: vault.address,
+            txHash,
+            context: {
+              ...analyticsContext,
+              chainId,
+            },
+          });
         },
       });
 
@@ -382,6 +514,18 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
         chainId,
         ownerAddress,
         event: activityEvent,
+      });
+      trackTransactionLifecycle({
+        track,
+        flow: "deposit",
+        lifecycle: "syncing",
+        vaultAddress: vault.address,
+        txHash: deposit.txHash,
+        context: {
+          ...analyticsContext,
+          chainId,
+        },
+        syncFreshness: "syncing",
       });
       await triggerIndexerSync({
         chainId,
@@ -412,6 +556,32 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
           result,
         }),
       );
+      track(
+        "deposit_confirmed",
+        {
+          vaultAddress: vault.address,
+          depositTxHash: deposit.txHash,
+          firstDeposit: vault.savedAmount <= 0,
+        },
+        {
+          ...analyticsContext,
+          chainId,
+          vaultAddress: vault.address,
+          txHash: deposit.txHash,
+        },
+      );
+      trackTransactionLifecycle({
+        track,
+        flow: "deposit",
+        lifecycle: "completed",
+        vaultAddress: vault.address,
+        txHash: deposit.txHash,
+        context: {
+          ...analyticsContext,
+          chainId,
+        },
+        syncFreshness: "current",
+      });
 
       void removeTransactionRecoveryRecord(createRecoveryId({ kind: "deposit", txHash: deposit.txHash }));
       return result;
@@ -435,12 +605,25 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
           errorMessage: getDepositErrorMessage(error),
         }),
       );
+      trackTransactionLifecycle({
+        track,
+        flow: "deposit",
+        lifecycle: "failed",
+        vaultAddress: vault.address,
+        txHash: submittedTxHash,
+        errorClass: classifyAnalyticsError(error),
+        context: {
+          ...analyticsContext,
+          chainId,
+        },
+      });
 
       return null;
     }
   }, [
     amountAtomic,
     amountDecimal,
+    analyticsContext,
     applyState,
     balance.decimals,
     chainId,
@@ -451,6 +634,7 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
     ownerAddress,
     provider,
     refetchBalances,
+    track,
     vault,
   ]);
 
@@ -495,7 +679,21 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
     validationMessage,
   ]);
 
-  const retry = useCallback(async () => submit(), [submit]);
+  const trackedRetry = useCallback(async () => {
+    track(
+      "transaction_recovery_action",
+      {
+        flow: "deposit",
+        action: "retry",
+      },
+      {
+        ...analyticsContext,
+        vaultAddress: vault?.address ?? null,
+      },
+    );
+
+    return submit();
+  }, [analyticsContext, submit, track, vault?.address]);
 
   const reset = useCallback(() => {
     setAllowanceOverrideAtomic(null);
@@ -579,7 +777,7 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
       derivedState.status === "deposit_confirming",
     primaryActionLabel,
     reset,
-    retry,
+    retry: trackedRetry,
     setAmountInput,
     setMaxAmount,
     state: derivedState,
