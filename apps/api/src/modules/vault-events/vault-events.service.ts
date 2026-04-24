@@ -2,20 +2,7 @@ import type { SupportedChainId, SyncFreshnessSnapshot } from "@goal-vault/shared
 import type { Address } from "viem";
 
 import type { IndexerContext } from "../indexer/context";
-import { getChainSyncStatuses } from "../indexer/sync-state.service";
-
-const getFreshnessSnapshot = (context: IndexerContext, chainId: SupportedChainId): SyncFreshnessSnapshot => {
-  const statuses = getChainSyncStatuses(context, chainId);
-  const latest = statuses.sort((left, right) => (left.lastSyncedAt ?? "").localeCompare(right.lastSyncedAt ?? "")).at(-1);
-
-  return {
-    freshness: latest?.freshness ?? "unavailable",
-    lastSyncedAt: latest?.lastSyncedAt ?? null,
-    latestIndexedBlock: latest?.latestIndexedBlock ?? null,
-    latestChainBlock: latest?.latestChainBlock ?? null,
-    lagBlocks: latest?.lagBlocks ?? null,
-  };
-};
+import { getChainFreshnessSnapshot } from "../indexer/freshness";
 
 export const getVaultActivity = ({
   context,
@@ -39,7 +26,7 @@ export const getVaultActivity = ({
 
   return {
     items,
-    freshness: getFreshnessSnapshot(context, chainId),
+    freshness: getChainFreshnessSnapshot(context, chainId),
   };
 };
 
@@ -80,7 +67,7 @@ export const getOwnerActivity = ({
   return {
     items,
     freshness: chainId
-      ? getFreshnessSnapshot(context, chainId)
+      ? getChainFreshnessSnapshot(context, chainId)
       : ({
           freshness: "unavailable",
           lastSyncedAt: null,

@@ -1,22 +1,9 @@
-import type { SyncFreshnessSnapshot, SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@goal-vault/shared";
 import type { Address } from "viem";
 
 import type { IndexerContext } from "../indexer/context";
+import { getChainFreshnessSnapshot } from "../indexer/freshness";
 import { saveVaultMetadata } from "../indexer/reconciliation.service";
-import { getChainSyncStatuses } from "../indexer/sync-state.service";
-
-const buildFreshnessSnapshot = (context: IndexerContext, chainId: SupportedChainId): SyncFreshnessSnapshot => {
-  const statuses = getChainSyncStatuses(context, chainId);
-  const latest = statuses.sort((left, right) => (left.lastSyncedAt ?? "").localeCompare(right.lastSyncedAt ?? "")).at(-1);
-
-  return {
-    freshness: latest?.freshness ?? "unavailable",
-    lastSyncedAt: latest?.lastSyncedAt ?? null,
-    latestIndexedBlock: latest?.latestIndexedBlock ?? null,
-    latestChainBlock: latest?.latestChainBlock ?? null,
-    lagBlocks: latest?.lagBlocks ?? null,
-  };
-};
 
 export const getVaultsByOwner = ({
   context,
@@ -44,7 +31,7 @@ export const getVaultsByOwner = ({
       events: context.store
         .listEvents()
         .filter((event) => event.chainId === chainId && event.vaultAddress.toLowerCase() === vault.contractAddress.toLowerCase()),
-      freshness: buildFreshnessSnapshot(context, chainId),
+      freshness: getChainFreshnessSnapshot(context, chainId),
     })),
   };
 };
@@ -76,7 +63,7 @@ export const getVaultDetailByAddress = ({
 
         return right.blockNumber - left.blockNumber;
       }),
-    freshness: buildFreshnessSnapshot(context, chainId),
+    freshness: getChainFreshnessSnapshot(context, chainId),
   };
 };
 

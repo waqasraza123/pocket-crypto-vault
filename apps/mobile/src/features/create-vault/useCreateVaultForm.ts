@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { createCreateVaultSchema } from "./createVaultSchema";
+import { createCreateVaultSchema } from "@goal-vault/shared";
 import { createVaultDefaults } from "./createVaultDefaults";
 import type { CreateVaultInput } from "../../types";
 import { useI18n } from "../../lib/i18n";

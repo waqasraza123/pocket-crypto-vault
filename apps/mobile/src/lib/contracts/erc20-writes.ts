@@ -1,8 +1,8 @@
+import { prepareApproveUsdcForVaultWriteRequest } from "@goal-vault/contracts-sdk";
 import { createWalletClient, custom, type Address, type EIP1193Provider, type Hash, type TransactionReceipt } from "viem";
 
 import { goalVaultSupportedViemChains } from "../blockchain/chains";
 import { getReadClient } from "../blockchain/read-client";
-import { prepareApproveUsdcForVaultWriteRequest } from "./writes";
 import type { SupportedChainId } from "../../types";
 
 export interface ApproveUsdcForVaultResult {

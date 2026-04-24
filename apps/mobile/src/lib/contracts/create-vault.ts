@@ -1,12 +1,11 @@
 import type { CreateVaultFormInput, CreateVaultReviewModel, VaultMetadataPayload } from "@goal-vault/shared";
-import { readFactoryVaultAddresses } from "@goal-vault/contracts-sdk";
+import { prepareCreateVaultWriteRequest, readFactoryVaultAddresses } from "@goal-vault/contracts-sdk";
 import { createWalletClient, custom, type Address, type EIP1193Provider, type Hash, type TransactionReceipt } from "viem";
 
 import { getReadClient } from "../blockchain/read-client";
 import { goalVaultSupportedViemChains } from "../blockchain/chains";
 import { buildCreateVaultReviewModel } from "./mappers";
 import { getFactoryAddressForChain } from "./registry";
-import { prepareCreateVaultWriteRequest } from "./writes";
 import { resolveCreatedVaultAddress } from "./resolve-created-vault";
 
 export interface CreateVaultTransactionResult {

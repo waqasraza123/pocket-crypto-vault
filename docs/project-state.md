@@ -9,11 +9,11 @@ Core promise:
 - Protect the money from impulse withdrawals.
 
 ## Current Repository Reality
-The repository now has a real Phase 6 foundation:
+The repository now has a real v1 foundation:
 - `pnpm` workspace monorepo
 - Expo-based universal React Native app in `apps/mobile`
 - Expo Router marketing and app route groups
-- shared TypeScript package boundaries for config, domain models, API client placeholder, contracts package, and contracts SDK
+- shared TypeScript package boundaries for config, domain models, a typed API client, contracts package, and contracts SDK
 - app-owned wallet boundary with Base and Base Sepolia support states
 - typed read-only chain access through centralized config and `viem`
 - real create-vault write flow with typed transaction stages, receipt-based address resolution, owner-vault-list fallback, and session-aware metadata refresh
@@ -83,8 +83,9 @@ Still not implemented:
 - Phase 11: post-launch instrumentation, analytics, and observability
 - Phase 12: motion-system upgrade, modern visual refresh, and animated product polish
 - Phase 13: full backend or API wiring, typed data flow, and completion of the end-to-end core loop
-- Phase 14: cooldown unlock
-- Phase 15: guardian approval
+- Phase 14: final production cleanup, dead-code removal, duplicate-path consolidation, and repository hardening
+- Phase 15: cooldown unlock
+- Phase 16: guardian approval
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -119,6 +120,7 @@ Still not implemented:
 - Phase 11 adds a typed analytics boundary in the universal app, lean API-side event ingestion, structured backend observability signals, and post-launch metric definitions without collecting freeform private vault content.
 - Phase 13 makes the API-backed read model the default product path for dashboard, detail, and activity, while keeping chain reads limited to correctness fallbacks and session overlays limited to in-flight recovery.
 - Phase 13 centralizes frontend merge logic for backend, chain, and session state so create, deposit, withdraw, and recovery refresh the same product surfaces consistently.
+- Phase 14 removes unused authenticated mocks, dead wrapper modules, and duplicate backend freshness helpers so the repository reads as a cleaner production codebase instead of layered phase scaffolding.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -141,6 +143,7 @@ Still not implemented:
 - The Phase 12 motion system note lives at `docs/plans/goal-vault-motion-system.md`.
 - The Phase 12 theme refresh note lives at `docs/plans/goal-vault-theme-refresh-notes.md`.
 - The Phase 13 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-13.md`.
+- The Phase 14 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-14.md`.
 
 ## Deferred / Not Yet Implemented
 - External database infrastructure for the backend beyond the current file-backed persistent store

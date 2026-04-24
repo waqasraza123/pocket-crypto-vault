@@ -1,7 +1,6 @@
 export * from "./AppErrorState";
 export * from "./AppLoadingState";
 export * from "./AllowanceRequiredNotice";
-export * from "./ChainDataLoadingState";
 export * from "./ConfigurationNotice";
 export * from "./CreateVaultErrorState";
 export * from "./DepositErrorState";
@@ -17,4 +16,3 @@ export * from "./TransactionRecoveryNotice";
 export * from "./UnsupportedNetworkNotice";
 export * from "./WithdrawErrorState";
 export * from "./WithdrawalLockedNotice";
-export * from "./UnsupportedNetworkCard";

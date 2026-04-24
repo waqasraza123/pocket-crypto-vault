@@ -26,6 +26,7 @@ import {
   GuidedStepsCard,
   MetadataRecoveryNotice,
   StateBanner,
+  TransactionRecoveryNotice,
 } from "../../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
 import { EmptyState, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
@@ -34,7 +35,6 @@ import {
   VaultActivityPreview,
   VaultDetailHeader,
   VaultProgressPanel,
-  VaultRecoveryCard,
   VaultRulePanel,
   VaultStateNotice,
   WithdrawActionPanel,
@@ -174,7 +174,7 @@ export default function VaultDetailScreen() {
           />
         ) : null}
 
-        {activeRecovery ? <VaultRecoveryCard item={activeRecovery} onDismiss={() => void dismiss(activeRecovery.id)} /> : null}
+        {activeRecovery ? <TransactionRecoveryNotice item={activeRecovery} onDismiss={() => void dismiss(activeRecovery.id)} /> : null}
 
         {vault?.metadataStatus === "failed" ? (
           <MetadataRecoveryNotice
