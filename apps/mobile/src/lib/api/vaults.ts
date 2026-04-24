@@ -1,10 +1,11 @@
 import {
+  parseVaultDetailPayload,
   parseVaultDetailResponse,
+  parseVaultListPayload,
   parseVaultListResponse,
-  type VaultDetailResponse,
-  type VaultListResponse,
+  parseVaultMetadataSavePayload,
 } from "@goal-vault/api-client";
-import type { MetadataSaveResult, SupportedChainId, VaultDetailEnriched, VaultMetadataPayload, VaultSummaryEnriched } from "@goal-vault/shared";
+import type { MetadataSaveResult, SupportedChainId, VaultDetailApiModel, VaultMetadataPayload, VaultSummaryApiModel } from "@goal-vault/shared";
 import type { Address } from "viem";
 
 import { getBackendBaseUrl } from "../env/client";
@@ -54,6 +55,11 @@ export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<
   }
 
   if (response.ok || response.status === 409) {
+    if (response.status !== 409) {
+      try {
+        parseVaultMetadataSavePayload(await response.json());
+      } catch {}
+    }
     return {
       status: "saved",
       persistence: "backend",
@@ -89,12 +95,13 @@ export const fetchOwnerVaults = async ({
   ownerWallet: Address;
 }): Promise<{
   status: "success" | "unavailable" | "error" | "not_found";
-  data: VaultSummaryEnriched[] | null;
+  data: VaultSummaryApiModel[] | null;
   message: string | null;
 }> => {
-  const response = await fetchBackendJson<VaultListResponse>({
+  const response = await fetchBackendJson({
     path: `/vaults?chainId=${chainId}&ownerWallet=${ownerWallet}`,
     fallbackMessage: "Vault list is not available right now.",
+    parse: parseVaultListPayload,
   });
 
   if (response.status !== "success" || !response.data) {
@@ -120,12 +127,13 @@ export const fetchVaultDetail = async ({
   vaultAddress: Address;
 }): Promise<{
   status: "success" | "unavailable" | "error" | "not_found";
-  data: VaultDetailEnriched | null;
+  data: VaultDetailApiModel | null;
   message: string | null;
 }> => {
-  const response = await fetchBackendJson<VaultDetailResponse>({
+  const response = await fetchBackendJson({
     path: `/vaults/${vaultAddress}?chainId=${chainId}`,
     fallbackMessage: "Vault detail is not available right now.",
+    parse: parseVaultDetailPayload,
   });
 
   if (response.status !== "success" || !response.data) {

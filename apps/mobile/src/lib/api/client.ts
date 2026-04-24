@@ -20,10 +20,12 @@ export const fetchBackendJson = async <T>({
   path,
   fallbackMessage,
   init,
+  parse,
 }: {
   path: string;
   fallbackMessage: string;
   init?: RequestInit;
+  parse?: (payload: unknown) => T;
 }): Promise<BackendReadResult<T>> => {
   const backendBaseUrl = getBackendBaseUrl();
 
@@ -65,7 +67,7 @@ export const fetchBackendJson = async <T>({
 
     return {
       status: "success",
-      data: (await response.json()) as T,
+      data: parse ? parse(await response.json()) : ((await response.json()) as T),
       message: null,
       responseStatus: response.status,
     };

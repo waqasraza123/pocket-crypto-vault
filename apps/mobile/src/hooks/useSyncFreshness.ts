@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { SyncFreshnessSnapshot } from "@goal-vault/shared";
+import type { PostTransactionRefreshState, SyncFreshnessSnapshot } from "@goal-vault/shared";
 
 import { useI18n } from "../lib/i18n";
 import { getVaultDegradedState } from "../lib/sync/freshness";
@@ -10,11 +10,13 @@ export const useSyncFreshness = ({
   metadataStatus,
   notFound,
   hasPartialData,
+  refreshState,
 }: {
   freshness?: SyncFreshnessSnapshot | null;
   metadataStatus?: "pending" | "saved" | "failed";
   notFound?: boolean;
   hasPartialData?: boolean;
+  refreshState?: PostTransactionRefreshState | null;
 }) => {
   const { messages } = useI18n();
 
@@ -38,7 +40,11 @@ export const useSyncFreshness = ({
           state,
           title: messages.feedback.syncingTitle,
           description:
-            metadataStatus === "pending"
+            refreshState?.status === "catching_up"
+              ? messages.feedback.activityUpdatingDescription
+              : refreshState?.status === "refreshing"
+                ? messages.feedback.transactionRefreshingDescription
+                : metadataStatus === "pending"
               ? messages.feedback.metadataPendingDescription
               : freshness?.freshness === "lagging"
                 ? messages.feedback.activityUpdatingDescription
@@ -69,5 +75,5 @@ export const useSyncFreshness = ({
           description: null,
         };
     }
-  }, [freshness, hasPartialData, messages, metadataStatus, notFound]);
+  }, [freshness, hasPartialData, messages, metadataStatus, notFound, refreshState]);
 };

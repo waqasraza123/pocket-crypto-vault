@@ -46,9 +46,16 @@ export const serializeVaultActivityResponse = ({
   freshness,
 });
 
-export const serializeActivityFeedResponse = ({ items }: { items: ApiVaultActivityItem[] }): ActivityFeedResponse => ({
+export const serializeActivityFeedResponse = ({
+  items,
+  freshness,
+}: {
+  items: ApiVaultActivityItem[];
+  freshness: SyncFreshnessSnapshot;
+}): ActivityFeedResponse => ({
   items,
   hasMore: false,
+  freshness,
 });
 
 export const toDisplayAmount = (amountAtomic: string | null) => (amountAtomic ? Number(formatUnits(BigInt(amountAtomic), 6)) : null);

@@ -2,6 +2,7 @@ import { useSyncExternalStore } from "react";
 
 import type {
   MetadataSaveResult,
+  PostTransactionRefreshState,
   SupportedChainId,
   VaultActivityEvent,
   VaultAddress,
@@ -19,6 +20,7 @@ type VaultStoreSnapshot = {
   version: number;
   metadataByVaultKey: Record<string, VaultMetadataRecord>;
   activityByEventId: Record<string, SessionVaultActivityRecord>;
+  refreshByScopeKey: Record<string, ActiveRefreshRecord>;
 };
 
 type SessionVaultActivityRecord = VaultActivityEvent & {
@@ -27,10 +29,13 @@ type SessionVaultActivityRecord = VaultActivityEvent & {
   source: "session";
 };
 
+type ActiveRefreshRecord = PostTransactionRefreshState;
+
 let snapshot: VaultStoreSnapshot = {
   version: 0,
   metadataByVaultKey: {},
   activityByEventId: {},
+  refreshByScopeKey: {},
 };
 
 const listeners = new Set<() => void>();
@@ -45,6 +50,16 @@ const subscribe = (listener: () => void) => {
 
 const createVaultKey = (chainId: SupportedChainId, vaultAddress: VaultAddress) =>
   `${chainId}:${vaultAddress.toLowerCase()}`;
+
+const createRefreshScopeKey = ({
+  chainId,
+  ownerAddress,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  ownerAddress?: Address | null;
+  vaultAddress?: VaultAddress | null;
+}) => `${chainId}:${ownerAddress?.toLowerCase() ?? "unknown"}:${vaultAddress?.toLowerCase() ?? "all"}`;
 
 const emitChange = () => {
   snapshot = {
@@ -199,3 +214,127 @@ export const getSessionVaultActivities = ({
       return true;
     })
     .sort((left, right) => (left.occurredAt < right.occurredAt ? 1 : -1));
+
+export const startPostTransactionRefresh = ({
+  chainId,
+  ownerAddress,
+  vaultAddress,
+  flow,
+  txHash,
+}: Omit<PostTransactionRefreshState, "startedAt" | "status" | "updatedAt">) => {
+  const now = new Date().toISOString();
+  const scopeKey = createRefreshScopeKey({
+    chainId,
+    ownerAddress,
+    vaultAddress,
+  });
+
+  snapshot = {
+    ...snapshot,
+    refreshByScopeKey: {
+      ...snapshot.refreshByScopeKey,
+      [scopeKey]: {
+        status: "refreshing",
+        chainId,
+        ownerAddress,
+        vaultAddress,
+        flow,
+        txHash,
+        startedAt: now,
+        updatedAt: now,
+      },
+    },
+  };
+
+  emitChange();
+};
+
+export const advancePostTransactionRefresh = ({
+  chainId,
+  ownerAddress,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  ownerAddress?: Address | null;
+  vaultAddress?: VaultAddress | null;
+}) => {
+  const scopeKey = createRefreshScopeKey({
+    chainId,
+    ownerAddress,
+    vaultAddress,
+  });
+  const current = snapshot.refreshByScopeKey[scopeKey];
+
+  if (!current) {
+    return;
+  }
+
+  snapshot = {
+    ...snapshot,
+    refreshByScopeKey: {
+      ...snapshot.refreshByScopeKey,
+      [scopeKey]: {
+        ...current,
+        status: "catching_up",
+        updatedAt: new Date().toISOString(),
+      },
+    },
+  };
+
+  emitChange();
+};
+
+export const completePostTransactionRefresh = ({
+  chainId,
+  ownerAddress,
+  vaultAddress,
+}: {
+  chainId: SupportedChainId;
+  ownerAddress?: Address | null;
+  vaultAddress?: VaultAddress | null;
+}) => {
+  const scopeKey = createRefreshScopeKey({
+    chainId,
+    ownerAddress,
+    vaultAddress,
+  });
+  const nextRefreshByScopeKey = {
+    ...snapshot.refreshByScopeKey,
+  };
+
+  delete nextRefreshByScopeKey[scopeKey];
+  snapshot = {
+    ...snapshot,
+    refreshByScopeKey: nextRefreshByScopeKey,
+  };
+
+  emitChange();
+};
+
+export const getPostTransactionRefreshState = ({
+  chainId,
+  ownerAddress,
+  vaultAddress,
+}: {
+  chainId?: SupportedChainId | null;
+  ownerAddress?: Address | null;
+  vaultAddress?: VaultAddress | null;
+} = {}): PostTransactionRefreshState | null => {
+  const matches = Object.values(snapshot.refreshByScopeKey).filter((record) => {
+    if (chainId && record.chainId !== chainId) {
+      return false;
+    }
+
+    if (ownerAddress && record.ownerAddress?.toLowerCase() !== ownerAddress.toLowerCase()) {
+      return false;
+    }
+
+    if (vaultAddress && record.vaultAddress?.toLowerCase() !== vaultAddress.toLowerCase()) {
+      return false;
+    }
+
+    return true;
+  });
+
+  return matches.sort((left, right) => (left.updatedAt ?? "") < (right.updatedAt ?? "") ? 1 : -1)[0] ?? null;
+};

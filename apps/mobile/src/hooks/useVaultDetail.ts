@@ -1,21 +1,33 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { SyncFreshnessSnapshot, VaultActivityItem, VaultDetail, VaultSummary } from "@goal-vault/shared";
+import type { VaultDetail, VaultDetailApiModel, VaultSummary } from "@goal-vault/shared";
 
-import { createActivityDedupeKey, mapActivityItemToViewEvent } from "../lib/api/activity";
 import { fetchVaultDetail } from "../lib/api/vaults";
 import { readVaultDetailByAddress, type VaultQueryResult } from "../lib/contracts/queries";
-import { createSessionVaultDetail, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
+import { mergeVaultDetailRecord } from "../lib/data/source-of-truth";
+import { settlePostTransactionRefreshIfCurrent } from "../lib/data/refresh-strategy";
 import { useI18n } from "../lib/i18n";
-import { getSessionVaultActivities, getSessionVaultMetadata, useVaultStoreVersion } from "../state/vault-store";
+import {
+  getPostTransactionRefreshState,
+  getSessionVaultActivities,
+  getSessionVaultMetadata,
+  useVaultStoreVersion,
+} from "../state/vault-store";
 import { useSyncFreshness } from "./useSyncFreshness";
 import { useWalletConnection } from "./useWalletConnection";
+
+type VaultDetailReadState = {
+  status: "success" | "empty" | "unavailable" | "error" | "not_found";
+  data: VaultDetail | VaultDetailApiModel | null;
+  source: "backend" | "fallback" | null;
+  message: string | null;
+};
 
 export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
   const { messages } = useI18n();
   const { connectionState } = useWalletConnection();
   const vaultStoreVersion = useVaultStoreVersion();
-  const [result, setResult] = useState<VaultQueryResult<VaultDetail>>({
+  const [result, setResult] = useState<VaultDetailReadState>({
     status: "empty",
     data: null,
     source: null,
@@ -43,30 +55,34 @@ export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
         chainId: connectionState.session.chain.id,
         vaultAddress,
       });
-      let nextResult: VaultQueryResult<VaultDetail>;
 
-      if (backendResult.status === "success" && backendResult.data) {
-        nextResult = {
+      if (backendResult.status === "success" && backendResult.data && isActive) {
+        setResult({
           status: "success",
           data: backendResult.data,
           source: "backend",
           message: null,
-        };
-      } else {
-        const chainResult = await readVaultDetailByAddress({
-          chainId: connectionState.session.chain.id,
-          vaultAddress,
         });
-        nextResult = {
-          ...chainResult,
-          message: backendResult.message ?? chainResult.message,
-        };
+        setIsLoading(false);
+        return;
       }
 
-      if (isActive) {
-        setResult(nextResult);
-        setIsLoading(false);
+      const chainResult: VaultQueryResult<VaultDetail> = await readVaultDetailByAddress({
+        chainId: connectionState.session.chain.id,
+        vaultAddress,
+      });
+
+      if (!isActive) {
+        return;
       }
+
+      setResult({
+        status: backendResult.status === "not_found" ? "not_found" : chainResult.status,
+        data: chainResult.data,
+        source: chainResult.status === "success" ? "fallback" : null,
+        message: backendResult.message ?? chainResult.message,
+      });
+      setIsLoading(false);
     };
 
     void loadVault();
@@ -87,78 +103,68 @@ export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
     });
   }, [connectionState, vaultAddress, vaultStoreVersion]);
 
-  const vault = useMemo(() => {
-    if (result.data && sessionMetadata) {
-      return {
-        ...result.data,
-        ...mergeVaultSummaryWithMetadata({
-          vault: result.data,
-          metadata: sessionMetadata,
-        }),
-      };
+  const sessionEvents = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return [];
     }
 
-    if (result.data) {
-      return result.data;
+    return getSessionVaultActivities({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+      vaultAddress,
+    });
+  }, [connectionState, vaultAddress, vaultStoreVersion]);
+
+  const refreshState = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return null;
     }
 
-    if (sessionMetadata) {
-      return createSessionVaultDetail(sessionMetadata);
-    }
-
-    return null;
-  }, [result.data, sessionMetadata]);
-  const backendDetail =
-    result.source === "backend"
-      ? (result.data as (VaultDetail & { normalizedActivity?: VaultActivityItem[]; freshness?: SyncFreshnessSnapshot }) | null)
-      : null;
-
-  const activityPreview = useMemo(() => {
-    const backendEvents = backendDetail?.normalizedActivity
-      ? backendDetail.normalizedActivity.map(mapActivityItemToViewEvent)
-      : vault?.activityPreview ?? [];
-    const activityMap = new Map<string, VaultDetail["activityPreview"][number]>();
-
-    for (const event of backendEvents) {
-      activityMap.set(
-        createActivityDedupeKey({
-          txHash: event.txHash,
-          type: event.type,
-          vaultAddress: event.vaultAddress,
-        }),
-        event,
-      );
-    }
-
-    if (connectionState.status === "ready" && connectionState.session?.chain) {
-      const sessionEvents = getSessionVaultActivities({
+    return (
+      getPostTransactionRefreshState({
         chainId: connectionState.session.chain.id,
         ownerAddress: connectionState.session.address,
         vaultAddress,
-      });
+      }) ??
+      getPostTransactionRefreshState({
+        chainId: connectionState.session.chain.id,
+        ownerAddress: connectionState.session.address,
+      })
+    );
+  }, [connectionState, vaultAddress, vaultStoreVersion]);
 
-      for (const event of sessionEvents) {
-        activityMap.set(
-          createActivityDedupeKey({
-            txHash: event.txHash,
-            type: event.type,
-            vaultAddress: event.vaultAddress,
-          }),
-          event,
-        );
-      }
+  const vault = useMemo(
+    () =>
+      mergeVaultDetailRecord({
+        backendVault: result.source === "backend" ? (result.data as VaultDetailApiModel | null) : null,
+        fallbackVault: result.source === "fallback" ? (result.data as VaultDetail | null) : null,
+        sessionMetadata,
+        sessionEvents,
+        refreshState,
+      }),
+    [refreshState, result.data, result.source, sessionEvents, sessionMetadata],
+  );
+
+  useEffect(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain || !vault) {
+      return;
     }
 
-    return Array.from(activityMap.values())
-      .sort((left, right) => (left.occurredAt < right.occurredAt ? 1 : -1))
-      .slice(0, 6);
-  }, [backendDetail?.normalizedActivity, connectionState, vault, vaultAddress, vaultStoreVersion]);
+    settlePostTransactionRefreshIfCurrent({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+      vaultAddress,
+      freshness: vault.freshness,
+      metadataStatus: vault.metadataStatus,
+    });
+  }, [connectionState, vault, vaultAddress]);
 
   const syncState = useSyncFreshness({
-    freshness: backendDetail?.freshness ?? null,
-    metadataStatus: sessionMetadata?.metadataStatus,
+    freshness: vault?.freshness ?? null,
+    metadataStatus: sessionMetadata?.metadataStatus ?? vault?.metadataStatus,
     hasPartialData: result.source === "fallback",
-    notFound: !vault && !isLoading && result.status === "empty",
+    notFound: !vault && !isLoading && result.status === "not_found",
+    refreshState,
   });
   const notice =
     sessionMetadata?.metadataStatus === "failed"
@@ -170,12 +176,7 @@ export const useVaultDetail = (vaultAddress: VaultSummary["address"]) => {
   return {
     connectionState,
     isLoading,
-    vault: vault
-      ? {
-          ...vault,
-          activityPreview,
-        }
-      : null,
+    vault,
     queryStatus: vault ? "success" : result.status,
     dataSource: result.source ?? (vault ? "session" : null),
     degradedState: syncState.state,

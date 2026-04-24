@@ -171,14 +171,15 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
         message: "Vault metadata saved.",
         route: "/vaults",
         requestId: request.id,
-        chainId: metadata.chainId,
-        vaultAddress: metadata.contractAddress,
+        chainId: metadata.record.chainId,
+        vaultAddress: metadata.record.contractAddress,
       });
       return reply.status(201).send({
-        contractAddress: metadata.contractAddress,
-        chainId: metadata.chainId,
-        metadataStatus: metadata.metadataStatus,
-        reconciliationStatus: metadata.reconciliationStatus,
+        contractAddress: metadata.record.contractAddress,
+        chainId: metadata.record.chainId,
+        metadataStatus: metadata.record.metadataStatus,
+        reconciliationStatus: metadata.record.reconciliationStatus,
+        result: metadata.result,
       });
     } catch (error) {
       logObservabilitySignal(app.log, {

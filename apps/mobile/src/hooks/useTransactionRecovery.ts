@@ -4,6 +4,7 @@ import type { TransactionRecoveryRecord, TransactionRecoveryState } from "@goal-
 
 import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { saveVaultMetadata } from "../lib/api/vaults";
+import { runPostTransactionRefresh } from "../lib/data/refresh-strategy";
 import { getReadClient } from "../lib/blockchain/read-client";
 import { resolveCreatedVaultAddress } from "../lib/contracts/resolve-created-vault";
 import {
@@ -15,7 +16,7 @@ import {
   useTransactionRecoveryStoreVersion,
 } from "../lib/recovery/store";
 import { useAnalytics } from "./useAnalytics";
-import { invalidateVaultQueries, markSessionVaultMetadata, upsertSessionVaultMetadata } from "../state";
+import { markSessionVaultMetadata, upsertSessionVaultMetadata } from "../state";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useTransactionRecovery = ({
@@ -167,7 +168,18 @@ export const useTransactionRecovery = ({
             }
           }
 
-          invalidateVaultQueries();
+          await runPostTransactionRefresh({
+            chainId: item.chainId,
+            ownerAddress: item.ownerAddress,
+            vaultAddress: item.vaultAddress ?? null,
+            flow:
+              item.kind === "create_vault"
+                ? "create_vault"
+                : item.kind === "deposit"
+                  ? "deposit"
+                  : "withdraw",
+            txHash: item.txHash,
+          });
         } catch {
           continue;
         }

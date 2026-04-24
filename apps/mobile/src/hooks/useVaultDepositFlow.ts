@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { DepositFlowState, VaultDetail } from "../types";
 import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
-import { triggerIndexerSync } from "../lib/api/sync-status";
+import { runPostTransactionRefresh } from "../lib/data/refresh-strategy";
 import { useAnalytics } from "./useAnalytics";
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
@@ -527,11 +527,13 @@ export const useVaultDepositFlow = (vault: VaultDetail | null) => {
         },
         syncFreshness: "syncing",
       });
-      await triggerIndexerSync({
+      await runPostTransactionRefresh({
         chainId,
-        mode: "all",
+        ownerAddress,
+        vaultAddress: vault.address,
+        flow: "deposit",
+        txHash: deposit.txHash,
       });
-      invalidateVaultQueries();
       setAllowanceOverrideAtomic(null);
       refetchBalances();
       setAmountInputState("");

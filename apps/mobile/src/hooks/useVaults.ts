@@ -1,20 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { SyncFreshnessSnapshot, VaultSummary } from "@goal-vault/shared";
+import type { VaultSummary, VaultSummaryApiModel, VaultSummaryViewModel } from "@goal-vault/shared";
 
 import { fetchOwnerVaults } from "../lib/api/vaults";
 import { readVaultSummariesByOwner, type VaultQueryResult } from "../lib/contracts/queries";
-import { createSessionVaultSummary, mergeVaultSummaryWithMetadata } from "../lib/contracts/mappers";
+import { mergeVaultSummaries } from "../lib/data/source-of-truth";
+import { settlePostTransactionRefreshIfCurrent } from "../lib/data/refresh-strategy";
 import { useI18n } from "../lib/i18n";
-import { getSessionVaultsByOwner, useVaultStoreVersion } from "../state/vault-store";
+import { getPostTransactionRefreshState, getSessionVaultsByOwner, useVaultStoreVersion } from "../state/vault-store";
 import { useSyncFreshness } from "./useSyncFreshness";
 import { useWalletConnection } from "./useWalletConnection";
+
+type VaultReadState = {
+  status: "success" | "empty" | "unavailable" | "error" | "not_found";
+  data: Array<VaultSummary | VaultSummaryApiModel> | null;
+  source: "backend" | "fallback" | null;
+  message: string | null;
+};
 
 export const useVaults = () => {
   const { messages } = useI18n();
   const { connectionState } = useWalletConnection();
   const vaultStoreVersion = useVaultStoreVersion();
-  const [result, setResult] = useState<VaultQueryResult<VaultSummary[]>>({
+  const [result, setResult] = useState<VaultReadState>({
     status: "empty",
     data: null,
     source: null,
@@ -42,30 +50,34 @@ export const useVaults = () => {
         chainId: connectionState.session.chain.id,
         ownerWallet: connectionState.session.address,
       });
-      let nextResult: VaultQueryResult<VaultSummary[]>;
 
-      if (backendResult.status === "success" && backendResult.data) {
-        nextResult = {
-          status: backendResult.data.length > 0 ? "success" : "empty",
-          data: backendResult.data.length > 0 ? backendResult.data : null,
+      if (backendResult.status === "success" && isActive) {
+        setResult({
+          status: backendResult.data && backendResult.data.length > 0 ? "success" : "empty",
+          data: backendResult.data,
           source: "backend",
           message: null,
-        };
-      } else {
-        const chainResult = await readVaultSummariesByOwner({
-          chainId: connectionState.session.chain.id,
-          ownerAddress: connectionState.session.address,
         });
-        nextResult = {
-          ...chainResult,
-          message: backendResult.message ?? chainResult.message,
-        };
+        setIsLoading(false);
+        return;
       }
 
-      if (isActive) {
-        setResult(nextResult);
-        setIsLoading(false);
+      const chainResult: VaultQueryResult<VaultSummary[]> = await readVaultSummariesByOwner({
+        chainId: connectionState.session.chain.id,
+        ownerAddress: connectionState.session.address,
+      });
+
+      if (!isActive) {
+        return;
       }
+
+      setResult({
+        status: chainResult.status,
+        data: chainResult.data,
+        source: chainResult.status === "success" ? "fallback" : null,
+        message: backendResult.message ?? chainResult.message,
+      });
+      setIsLoading(false);
     };
 
     void loadVaults();
@@ -86,23 +98,52 @@ export const useVaults = () => {
     });
   }, [connectionState, vaultStoreVersion]);
 
-  const mergedVaults = useMemo(() => {
-    const vaultMap = new Map<string, VaultSummary>();
-
-    for (const vault of result.data ?? []) {
-      const metadata = sessionVaults.find((record) => record.contractAddress.toLowerCase() === vault.address.toLowerCase()) ?? null;
-      vaultMap.set(vault.address.toLowerCase(), mergeVaultSummaryWithMetadata({ vault, metadata }));
+  const refreshState = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain || !connectionState.session.address) {
+      return null;
     }
 
-    for (const sessionVault of sessionVaults) {
-      const key = sessionVault.contractAddress.toLowerCase();
-      if (!vaultMap.has(key)) {
-        vaultMap.set(key, createSessionVaultSummary(sessionVault));
-      }
+    return getPostTransactionRefreshState({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+    });
+  }, [connectionState, vaultStoreVersion]);
+
+  const vaults = useMemo<VaultSummaryViewModel[]>(
+    () =>
+      mergeVaultSummaries({
+        backendVaults: result.source === "backend" ? (result.data as VaultSummaryApiModel[] | null) : null,
+        fallbackVaults: result.source === "fallback" ? (result.data as VaultSummary[] | null) : null,
+        sessionMetadata: sessionVaults,
+        refreshState,
+      }),
+    [refreshState, result.data, result.source, sessionVaults],
+  );
+
+  const backendFreshness = vaults.find((vault) => vault.source === "backend")?.freshness ?? null;
+  const metadataStatus =
+    sessionVaults.find((record) => record.metadataStatus === "failed")?.metadataStatus ??
+    sessionVaults.find((record) => record.metadataStatus === "pending")?.metadataStatus;
+
+  useEffect(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return;
     }
 
-    return Array.from(vaultMap.values()).sort((left, right) => (left.unlockDate > right.unlockDate ? 1 : -1));
-  }, [result.data, sessionVaults]);
+    settlePostTransactionRefreshIfCurrent({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+      freshness: backendFreshness,
+      metadataStatus,
+    });
+  }, [backendFreshness, connectionState, metadataStatus]);
+
+  const syncState = useSyncFreshness({
+    freshness: backendFreshness,
+    metadataStatus,
+    hasPartialData: result.source === "fallback",
+    refreshState,
+  });
 
   const sessionNotice =
     sessionVaults.find((record) => record.metadataStatus === "failed")?.metadataStatus === "failed"
@@ -110,25 +151,14 @@ export const useVaults = () => {
       : sessionVaults.find((record) => record.metadataStatus === "pending")
         ? messages.feedback.metadataPendingDescription
         : null;
-  const backendFreshness =
-    result.source === "backend"
-      ? ((result.data ?? []).find((vault) => "freshness" in vault)?.freshness as SyncFreshnessSnapshot | undefined) ?? null
-      : null;
-  const syncState = useSyncFreshness({
-    freshness: backendFreshness,
-    metadataStatus: sessionVaults.find((record) => record.metadataStatus === "failed")?.metadataStatus ?? sessionVaults.find((record) => record.metadataStatus === "pending")?.metadataStatus,
-    hasPartialData: result.source === "fallback",
-  });
-
-  const queryStatus =
-    mergedVaults.length > 0 ? "success" : result.status === "success" ? "empty" : result.status;
-  const dataSource = result.source ?? (mergedVaults.length > 0 ? "session" : null);
+  const queryStatus = vaults.length > 0 ? "success" : result.status === "success" ? "empty" : result.status;
+  const dataSource = result.source ?? (vaults.length > 0 ? "session" : null);
   const notice = sessionNotice ?? syncState.description ?? result.message;
 
   return {
     connectionState,
     isLoading,
-    vaults: mergedVaults,
+    vaults,
     queryStatus,
     dataSource,
     degradedState: syncState.state,

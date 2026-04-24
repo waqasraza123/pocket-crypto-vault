@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { VaultDetail, WithdrawFlowState } from "../types";
 import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
-import { triggerIndexerSync } from "../lib/api/sync-status";
+import { runPostTransactionRefresh } from "../lib/data/refresh-strategy";
 import { useAnalytics } from "./useAnalytics";
 import { useWalletConnection } from "./useWalletConnection";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
@@ -364,11 +364,13 @@ export const useVaultWithdrawFlow = (vault: VaultDetail | null) => {
         },
         syncFreshness: "syncing",
       });
-      await triggerIndexerSync({
+      await runPostTransactionRefresh({
         chainId: connectionState.session.chain.id,
-        mode: "all",
+        ownerAddress: connectionState.session.address,
+        vaultAddress: vault.address,
+        flow: "withdraw",
+        txHash: withdrawal.txHash,
       });
-      invalidateVaultQueries();
       setAmountInputState("");
 
       const result = createWithdrawResult({

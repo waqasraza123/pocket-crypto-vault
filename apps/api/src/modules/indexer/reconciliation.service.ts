@@ -163,5 +163,8 @@ export const saveVaultMetadata = async (context: IndexerContext, payload: VaultM
     chainId: payload.chainId,
     vaultAddress: payload.contractAddress,
   });
-  return nextRecord;
+  return {
+    record: nextRecord,
+    result: current ? "updated" : "created",
+  } as const;
 };

@@ -79,5 +79,14 @@ export const getOwnerActivity = ({
 
   return {
     items,
+    freshness: chainId
+      ? getFreshnessSnapshot(context, chainId)
+      : ({
+          freshness: "unavailable",
+          lastSyncedAt: null,
+          latestIndexedBlock: null,
+          latestChainBlock: null,
+          lagBlocks: null,
+        } satisfies SyncFreshnessSnapshot),
   };
 };

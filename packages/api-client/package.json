@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@goal-vault/shared": "workspace:*"
+    "@goal-vault/shared": "workspace:*",
+    "zod": "^4.1.12"
   }
 }

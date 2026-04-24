@@ -30,11 +30,12 @@ export const registerVaultEventRoutes = (app: FastifyInstance) => {
 
     try {
       const context = app.goalVaultContext;
-      const items = getOwnerActivity({
+      const activity = getOwnerActivity({
         context,
         chainId: parsed.data.chainId,
         ownerWallet: parsed.data.ownerWallet as `0x${string}` | undefined,
-      }).items.map((event) =>
+      });
+      const items = activity.items.map((event) =>
         serializeVaultActivityItem({
           event,
           vault: context.store.getVault(event.chainId, event.vaultAddress),
@@ -51,7 +52,10 @@ export const registerVaultEventRoutes = (app: FastifyInstance) => {
         count: items.length,
       });
 
-      return serializeActivityFeedResponse({ items });
+      return serializeActivityFeedResponse({
+        items,
+        freshness: activity.freshness,
+      });
     } catch (error) {
       logObservabilitySignal(app.log, {
         domain: "api",

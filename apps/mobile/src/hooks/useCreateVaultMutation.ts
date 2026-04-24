@@ -7,8 +7,8 @@ import { useAnalytics } from "./useAnalytics";
 import { useWalletWriteProvider } from "../lib/blockchain/wallet";
 import { buildCreateVaultMetadataPayload, createVaultTransaction } from "../lib/contracts/create-vault";
 import { buildCreateVaultReviewModel } from "../lib/contracts/mappers";
-import { triggerIndexerSync } from "../lib/api/sync-status";
 import { saveVaultMetadata } from "../lib/api/vaults";
+import { runPostTransactionRefresh } from "../lib/data/refresh-strategy";
 import { buildTransactionRecoveryRecord, createRecoveryId } from "../lib/recovery/records";
 import { removeTransactionRecoveryRecord, updateTransactionRecoveryRecord, upsertTransactionRecoveryRecord } from "../lib/recovery/store";
 import {
@@ -157,11 +157,13 @@ export const useCreateVaultMutation = () => {
         vaultAddress: payload.contractAddress,
         status: metadataSave.status,
       });
-      await triggerIndexerSync({
+      await runPostTransactionRefresh({
         chainId: payload.chainId,
-        mode: "all",
+        ownerAddress: payload.ownerWallet,
+        vaultAddress: payload.contractAddress,
+        flow: "create_vault",
+        txHash,
       });
-      invalidateVaultQueries();
 
       return metadataSave;
     },

@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { VaultActivityEvent } from "../types";
-import { createActivityDedupeKey, fetchOwnerActivityFeed, mapActivityItemToViewEvent } from "../lib/api/activity";
+import type { SyncFreshnessSnapshot, VaultActivityItem } from "@goal-vault/shared";
+
+import { fetchOwnerActivityFeed } from "../lib/api/activity";
+import { mergeOwnerActivityFeed } from "../lib/data/source-of-truth";
+import { settlePostTransactionRefreshIfCurrent } from "../lib/data/refresh-strategy";
 import { useI18n } from "../lib/i18n";
-import { getSessionVaultActivities, useVaultStoreVersion } from "../state/vault-store";
+import { getPostTransactionRefreshState, getSessionVaultActivities, useVaultStoreVersion } from "../state/vault-store";
 import { useWalletConnection } from "./useWalletConnection";
 
 export const useVaultActivity = () => {
   const { messages } = useI18n();
   const { connectionState } = useWalletConnection();
   const vaultStoreVersion = useVaultStoreVersion();
-  const [backendEvents, setBackendEvents] = useState<VaultActivityEvent[] | null>(null);
+  const [backendEvents, setBackendEvents] = useState<{
+    items: VaultActivityItem[];
+    freshness: SyncFreshnessSnapshot | null;
+  } | null>(null);
   const [backendStatus, setBackendStatus] = useState<"idle" | "loading" | "success" | "error" | "unavailable">("idle");
   const [backendMessage, setBackendMessage] = useState<string | null>(null);
 
@@ -36,7 +42,10 @@ export const useVaultActivity = () => {
       }
 
       if (response.status === "success" && response.data) {
-        setBackendEvents(response.data.map(mapActivityItemToViewEvent));
+        setBackendEvents({
+          items: response.data.items,
+          freshness: response.data.freshness,
+        });
         setBackendStatus("success");
         setBackendMessage(null);
         return;
@@ -54,40 +63,61 @@ export const useVaultActivity = () => {
     };
   }, [connectionState, vaultStoreVersion]);
 
-  const events = useMemo(() => {
-    const sessionEvents =
+  const sessionEvents = useMemo(
+    () =>
       connectionState.status === "ready" && connectionState.session?.chain
         ? getSessionVaultActivities({
             chainId: connectionState.session.chain.id,
             ownerAddress: connectionState.session.address,
           })
-        : [];
-    const eventMap = new Map<string, VaultActivityEvent>();
+        : [],
+    [connectionState, vaultStoreVersion],
+  );
 
-    for (const event of backendEvents ?? []) {
-      eventMap.set(
-        createActivityDedupeKey({
-          txHash: event.txHash,
-          type: event.type,
-          vaultAddress: event.vaultAddress,
-        }),
-        event,
-      );
+  const refreshState = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain || !connectionState.session.address) {
+      return null;
     }
 
-    for (const event of sessionEvents) {
-      eventMap.set(
-        createActivityDedupeKey({
-          txHash: event.txHash,
-          type: event.type,
-          vaultAddress: event.vaultAddress,
-        }),
-        event,
-      );
+    return getPostTransactionRefreshState({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+    });
+  }, [connectionState, vaultStoreVersion]);
+
+  const events = useMemo(
+    () =>
+      mergeOwnerActivityFeed({
+        backendItems: backendEvents?.items ?? null,
+        sessionEvents,
+        refreshState,
+      }),
+    [backendEvents?.items, refreshState, sessionEvents],
+  );
+
+  useEffect(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain) {
+      return;
     }
 
-    return Array.from(eventMap.values()).sort((left, right) => (left.occurredAt < right.occurredAt ? 1 : -1));
-  }, [backendEvents, connectionState, vaultStoreVersion]);
+    settlePostTransactionRefreshIfCurrent({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+      freshness: backendEvents?.freshness ?? null,
+    });
+  }, [backendEvents?.freshness, connectionState]);
+
+  const notice =
+    refreshState?.status === "catching_up"
+      ? messages.feedback.activityUpdatingDescription
+      : refreshState?.status === "refreshing"
+        ? messages.feedback.transactionRefreshingDescription
+        : backendStatus === "success"
+          ? messages.pages.activity.description
+          : backendMessage ??
+            (events.some((event) => event.source === "session")
+              ? messages.feedback.activityUpdatingDescription
+              : messages.pages.activity.emptyDescription);
 
   return {
     connectionState,
@@ -99,9 +129,6 @@ export const useVaultActivity = () => {
         : events.some((event) => event.source === "session")
           ? ("session" as const)
           : ("fallback" as const),
-    notice:
-      backendStatus === "success"
-        ? messages.pages.activity.description
-        : backendMessage ?? (events.some((event) => event.source === "session") ? messages.pages.activity.description : messages.pages.activity.emptyDescription),
+    notice,
   };
 };

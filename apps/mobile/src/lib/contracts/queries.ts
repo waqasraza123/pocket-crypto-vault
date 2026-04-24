@@ -1,7 +1,6 @@
 import { mapVaultDetail, mapVaultSummary } from "@goal-vault/contracts-sdk";
 import type { VaultDetail, VaultSummary, SupportedChainId } from "@goal-vault/shared";
 
-import { getMockVaultDetail } from "../../features/vault-detail/mockVaultDetail";
 import { getReadClient } from "../blockchain/read-client";
 import { getFactoryAddressForChain } from "./registry";
 import { readFactoryVaultAddresses, readGoalVaultSummary } from "./reads";
@@ -12,14 +11,6 @@ export interface VaultQueryResult<T> {
   source: "backend" | "onchain" | "fallback" | null;
   message: string | null;
 }
-
-const fallbackVaultByAddress = (vaultAddress: VaultSummary["address"]): VaultDetail | null => {
-  try {
-    return getMockVaultDetail(vaultAddress);
-  } catch {
-    return null;
-  }
-};
 
 export const readVaultSummariesByOwner = async ({
   chainId,
@@ -106,25 +97,17 @@ export const readVaultDetailByAddress = async ({
   });
 
   if (summaryResult.status === "success") {
-    const fallback = fallbackVaultByAddress(vaultAddress);
     const vault = mapVaultSummary({
       address: vaultAddress,
       chainId,
       summary: summaryResult.data,
-      metadataFallback: fallback
-        ? {
-            goalName: fallback.goalName,
-            note: fallback.note,
-            accentTone: fallback.accentTone,
-          }
-        : undefined,
     });
 
     return {
       status: "success",
       data: {
         ...mapVaultDetail(vault),
-        activityPreview: fallback?.activityPreview ?? [],
+        activityPreview: [],
       },
       source: "onchain",
       message: null,
