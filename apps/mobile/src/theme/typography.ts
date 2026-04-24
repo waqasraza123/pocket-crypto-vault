@@ -1,8 +1,25 @@
+import { Platform } from "react-native";
+
 export const typography = {
   fontFamily: {
-    body: "System",
-    heading: "System",
-    mono: "Courier",
+    body: Platform.select({
+      ios: "Avenir Next",
+      android: "sans-serif",
+      default: "System",
+      web: "Avenir Next, Helvetica Neue, sans-serif",
+    }),
+    heading: Platform.select({
+      ios: "Georgia",
+      android: "serif",
+      default: "Georgia",
+      web: "Iowan Old Style, Georgia, serif",
+    }),
+    mono: Platform.select({
+      ios: "Menlo",
+      android: "monospace",
+      default: "Courier",
+      web: "IBM Plex Mono, Menlo, monospace",
+    }),
   },
   size: {
     xs: 12,
@@ -12,7 +29,7 @@ export const typography = {
     xl: 22,
     "2xl": 28,
     "3xl": 36,
-    "4xl": 48,
+    "4xl": 56,
   },
   lineHeight: {
     xs: 18,
@@ -22,7 +39,7 @@ export const typography = {
     xl: 32,
     "2xl": 36,
     "3xl": 44,
-    "4xl": 56,
+    "4xl": 64,
   },
   weight: {
     regular: "400",

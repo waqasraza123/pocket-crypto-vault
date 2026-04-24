@@ -1,3 +1,4 @@
+import { Stack } from "expo-router";
 import { View } from "react-native";
 
 import { useWalletConnection } from "../hooks/useWalletConnection";
@@ -14,6 +15,7 @@ export default function LandingScreen() {
 
   return (
     <MarketingShell>
+      <Stack.Screen options={{ title: "Goal Vault" }} />
       <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
         <PageContainer width="dashboard" style={{ gap: spacing[12], paddingTop: spacing[6] }}>
           <HeroSection />

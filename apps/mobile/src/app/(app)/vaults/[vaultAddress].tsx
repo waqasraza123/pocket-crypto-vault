@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { useTransactionRecovery } from "../../../hooks/useTransactionRecovery";
@@ -18,7 +18,7 @@ import {
   StateBanner,
 } from "../../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
-import { EmptyState, PageContainer, Screen } from "../../../components/primitives";
+import { EmptyState, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
 import {
   DepositActionPanel,
   VaultActivityPreview,
@@ -48,6 +48,7 @@ export default function VaultDetailScreen() {
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+      <Stack.Screen options={{ title: messages.pages.vaultDetail.title }} />
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.vaultDetail.eyebrow}
@@ -106,10 +107,14 @@ export default function VaultDetailScreen() {
 
         {connectionState.status === "ready" && !isLoading && queryStatus !== "success" && degradedState === "not_found" ? (
           <EmptyState
+            eyebrow={messages.pages.vaultDetail.notAvailableEyebrow}
             description={messages.pages.vaultDetail.notAvailableDescription}
+            highlights={messages.pages.myVaults.emptyHighlights}
             icon="shield-star-outline"
             title={messages.pages.vaultDetail.notAvailableTitle}
-          />
+          >
+            <SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={() => router.replace(routes.appHome)} />
+          </EmptyState>
         ) : null}
 
         {vault ? <VaultDetailHeader vault={vault} /> : null}

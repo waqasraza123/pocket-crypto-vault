@@ -22,8 +22,10 @@ export const StatusChip = ({ label, tone = "active" }: StatusChipProps) => {
       style={{
         alignSelf: "flex-start",
         borderRadius: radii.pill,
+        borderWidth: 1,
+        borderColor: toneMap[tone].textColor,
         paddingHorizontal: spacing[3],
-        paddingVertical: spacing[2],
+        paddingVertical: spacing[1],
         backgroundColor: toneMap[tone].backgroundColor,
       }}
     >

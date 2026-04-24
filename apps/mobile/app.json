@@ -1,16 +1,26 @@
 {
   "expo": {
     "name": "Goal Vault",
+    "description": "A Base-native USDC savings app that protects one goal with a clear unlock date.",
     "slug": "goal-vault",
     "scheme": "goal-vault",
     "version": "0.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#f4efe8"
+    },
     "experiments": {
       "typedRoutes": true
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "Goal Vault",
+      "shortName": "Goal Vault",
+      "description": "Protect the money you do not want to break with one Base-native USDC vault at a time.",
+      "backgroundColor": "#f4efe8",
+      "themeColor": "#87684f",
+      "lang": "en"
     },
     "plugins": ["expo-router"]
   }

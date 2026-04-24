@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { useWalletConnection } from "../../hooks/useWalletConnection";
@@ -8,7 +8,8 @@ import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
 import { AppErrorState, AppLoadingState, DisconnectedState, StateBanner } from "../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../components/layout";
-import { AppText, EmptyState, PageContainer, Screen, SurfaceCard } from "../../components/primitives";
+import { AppText, EmptyState, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../components/primitives";
+import { routes } from "../../lib/routing";
 
 export default function ActivityScreen() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function ActivityScreen() {
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+      <Stack.Screen options={{ title: messages.pages.activity.title }} />
       <PageContainer width="reading" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.activity.eyebrow}
@@ -42,10 +44,14 @@ export default function ActivityScreen() {
         ) : null}
         {connectionState.status === "ready" && !isLoading && events.length === 0 ? (
           <EmptyState
+            eyebrow={messages.pages.activity.emptyEyebrow}
             description={messages.pages.activity.emptyDescription}
+            highlights={messages.pages.activity.emptyHighlights}
             icon="timeline-clock-outline"
-            title={messages.pages.activity.title}
-          />
+            title={messages.pages.activity.emptyTitle}
+          >
+            <PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />
+          </EmptyState>
         ) : null}
         {connectionState.status === "ready" && !isLoading && dataSource === "fallback" && events.length > 0 ? (
           <AppErrorState

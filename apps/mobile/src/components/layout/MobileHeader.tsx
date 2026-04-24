@@ -67,7 +67,7 @@ export const MobileHeader = ({ links, ctaHref, ctaLabel }: MobileHeaderProps) =>
                   borderRadius: radii.pill,
                   backgroundColor: pressed ? colors.accentStrong : colors.accent,
                   paddingHorizontal: spacing[4],
-                  paddingVertical: spacing[2],
+                  paddingVertical: spacing[3],
                 })}
               >
                 <AppText size="sm" style={{ color: colors.white }} weight="semibold">

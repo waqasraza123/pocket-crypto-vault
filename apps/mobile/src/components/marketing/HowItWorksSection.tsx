@@ -27,7 +27,7 @@ export const HowItWorksSection = () => {
         }}
       >
         {messages.landing.howItWorksSteps.map((step, index) => (
-          <SurfaceCard key={step.title} style={{ flex: 1 }}>
+          <SurfaceCard key={step.title} style={{ flex: 1, backgroundColor: index === 1 ? colors.backgroundElevated : colors.surface }}>
             <View
               style={{
                 width: 36,
@@ -42,6 +42,9 @@ export const HowItWorksSection = () => {
                 {index + 1}
               </AppText>
             </View>
+            <AppText size="sm" tone="secondary" weight="semibold">
+              {messages.landing.howItWorksSupport[index]}
+            </AppText>
             <AppHeading size="md">{step.title}</AppHeading>
             <AppText tone="secondary">{step.description}</AppText>
           </SurfaceCard>

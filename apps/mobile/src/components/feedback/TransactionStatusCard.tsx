@@ -41,7 +41,7 @@ export const TransactionStatusCard = ({
             borderRadius: 18,
             borderWidth: 1,
             borderColor: colors.border,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.backgroundElevated,
             padding: spacing[4],
             gap: spacing[2],
           }}

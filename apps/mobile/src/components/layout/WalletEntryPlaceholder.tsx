@@ -23,7 +23,7 @@ export const WalletEntryPlaceholder = () => {
           backgroundColor: colors.surface,
           borderWidth: 1,
           borderColor: colors.border,
-          paddingHorizontal: spacing[3],
+          paddingHorizontal: spacing[4],
           paddingVertical: spacing[2],
         }}
       >

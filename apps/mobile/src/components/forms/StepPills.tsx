@@ -26,8 +26,25 @@ export const StepPills = ({ currentStep, steps }: StepPillsProps) => {
               backgroundColor: isActive ? colors.accentSoft : colors.surface,
               borderWidth: 1,
               borderColor: isActive ? colors.accent : colors.border,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: spacing[2],
             }}
           >
+            <View
+              style={{
+                width: 22,
+                height: 22,
+                borderRadius: radii.pill,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: isActive ? colors.accentStrong : colors.surfaceMuted,
+              }}
+            >
+              <AppText size="xs" style={{ color: isActive ? colors.white : colors.textSecondary }} weight="semibold">
+                {index + 1}
+              </AppText>
+            </View>
             <AppText size="sm" style={{ color: isActive ? colors.accentStrong : colors.textSecondary }} weight="semibold">
               {step}
             </AppText>

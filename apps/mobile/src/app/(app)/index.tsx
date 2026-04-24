@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { getUnlockedVaultCount, getTotalSaved } from "../../features/vault-list/selectors";
@@ -33,6 +33,7 @@ export default function MyVaultsScreen() {
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+      <Stack.Screen options={{ title: messages.pages.myVaults.title }} />
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.myVaults.eyebrow}
@@ -105,7 +106,9 @@ export default function MyVaultsScreen() {
 
         {connectionState.status === "ready" && !isLoading && queryStatus === "empty" ? (
           <EmptyState
+            eyebrow={messages.pages.myVaults.emptyEyebrow}
             description={messages.pages.myVaults.emptyDescription}
+            highlights={messages.pages.myVaults.emptyHighlights}
             title={messages.pages.myVaults.emptyTitle}
           >
             <PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />

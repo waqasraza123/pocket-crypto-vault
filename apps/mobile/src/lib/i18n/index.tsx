@@ -104,8 +104,14 @@ const enMessages = {
     heroTitle: "Protect the money meant for something that matters.",
     heroSubtitle: "Create one goal, fund it in USDC, and keep withdrawals locked until the rule allows it.",
     heroHighlights: ["One goal per vault", "USDC only on Base", "Withdraw when the rule allows"],
+    heroPreviewLabel: "Launch candidate preview",
+    heroPreviewGoal: "Emergency Reserve",
+    heroPreviewDescription:
+      "Protect six months of living costs until late summer, with deposits open whenever you are ready.",
+    heroPreviewFooter: "Base • USDC • Withdrawals wait for the chosen date",
     howItWorksEyebrow: "Three calm steps",
     howItWorksTitle: "Make saving feel deliberate again.",
+    howItWorksSupport: ["Start with intention", "Make the rule clear", "Fund it gradually"],
     howItWorksSteps: [
       {
         title: "Name the goal",
@@ -124,6 +130,9 @@ const enMessages = {
     securityTitle: "Serious withdrawals start with clear rules.",
     securityDescription:
       "Goal Vault keeps the promise narrow: Base, USDC, one goal, and one rule you can understand instantly.",
+    securitySummaryTitle: "Calm product boundaries",
+    securitySummaryDescription:
+      "Goal Vault explains the contract truth, the display metadata, and the sync layer separately so the product stays understandable under real-world lag.",
     securityPrinciples: [
       {
         title: "Base-native by design",
@@ -142,6 +151,7 @@ const enMessages = {
         description: "Balances, deposits, and withdrawals follow confirmed onchain state. The backend helps the app catch up faster, but it does not control your funds.",
       },
     ],
+    finalCtaEyebrow: "Launch-candidate shell",
     finalCtaTitle: "Build the habit before the integrations land.",
     finalCtaDescription:
       "This phase ships the universal shell, adaptive layouts, and a clean product hierarchy for every later wallet, contract, and backend step.",
@@ -162,20 +172,34 @@ const enMessages = {
       eyebrow: "My Vaults",
       title: "Protect the money meant for something real.",
       description: "A calm view of progress, rules, and upcoming withdrawal eligibility.",
+      emptyEyebrow: "Your first vault starts here",
       emptyTitle: "No vaults yet",
       emptyDescription: "Create your first protected vault now to start saving toward one goal with a real unlock date.",
+      emptyHighlights: [
+        "Choose one goal that matters",
+        "Protect it with a clear unlock date",
+        "Fund it over time with USDC on Base",
+      ],
     },
     activity: {
       eyebrow: "Activity",
       title: "Every vault movement in one calm timeline.",
       description:
         "Confirmed deposits and withdrawals appear here through the indexed Goal Vault history, with gentle syncing when recent activity is still catching up.",
+      emptyEyebrow: "A clean timeline",
+      emptyTitle: "No activity yet",
       emptyDescription: "Confirmed deposits, withdrawals, and new vault activity will appear here.",
+      emptyHighlights: [
+        "Create a vault first",
+        "Fund it with USDC",
+        "Return here for confirmed history",
+      ],
     },
     vaultDetail: {
       eyebrow: "Vault Detail",
       title: "One place for progress, rules, and next actions.",
       description: "Track the live vault, its unlock rule, and the current metadata state without leaving the same route.",
+      notAvailableEyebrow: "Vault lookup",
       notAvailableTitle: "Vault not available",
       notAvailableDescription:
         "The requested vault could not be resolved from the supported chain reads or the fallback dataset.",
@@ -217,6 +241,8 @@ const enMessages = {
         emptyGoal: "Your next milestone",
         emptyNote: "Protect this goal with a clear unlock date.",
         chooseUnlockDate: "Choose an unlock date",
+        progressHint: "The first deposit will start this vault’s visible progress.",
+        networkSummary: "Base • USDC • Withdrawals wait for the chosen date",
       },
       accentThemes: {
         sand: "Sand",
@@ -227,6 +253,7 @@ const enMessages = {
       success: {
         eyebrow: "Vault created successfully",
         description: "Your vault is now active and protected by its unlock date.",
+        nextDescription: "You can fund this vault any time. Withdrawals stay locked until the selected date.",
       },
       error: {
         activeTitle: "Your vault is active onchain",
@@ -251,8 +278,14 @@ const enMessages = {
       "The wallet is connected, but the active network is outside the supported launch set.",
     connecting: "Waiting for wallet approval.",
     ready: "Wallet and supported network are ready for vault creation and reads.",
+    connectToOpenAppEyebrow: "First step",
     connectToOpenAppTitle: "Connect a wallet to open the app",
     connectToOpenAppDescription: "Connect a wallet to create and review vaults on Base or Base Sepolia.",
+    connectToOpenAppHighlights: [
+      "Create one goal-focused vault",
+      "Set a clear unlock date",
+      "Track progress and withdrawals in one place",
+    ],
     switchToChain: "Switch to {chain}",
   },
   feedback: {
@@ -593,8 +626,13 @@ const arMessages: AppMessages = {
     heroTitle: "احمِ المال المخصّص لشيء مهم فعلاً.",
     heroSubtitle: "أنشئ هدفاً واحداً، موّله بعملة USDC، وأبقِ السحب مقفلاً حتى تسمح القاعدة بذلك.",
     heroHighlights: ["هدف واحد لكل خزنة", "USDC فقط على Base", "السحب عندما تسمح القاعدة"],
+    heroPreviewLabel: "معاينة جاهزة للإطلاق",
+    heroPreviewGoal: "صندوق الطوارئ",
+    heroPreviewDescription: "احمِ ستة أشهر من تكاليف المعيشة حتى أواخر الصيف، مع بقاء الإيداعات متاحة متى ما أصبحت جاهزاً.",
+    heroPreviewFooter: "Base • USDC • السحب ينتظر التاريخ الذي اخترته",
     howItWorksEyebrow: "ثلاث خطوات هادئة",
     howItWorksTitle: "اجعل الادخار عملاً مقصوداً من جديد.",
+    howItWorksSupport: ["ابدأ بنية واضحة", "اجعل القاعدة واضحة", "موّله تدريجياً"],
     howItWorksSteps: [
       {
         title: "سمِّ الهدف",
@@ -612,6 +650,9 @@ const arMessages: AppMessages = {
     securityEyebrow: "نموذج الثقة",
     securityTitle: "السحوبات الجادة تبدأ بقواعد واضحة.",
     securityDescription: "يحافظ Goal Vault على الوعد بشكل ضيق: Base وUSDC وهدف واحد وقاعدة واحدة يمكنك فهمها فوراً.",
+    securitySummaryTitle: "حدود منتج هادئة",
+    securitySummaryDescription:
+      "يفصل Goal Vault بين حقيقة العقد وبيانات العرض وطبقة المزامنة حتى يبقى المنتج مفهوماً حتى عند وجود تأخر في التحديث.",
     securityPrinciples: [
       {
         title: "مصمم خصيصاً لـ Base",
@@ -630,6 +671,7 @@ const arMessages: AppMessages = {
         description: "الأرصدة والإيداعات والسحوبات تتبع الحالة المؤكدة على السلسلة. الخلفية تساعد الواجهة على التحديث بسرعة أكبر، لكنها لا تتحكم في أموالك.",
       },
     ],
+    finalCtaEyebrow: "واجهة جاهزة للإطلاق",
     finalCtaTitle: "ابنِ العادة قبل وصول التكاملات.",
     finalCtaDescription: "تطلق هذه المرحلة الواجهة الموحدة والتخطيطات المتكيفة وهيكلية منتج نظيفة لكل خطوة لاحقة تتعلق بالمحفظة والعقود والخلفية.",
   },
@@ -648,19 +690,33 @@ const arMessages: AppMessages = {
       eyebrow: "خزائني",
       title: "احمِ المال المخصص لشيء حقيقي.",
       description: "عرض هادئ للتقدّم والقواعد ومواعيد أهلية السحب القادمة.",
+      emptyEyebrow: "خزنتك الأولى تبدأ هنا",
       emptyTitle: "لا توجد خزائن بعد",
       emptyDescription: "أنشئ أول خزنة محمية الآن لتبدأ الادخار نحو هدف واحد بتاريخ فتح حقيقي.",
+      emptyHighlights: [
+        "اختر هدفاً واحداً مهماً",
+        "احمه بتاريخ فتح واضح",
+        "موّله تدريجياً بعملة USDC على Base",
+      ],
     },
     activity: {
       eyebrow: "النشاط",
       title: "كل حركة للخزنة في خط زمني هادئ واحد.",
       description: "تظهر هنا الإيداعات والسحوبات المؤكدة من سجل Goal Vault المفهرس، مع مزامنة هادئة عندما تكون الحركة الأخيرة ما زالت تلحق بالواجهة.",
+      emptyEyebrow: "خط زمني نظيف",
+      emptyTitle: "لا يوجد نشاط بعد",
       emptyDescription: "ستظهر هنا الإيداعات والسحوبات المؤكدة ونشاط الخزنة الجديد.",
+      emptyHighlights: [
+        "أنشئ خزنة أولاً",
+        "موّلها بعملة USDC",
+        "ارجع إلى هنا لمراجعة السجل المؤكد",
+      ],
     },
     vaultDetail: {
       eyebrow: "تفاصيل الخزنة",
       title: "مكان واحد للتقدّم والقواعد والخطوات التالية.",
       description: "تابع الخزنة الحية وقاعدة الفتح وحالة البيانات الحالية من نفس الصفحة.",
+      notAvailableEyebrow: "فحص الخزنة",
       notAvailableTitle: "الخزنة غير متاحة",
       notAvailableDescription: "تعذّر الوصول إلى الخزنة المطلوبة من قراءات السلسلة المدعومة أو من مجموعة البيانات الاحتياطية.",
     },
@@ -699,6 +755,8 @@ const arMessages: AppMessages = {
         emptyGoal: "محطتك القادمة",
         emptyNote: "احمِ هذا الهدف بتاريخ فتح واضح.",
         chooseUnlockDate: "اختر تاريخ الفتح",
+        progressHint: "سيبدأ أول إيداع التقدّم الظاهر لهذه الخزنة.",
+        networkSummary: "Base • USDC • السحب ينتظر التاريخ الذي اخترته",
       },
       accentThemes: {
         sand: "رملي",
@@ -709,6 +767,7 @@ const arMessages: AppMessages = {
       success: {
         eyebrow: "تم إنشاء الخزنة بنجاح",
         description: "خزنتك أصبحت الآن نشطة ومحمية بتاريخ الفتح.",
+        nextDescription: "يمكنك تمويل هذه الخزنة في أي وقت. ويظل السحب مقفلاً حتى التاريخ المحدد.",
       },
       error: {
         activeTitle: "خزنتك نشطة على السلسلة",
@@ -732,8 +791,14 @@ const arMessages: AppMessages = {
     unsupported: "المحفظة متصلة، لكن الشبكة الحالية خارج مجموعة الإطلاق المدعومة.",
     connecting: "بانتظار موافقة المحفظة.",
     ready: "المحفظة والشبكة المدعومة جاهزتان لإنشاء الخزائن وقراءتها.",
+    connectToOpenAppEyebrow: "الخطوة الأولى",
     connectToOpenAppTitle: "اربط محفظة لفتح التطبيق",
     connectToOpenAppDescription: "اربط محفظة لإنشاء الخزائن ومراجعتها على Base أو Base Sepolia.",
+    connectToOpenAppHighlights: [
+      "أنشئ خزنة لهدف واحد واضح",
+      "حدّد تاريخ فتح واضح",
+      "تابع التقدم والسحب من مكان واحد",
+    ],
     switchToChain: "بدّل إلى {chain}",
   },
   feedback: {

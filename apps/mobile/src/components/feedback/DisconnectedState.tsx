@@ -10,7 +10,9 @@ export const DisconnectedState = ({ onConnect }: DisconnectedStateProps) => {
 
   return (
     <EmptyState
+      eyebrow={messages.wallet.connectToOpenAppEyebrow}
       description={messages.wallet.connectToOpenAppDescription}
+      highlights={messages.wallet.connectToOpenAppHighlights}
       icon="wallet-outline"
       title={messages.wallet.connectToOpenAppTitle}
     >

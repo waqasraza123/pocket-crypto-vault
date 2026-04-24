@@ -33,11 +33,11 @@ export const SurfaceCard = ({
       style={[
         {
           borderWidth: 1,
-          borderRadius: radii.lg,
+          borderRadius: radii.lg + 4,
           padding: spacing[6],
           gap: spacing[4],
         },
-        shadows.soft,
+        tone === "accent" ? shadows.medium : shadows.soft,
         toneStyles[tone],
         style,
       ]}

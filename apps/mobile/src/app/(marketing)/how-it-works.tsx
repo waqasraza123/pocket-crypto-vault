@@ -1,3 +1,5 @@
+import { Stack } from "expo-router";
+
 import { FinalCtaSection, HowItWorksSection } from "../../components/marketing";
 import { PageContainer, Screen } from "../../components/primitives";
 import { ScreenHeader } from "../../components/layout";
@@ -9,6 +11,7 @@ export default function HowItWorksScreen() {
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+      <Stack.Screen options={{ title: messages.pages.howItWorks.title }} />
       <PageContainer width="dashboard" style={{ gap: spacing[10], paddingTop: spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.howItWorks.eyebrow}

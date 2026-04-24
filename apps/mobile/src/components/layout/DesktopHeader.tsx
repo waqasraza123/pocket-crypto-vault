@@ -34,7 +34,7 @@ export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) 
             alignItems: "center",
             justifyContent: "space-between",
             gap: spacing[6],
-            minHeight: 80,
+            minHeight: 84,
           }}
         >
           <Link href={routes.landing} asChild>
@@ -55,7 +55,7 @@ export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) 
                     paddingHorizontal: spacing[3],
                     paddingVertical: spacing[2],
                     borderRadius: radii.pill,
-                    backgroundColor: pressed ? colors.surfaceStrong : "transparent",
+                    backgroundColor: pressed ? colors.surfaceStrong : colors.backgroundElevated,
                   })}
                 >
                   <AppText tone="secondary" weight="medium">
@@ -68,7 +68,7 @@ export const DesktopHeader = ({ links, ctaLabel, ctaHref }: DesktopHeaderProps) 
           <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3], justifyContent: justifyEnd }}>
             <LanguageSwitcher />
             <WalletEntryPlaceholder />
-            <PrimaryButton label={ctaLabel} onPress={() => router.push(ctaHref)} />
+            <PrimaryButton icon="arrow-right" label={ctaLabel} onPress={() => router.push(ctaHref)} />
           </View>
         </View>
       </PageContainer>

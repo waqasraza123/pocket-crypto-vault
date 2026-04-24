@@ -16,6 +16,8 @@ export const ProgressBar = ({ progress, style, height = 10 }: ProgressBarProps) 
           height,
           width: "100%",
           borderRadius: radii.pill,
+          borderWidth: 1,
+          borderColor: colors.border,
           backgroundColor: colors.surfaceStrong,
           overflow: "hidden",
         },
@@ -27,7 +29,7 @@ export const ProgressBar = ({ progress, style, height = 10 }: ProgressBarProps) 
           width: `${Math.max(4, Math.min(100, progress * 100))}%`,
           height: "100%",
           borderRadius: radii.pill,
-          backgroundColor: colors.accent,
+          backgroundColor: colors.accentStrong,
         }}
       />
     </View>

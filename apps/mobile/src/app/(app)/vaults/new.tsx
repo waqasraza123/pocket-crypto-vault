@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 
 import { useCreateVaultForm } from "../../../features/create-vault/useCreateVaultForm";
 import { useAppReadiness } from "../../../hooks/useAppReadiness";
@@ -110,6 +110,7 @@ export default function CreateVaultScreen() {
 
   return (
     <Screen contentContainerStyle={{ paddingBottom: spacing[12] }} keyboardShouldPersistTaps="always">
+      <Stack.Screen options={{ title: messages.pages.createVault.title }} />
       <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.createVault.eyebrow}

@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactNode } from "react";
 import { View } from "react-native";
 
-import { spacing } from "../../theme";
+import { colors, radii, spacing } from "../../theme";
 import { AppHeading, AppText } from "../primitives";
 
 export interface FormSectionProps {
@@ -18,7 +18,16 @@ export const FormSection = ({
 }: PropsWithChildren<FormSectionProps>) => {
   return (
     <View style={{ gap: spacing[4] }}>
-      <View style={{ gap: spacing[2] }}>
+      <View
+        style={{
+          gap: spacing[2],
+          borderRadius: radii.md,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.backgroundElevated,
+          padding: spacing[4],
+        }}
+      >
         <AppHeading size="md">{title}</AppHeading>
         {description ? <AppText tone="secondary">{description}</AppText> : null}
       </View>

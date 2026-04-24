@@ -41,12 +41,41 @@ export const HeroSection = () => {
             {messages.landing.heroSubtitle}
           </AppText>
         </View>
-        <View style={{ gap: spacing[2] }}>
+        <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
           {messages.landing.heroHighlights.map((item) => (
-            <AppText key={item} tone="secondary">
-              • {item}
-            </AppText>
+            <View
+              key={item}
+              style={{
+                borderRadius: radii.pill,
+                borderWidth: 1,
+                borderColor: colors.border,
+                backgroundColor: colors.surface,
+                paddingHorizontal: spacing[3],
+                paddingVertical: spacing[2],
+              }}
+            >
+              <AppText size="sm" tone="secondary" weight="semibold">
+                {item}
+              </AppText>
+            </View>
           ))}
+        </View>
+        <View
+          style={{
+            gap: spacing[2],
+            borderRadius: radii.lg,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+            padding: spacing[4],
+          }}
+        >
+          <AppText size="sm" tone="accent" weight="semibold">
+            {messages.landing.finalCtaEyebrow}
+          </AppText>
+          <AppText tone="secondary">
+            {messages.landing.securityDescription}
+          </AppText>
         </View>
         <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
           <PrimaryButton

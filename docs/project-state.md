@@ -36,7 +36,7 @@ Still not implemented:
 - No yield, swaps, multi-asset support, multi-chain support, social layer, or AI features in MVP
 
 ## Planned Release Order
-- `v1`: time-lock vaults only, followed by release hardening and staging readiness
+- `v1`: time-lock vaults only, followed by release hardening, staging readiness, and launch-candidate presentation polish
 - `v1.5`: cooldown unlock
 - `v2`: guardian approval
 
@@ -77,8 +77,9 @@ Still not implemented:
 - Phase 5: withdraw flow with time-lock eligibility, confirmation UX, and refreshed vault/activity state
 - Phase 6: metadata backend and indexed activity polish
 - Phase 7: release hardening, transaction recovery, trust polish, and staging readiness
-- Phase 8: cooldown unlock
-- Phase 9: guardian approval
+- Phase 8: onboarding polish, demo readiness, packaging polish, and portfolio presentation improvements
+- Phase 9: cooldown unlock
+- Phase 10: guardian approval
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -104,6 +105,8 @@ Still not implemented:
 - Phase 7 adds shared readiness and recovery models, persistent mobile transaction recovery, app-shell readiness banners, calmer degraded-state handling, and explicit staging health summaries from the API.
 - Phase 7 removes connected-user mock live fallbacks when real reads fail. The app now prefers honest chain/session data plus syncing or recovery messaging.
 - The API now exposes richer `/health` and `/ready` responses that report environment checks, per-chain readiness, staging readiness, and sync lag in one contract.
+- Phase 8 tightens the universal product presentation around first-run clarity, premium empty states, stronger create/detail/dashboard composition, and cleaner launch-surface metadata without faking authenticated product truth.
+- Phase 8 updates the near-term roadmap order so demo polish and packaging land before cooldown unlock and guardian expansion.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -116,6 +119,7 @@ Still not implemented:
 - The Phase 4 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-4.md`.
 - The Phase 5 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-5.md`.
 - The Phase 7 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-7.md`.
+- The Phase 8 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-8.md`.
 
 ## Deferred / Not Yet Implemented
 - External database infrastructure for the backend beyond the current file-backed persistent store

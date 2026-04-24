@@ -2,7 +2,7 @@ import { View } from "react-native";
 
 import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
 import { useI18n } from "../../lib/i18n";
-import { spacing } from "../../theme";
+import { colors, radii, spacing } from "../../theme";
 import { AppHeading, AppText, SectionContainer, SurfaceCard } from "../primitives";
 
 export const SecurityTrustSection = () => {
@@ -21,6 +21,23 @@ export const SecurityTrustSection = () => {
         </View>
       }
     >
+      <View
+        style={{
+          borderRadius: radii.lg,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.backgroundElevated,
+          padding: spacing[5],
+          gap: spacing[2],
+        }}
+      >
+        <AppText size="sm" tone="accent" weight="semibold">
+          {messages.landing.securitySummaryTitle}
+        </AppText>
+        <AppText tone="secondary">
+          {messages.landing.securitySummaryDescription}
+        </AppText>
+      </View>
       <View style={{ flexDirection: adaptiveLayout.useSplitLayout ? "row" : "column", gap: spacing[4] }}>
         {messages.landing.securityPrinciples.map((item) => (
           <SurfaceCard key={item.title} style={{ flex: 1 }}>
