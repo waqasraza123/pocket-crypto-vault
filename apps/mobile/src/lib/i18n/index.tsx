@@ -1,8 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, useContext, useEffect, useMemo, useState, type PropsWithChildren } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from "react";
 import { View, type ViewStyle } from "react-native";
 import type { ComponentProps } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+import { isAppLocale, resolveInitialLocale, shouldApplyHydratedLocale } from "./locale-storage";
 
 export type AppLocale = "en" | "ar";
 export type AppDirection = "ltr" | "rtl";
@@ -1205,6 +1207,29 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 let currentLocale: AppLocale = "en";
 
+const getWebStoredLocale = (): AppLocale | null => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const storedLocale = window.localStorage.getItem(localeStorageKey);
+    return storedLocale === "en" || storedLocale === "ar" ? storedLocale : null;
+  } catch {
+    return null;
+  }
+};
+
+const setWebStoredLocale = (locale: AppLocale) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(localeStorageKey, locale);
+  } catch {}
+};
+
 export const getCurrentLocale = () => currentLocale;
 
 export const getCurrentMessages = () => getLocaleMessages(currentLocale);
@@ -1212,8 +1237,9 @@ export const getCurrentMessages = () => getLocaleMessages(currentLocale);
 export const getCurrentLocaleTag = () => getCurrentMessages().dateLocale;
 
 export const LocaleProvider = ({ children }: PropsWithChildren) => {
-  const [locale, setLocaleState] = useState<AppLocale>("en");
+  const [locale, setLocaleState] = useState<AppLocale>(() => resolveInitialLocale(getWebStoredLocale()));
   const [isHydrated, setIsHydrated] = useState(false);
+  const hasManualSelectionRef = useRef(false);
 
   useEffect(() => {
     currentLocale = locale;
@@ -1228,7 +1254,7 @@ export const LocaleProvider = ({ children }: PropsWithChildren) => {
           return;
         }
 
-        if (storedLocale === "en" || storedLocale === "ar") {
+        if (shouldApplyHydratedLocale({ hydratedLocale: storedLocale, hasManualSelection: hasManualSelectionRef.current }) && isAppLocale(storedLocale)) {
           setLocaleState(storedLocale);
           currentLocale = storedLocale;
         }
@@ -1271,8 +1297,10 @@ export const LocaleProvider = ({ children }: PropsWithChildren) => {
       direction: getLocaleDirection(locale),
       messages: getLocaleMessages(locale),
       setLocale: (nextLocale) => {
+        hasManualSelectionRef.current = true;
         currentLocale = nextLocale;
         setLocaleState(nextLocale);
+        setWebStoredLocale(nextLocale);
       },
       isHydrated,
     }),
