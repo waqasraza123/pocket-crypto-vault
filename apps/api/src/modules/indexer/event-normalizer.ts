@@ -21,28 +21,28 @@ const sortLogs = <T extends { blockNumber?: bigint | number | null; logIndex?: n
     return leftBlock - rightBlock;
   });
 
-const parseRuleType = (value?: bigint) => {
-  if (value === 1n) {
+const parseRuleType = (value?: bigint | number) => {
+  if (value === 1 || value === 1n) {
     return "cooldownUnlock" as const;
   }
 
-  if (value === 2n) {
+  if (value === 2 || value === 2n) {
     return "guardianApproval" as const;
   }
 
   return "timeLock" as const;
 };
 
-const parseGuardianDecision = (value?: bigint) => {
-  if (value === 1n) {
+const parseGuardianDecision = (value?: bigint | number) => {
+  if (value === 1 || value === 1n) {
     return "pending" as const;
   }
 
-  if (value === 2n) {
+  if (value === 2 || value === 2n) {
     return "approved" as const;
   }
 
-  if (value === 3n) {
+  if (value === 3 || value === 3n) {
     return "rejected" as const;
   }
 
@@ -104,7 +104,7 @@ export const normalizeVaultCreatedLogs = ({
 
     const current = currentVaults.get(args.vault.toLowerCase()) ?? null;
     const occurredAt = new Date(Number(args.createdAt ?? 0n) * 1000).toISOString();
-    const ruleType = "ruleType" in args ? parseRuleType(args.ruleType) : "timeLock";
+    const ruleType = log.eventName === "VaultCreatedV2" ? parseRuleType(args.ruleType) : "timeLock";
     const event: PersistedVaultEventRecord = {
       id: createEventId(chainId, log.transactionHash, log.logIndex ?? 0),
       chainId,

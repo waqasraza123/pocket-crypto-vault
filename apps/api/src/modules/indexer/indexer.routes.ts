@@ -3,6 +3,8 @@ import { z } from "zod";
 
 import type { SupportedChainId } from "@goal-vault/shared";
 
+import type { ApiRuntimeEnv } from "../../env";
+import { requireInternalRequestAccess } from "../../lib/security/internal-access";
 import type { IndexerContext } from "./context";
 import { syncFactoryEventsForChain } from "./factory-sync.service";
 import { reconcileVaultMetadata } from "./reconciliation.service";
@@ -25,12 +27,22 @@ export const runFullIndexerSync = async (context: IndexerContext, chainId?: Supp
   await reconcileVaultMetadata(context);
 };
 
-export const registerIndexerRoutes = (app: FastifyInstance, context: IndexerContext) => {
-  app.get("/internal/indexer/status", async () => ({
-    items: getChainSyncStatuses(context),
-  }));
+export const registerIndexerRoutes = (app: FastifyInstance, context: IndexerContext, env: ApiRuntimeEnv) => {
+  app.get("/internal/indexer/status", async (request, reply) => {
+    if (!(await requireInternalRequestAccess({ env, request, reply }))) {
+      return;
+    }
+
+    return {
+      items: getChainSyncStatuses(context),
+    };
+  });
 
   app.post("/internal/indexer/sync", async (request, reply) => {
+    if (!(await requireInternalRequestAccess({ env, request, reply }))) {
+      return;
+    }
+
     const parsed = syncRequestSchema.safeParse(request.body ?? {});
 
     if (!parsed.success) {

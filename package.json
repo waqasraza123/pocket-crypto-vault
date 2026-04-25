@@ -9,12 +9,15 @@
     "dev:web": "pnpm --filter @goal-vault/mobile web",
     "dev:ios": "pnpm --filter @goal-vault/mobile ios",
     "dev:android": "pnpm --filter @goal-vault/mobile android",
+    "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "verify:mobile:web": "pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web",
     "verify:mobile:ios": "pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist-ios",
     "verify:release": "pnpm typecheck && pnpm verify:mobile:web && pnpm verify:mobile:ios"
   },
   "devDependencies": {
+    "@types/node": "^24.9.1",
+    "tsx": "^4.20.6",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"
   }

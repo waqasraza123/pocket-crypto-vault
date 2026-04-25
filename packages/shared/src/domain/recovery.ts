@@ -4,7 +4,7 @@ import type { SupportedChainId } from "./chain";
 import type { UserFacingRecoveryAction } from "./app-readiness";
 import type { VaultAccentTheme, VaultAddress, VaultRuleType } from "./vault";
 
-export type TransactionRecoveryKind = "create_vault" | "deposit" | "withdraw";
+export type TransactionRecoveryKind = "create_vault" | "deposit" | "withdraw" | "unlock";
 export type TransactionRecoveryLifecycle = "submitted" | "confirming" | "confirmed" | "syncing" | "failed" | "completed";
 export type TransactionRecoverySyncStatus = "idle" | "pending" | "synced" | "failed";
 

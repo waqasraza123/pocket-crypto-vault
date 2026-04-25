@@ -319,6 +319,7 @@ export interface VaultMetadataPayload {
   contractAddress: VaultAddress;
   chainId: SupportedChainId;
   ownerWallet: Address;
+  createdTxHash: Hash;
   displayName: string;
   category?: string;
   note?: string;
@@ -330,9 +331,18 @@ export interface VaultMetadataPayload {
   guardianAddress?: Address | null;
 }
 
+export interface VaultMetadataAuth {
+  issuedAt: string;
+  signature: Hash;
+}
+
+export interface VaultMetadataWriteRequest {
+  metadata: VaultMetadataPayload;
+  auth: VaultMetadataAuth;
+}
+
 export interface VaultMetadataRecord extends VaultMetadataPayload {
   metadataStatus: VaultMetadataStatus;
   accentTone: string;
   createdAt: string;
-  txHash?: Hash;
 }

@@ -7,6 +7,12 @@
       ],
       "outputs": []
     },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ],
+      "outputs": []
+    },
     "start": {
       "cache": false,
       "persistent": true

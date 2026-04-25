@@ -2,10 +2,12 @@ import type { FastifyInstance } from "fastify";
 import { isAddress } from "viem";
 import { z } from "zod";
 
-import type { VaultMetadataPayload } from "@goal-vault/shared";
+import type { VaultMetadataPayload, VaultMetadataWriteRequest } from "@goal-vault/shared";
 
 import { classifyObservedError } from "../../lib/observability/event-classification";
 import { logObservabilitySignal } from "../../lib/observability/logger";
+import { syncVaultAddressForChain } from "../indexer/vault-sync.service";
+import { verifyVaultMetadataWriteRequest } from "./metadata-security";
 import { serializeVaultDetail, serializeVaultDetailResponse, serializeVaultListResponse, serializeVaultSummary } from "./vaults.serializers";
 import { getVaultDetailByAddress, getVaultsByOwner, saveVaultMetadata } from "./vaults.service";
 
@@ -15,18 +17,25 @@ const vaultListQuerySchema = z.object({
 });
 
 const vaultMetadataSchema = z.object({
-  contractAddress: z.string().trim(),
-  chainId: z.union([z.literal(8453), z.literal(84532)]),
-  ownerWallet: z.string().trim(),
-  displayName: z.string().trim().min(1),
-  category: z.string().trim().optional().nullable(),
-  note: z.string().trim().optional().nullable(),
-  accentTheme: z.enum(["sand", "sage", "sky", "terracotta"]).optional().nullable(),
-  targetAmount: z.string().trim().min(1),
-  ruleType: z.enum(["timeLock", "cooldownUnlock", "guardianApproval"]),
-  unlockDate: z.string().trim().optional().nullable(),
-  cooldownDurationSeconds: z.number().int().optional().nullable(),
-  guardianAddress: z.string().trim().optional().nullable(),
+  metadata: z.object({
+    contractAddress: z.string().trim(),
+    chainId: z.union([z.literal(8453), z.literal(84532)]),
+    ownerWallet: z.string().trim(),
+    createdTxHash: z.string().trim(),
+    displayName: z.string().trim().min(1),
+    category: z.string().trim().optional().nullable(),
+    note: z.string().trim().optional().nullable(),
+    accentTheme: z.enum(["sand", "sage", "sky", "terracotta"]).optional().nullable(),
+    targetAmount: z.string().trim().min(1),
+    ruleType: z.enum(["timeLock", "cooldownUnlock", "guardianApproval"]),
+    unlockDate: z.string().trim().optional().nullable(),
+    cooldownDurationSeconds: z.number().int().optional().nullable(),
+    guardianAddress: z.string().trim().optional().nullable(),
+  }),
+  auth: z.object({
+    issuedAt: z.string().trim().datetime(),
+    signature: z.string().trim(),
+  }),
 });
 
 export const registerVaultRoutes = (app: FastifyInstance) => {
@@ -159,14 +168,53 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
   app.post("/vaults", async (request, reply) => {
     const parsed = vaultMetadataSchema.safeParse(request.body);
 
-    if (!parsed.success || !isAddress(parsed.data.contractAddress) || !isAddress(parsed.data.ownerWallet)) {
+    if (
+      !parsed.success ||
+      !isAddress(parsed.data.metadata.contractAddress) ||
+      !isAddress(parsed.data.metadata.ownerWallet)
+    ) {
       return reply.status(400).send({
         message: "Vault metadata payload is invalid.",
       });
     }
 
     try {
-      const metadata = await saveVaultMetadata(app.goalVaultContext, parsed.data as VaultMetadataPayload);
+      const payload: VaultMetadataWriteRequest = {
+        metadata: parsed.data.metadata as VaultMetadataPayload,
+        auth: {
+          issuedAt: parsed.data.auth.issuedAt,
+          signature: parsed.data.auth.signature as `0x${string}`,
+        },
+      };
+      const verification = await verifyVaultMetadataWriteRequest({
+        context: app.goalVaultContext,
+        request: payload,
+      });
+
+      if (verification.status !== "verified") {
+        const statusCode =
+          verification.code === "unauthorized" ? 401 : verification.code === "invalid" ? 409 : 503;
+
+        return reply.status(statusCode).send({
+          message: verification.message,
+        });
+      }
+
+      const metadata = await saveVaultMetadata(app.goalVaultContext, payload.metadata);
+      const client = app.goalVaultContext.clients[metadata.record.chainId];
+
+      if (client && metadata.record.ownerWallet) {
+        const latestChainBlock = Number(await client.getBlockNumber());
+
+        await syncVaultAddressForChain({
+          context: app.goalVaultContext,
+          chainId: metadata.record.chainId,
+          latestChainBlock,
+          vaultAddress: metadata.record.contractAddress,
+          ownerAddress: metadata.record.ownerWallet,
+        });
+      }
+
       logObservabilitySignal(app.log, {
         domain: "api",
         action: "vault_metadata_save",
@@ -192,8 +240,8 @@ export const registerVaultRoutes = (app: FastifyInstance) => {
         message: "Vault metadata save failed.",
         route: "/vaults",
         requestId: request.id,
-        chainId: parsed.data.chainId,
-        vaultAddress: parsed.data.contractAddress as `0x${string}`,
+        chainId: parsed.data.metadata.chainId,
+        vaultAddress: parsed.data.metadata.contractAddress as `0x${string}`,
         errorClass: classifyObservedError(error),
       });
       return reply.status(503).send({

@@ -7,7 +7,12 @@ import { readVaultSummariesByOwner, type VaultQueryResult } from "../lib/contrac
 import { mergeVaultSummaries } from "../lib/data/source-of-truth";
 import { settlePostTransactionRefreshIfCurrent } from "../lib/data/refresh-strategy";
 import { useI18n } from "../lib/i18n";
-import { getPostTransactionRefreshState, getSessionVaultsByOwner, useVaultStoreVersion } from "../state/vault-store";
+import {
+  getPostTransactionRefreshState,
+  getSessionVaultActivities,
+  getSessionVaultsByOwner,
+  useVaultStoreVersion,
+} from "../state/vault-store";
 import { useSyncFreshness } from "./useSyncFreshness";
 import { useWalletConnection } from "./useWalletConnection";
 
@@ -109,15 +114,27 @@ export const useVaults = () => {
     });
   }, [connectionState, vaultStoreVersion]);
 
+  const sessionEvents = useMemo(() => {
+    if (connectionState.status !== "ready" || !connectionState.session?.chain || !connectionState.session.address) {
+      return [];
+    }
+
+    return getSessionVaultActivities({
+      chainId: connectionState.session.chain.id,
+      ownerAddress: connectionState.session.address,
+    });
+  }, [connectionState, vaultStoreVersion]);
+
   const vaults = useMemo<VaultSummaryViewModel[]>(
     () =>
       mergeVaultSummaries({
         backendVaults: result.source === "backend" ? (result.data as VaultSummaryApiModel[] | null) : null,
         fallbackVaults: result.source === "fallback" ? (result.data as VaultSummary[] | null) : null,
+        sessionEvents,
         sessionMetadata: sessionVaults,
         refreshState,
       }),
-    [refreshState, result.data, result.source, sessionVaults],
+    [refreshState, result.data, result.source, sessionEvents, sessionVaults],
   );
 
   const backendFreshness = vaults.find((vault) => vault.source === "backend")?.freshness ?? null;

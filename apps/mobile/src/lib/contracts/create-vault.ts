@@ -17,11 +17,13 @@ export interface CreateVaultTransactionResult {
 
 export const buildCreateVaultMetadataPayload = ({
   chainId,
+  createdTxHash,
   ownerAddress,
   vaultAddress,
   review,
 }: {
   chainId: 8453 | 84532;
+  createdTxHash: Hash;
   ownerAddress: Address;
   vaultAddress: Address;
   review: CreateVaultReviewModel;
@@ -29,6 +31,7 @@ export const buildCreateVaultMetadataPayload = ({
   contractAddress: vaultAddress,
   chainId,
   ownerWallet: ownerAddress,
+  createdTxHash,
   displayName: review.goalName,
   category: review.category,
   note: review.note || undefined,

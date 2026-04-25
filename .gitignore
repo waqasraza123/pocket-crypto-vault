@@ -19,6 +19,8 @@ build/
 
 apps/mobile/android/
 apps/mobile/ios/
+packages/contracts/cache/
+packages/contracts/out/
 
 .env
 .env.*

@@ -20,11 +20,12 @@ The repository now has a real v1 foundation:
 - real USDC deposit flow with balance reads, allowance reads, approval handling, deposit confirmation, and session-backed activity refresh
 - real time-lock withdrawal flow with owner gating, unlock countdowns, deliberate confirmation UX, receipt-confirmed withdrawals, and session-backed activity refresh
 - a thin Fastify backend in `apps/api` with persisted sync state, normalized event indexing, metadata reconciliation, enriched vault/activity reads, and internal sync triggers
+- signed metadata writes tied to owner wallet authorization plus verified creation receipts
+- protected internal indexer routes and SQLite-backed backend persistence for indexed state and analytics
 - hybrid product screens that use real connection/network state and fall back safely when chain config is incomplete
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- external database-backed backend persistence
 - production CI and release workflows
 
 ## Confirmed Product Boundaries
@@ -38,6 +39,7 @@ Still not implemented:
 ## Planned Release Order
 - `v1`: time-lock vaults only, followed by release hardening, staging readiness, launch-candidate presentation polish, deployment packaging, and final demo or case-study support
 - `v1.5`: complete the planned rule system with cooldown unlock and guardian approval
+- `v1.6`: close correctness, persistence, security, and automated coverage gaps so the original product scope is defensible in code
 - `v2`: infrastructure and expansion work beyond the original one-goal vault rule set
 
 ## Core MVP Actions
@@ -85,7 +87,7 @@ Still not implemented:
 - Phase 13: full backend or API wiring, typed data flow, and completion of the end-to-end core loop
 - Phase 14: final production cleanup, dead-code removal, duplicate-path consolidation, and repository hardening
 - Phase 15: cooldown unlock plus guardian approval, with rule-system completion across contracts, backend, and app flows
-- Phase 16: later infrastructure or expansion work after the original rule system is complete
+- Phase 16: remediation pass for indexed rule correctness, unlock-flow hardening, signed metadata security, SQLite persistence, and critical automated coverage
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -107,6 +109,10 @@ Still not implemented:
 - Phase 6 now makes backend enrichment the primary product read path when the API is configured, while preserving direct chain reads and session overlays as honest fallbacks.
 - The API owns normalized confirmed activity, metadata reconciliation status, and sync freshness hints. It does not invent financial truth beyond confirmed chain reads and indexed events.
 - The backend currently persists index state in a file-backed store under `apps/api/.data/` so the repo can boot, sync, and recover without external infrastructure. A database-backed replacement remains a later infrastructure step.
+- Phase 16 replaces the older file-backed index and analytics stores with SQLite-backed durable persistence under `apps/api/.data/` while keeping the backend self-contained inside the repo.
+- Phase 16 hardens metadata writes by requiring a fresh owner signature bound to the vault metadata payload and verified against the creation transaction receipt plus onchain summary.
+- Phase 16 protects internal sync and status routes with an internal token header model, while still allowing local loopback development when no token is configured.
+- Phase 16 closes the audited rule-system gap by intentionally normalizing both `VaultCreated` and `VaultCreatedV2` creation events into one backend creation model.
 - Confirmed create, deposit, and withdraw flows now trigger a thin backend sync endpoint and then invalidate reads so backend-enriched vaults and activity refresh more cleanly.
 - Phase 7 adds shared readiness and recovery models, persistent mobile transaction recovery, app-shell readiness banners, calmer degraded-state handling, and explicit staging health summaries from the API.
 - Phase 7 removes connected-user mock live fallbacks when real reads fail. The app now prefers honest chain/session data plus syncing or recovery messaging.
@@ -147,10 +153,12 @@ Still not implemented:
 - The Phase 13 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-13.md`.
 - The Phase 14 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-14.md`.
 - The Phase 15 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-15.md`.
+- The Phase 16 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-16.md`.
 - The Phase 15 rule-system note lives at `docs/plans/goal-vault-rule-system.md`.
+- The Phase 16 test coverage note lives at `docs/plans/goal-vault-test-coverage-notes.md`.
 
 ## Deferred / Not Yet Implemented
-- External database infrastructure for the backend beyond the current file-backed persistent store
+- External managed database infrastructure beyond the current in-repo SQLite persistence
 - CI, linting, formatting, and release workflows
 
 ## Risks / Watchouts

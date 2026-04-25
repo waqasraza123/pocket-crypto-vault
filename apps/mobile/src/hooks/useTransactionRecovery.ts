@@ -1,10 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import type { TransactionRecoveryRecord, TransactionRecoveryState } from "@goal-vault/shared";
 
 import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { saveVaultMetadata } from "../lib/api/vaults";
 import { runPostTransactionRefresh } from "../lib/data/refresh-strategy";
+import { useWalletWriteProvider } from "../lib/blockchain/wallet";
 import { getReadClient } from "../lib/blockchain/read-client";
 import { resolveCreatedVaultAddress } from "../lib/contracts/resolve-created-vault";
 import {
@@ -28,12 +29,19 @@ export const useTransactionRecovery = ({
 } = {}) => {
   const { track } = useAnalytics();
   const { connectionState } = useWalletConnection();
+  const provider = useWalletWriteProvider();
   const analyticsContext = useMemo(
     () => createConnectionAnalyticsContext(connectionState),
     [connectionState],
   );
   const version = useTransactionRecoveryStoreVersion();
   useHydrateTransactionRecoveryStore();
+
+  const getRecoveryFlow = useCallback(
+    (kind: TransactionRecoveryRecord["kind"]) =>
+      kind === "create_vault" ? "create_vault" : kind === "deposit" ? "deposit" : "withdraw",
+    [],
+  );
 
   const items = useMemo(() => {
     return getTransactionRecoveryRecords().filter((item) => {
@@ -91,12 +99,7 @@ export const useTransactionRecovery = ({
           }));
           trackTransactionLifecycle({
             track,
-            flow:
-              item.kind === "create_vault"
-                ? "create_vault"
-                : item.kind === "deposit"
-                  ? "deposit"
-                  : "withdraw",
+            flow: getRecoveryFlow(item.kind),
             lifecycle: "syncing",
             vaultAddress: item.vaultAddress ?? null,
             txHash: item.txHash,
@@ -119,6 +122,7 @@ export const useTransactionRecovery = ({
                 contractAddress: resolution.vaultAddress,
                 chainId: item.chainId,
                 ownerWallet: item.ownerAddress,
+                createdTxHash: item.txHash,
                 displayName: item.metadata.displayName ?? "Goal Vault",
                 category: item.metadata.category ?? undefined,
                 note: item.metadata.note ?? undefined,
@@ -128,22 +132,25 @@ export const useTransactionRecovery = ({
                 unlockDate: item.metadata.unlockDate ?? null,
                 cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
                 guardianAddress: item.metadata.guardianAddress ?? null,
-                txHash: item.txHash,
                 accentTone: item.metadata.accentTone ?? "#1E2B26",
               });
               const metadataResult = await saveVaultMetadata({
-                contractAddress: resolution.vaultAddress,
-                chainId: item.chainId,
-                ownerWallet: item.ownerAddress,
-                displayName: item.metadata.displayName ?? "Goal Vault",
-                category: item.metadata.category ?? undefined,
-                note: item.metadata.note ?? undefined,
-                accentTheme: item.metadata.accentTheme ?? undefined,
-                targetAmount: item.metadata.targetAmount ?? "0",
-                ruleType: item.metadata.ruleType ?? "timeLock",
-                unlockDate: item.metadata.unlockDate ?? null,
-                cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
-                guardianAddress: item.metadata.guardianAddress ?? null,
+                payload: {
+                  contractAddress: resolution.vaultAddress,
+                  chainId: item.chainId,
+                  ownerWallet: item.ownerAddress,
+                  createdTxHash: item.txHash,
+                  displayName: item.metadata.displayName ?? "Goal Vault",
+                  category: item.metadata.category ?? undefined,
+                  note: item.metadata.note ?? undefined,
+                  accentTheme: item.metadata.accentTheme ?? undefined,
+                  targetAmount: item.metadata.targetAmount ?? "0",
+                  ruleType: item.metadata.ruleType ?? "timeLock",
+                  unlockDate: item.metadata.unlockDate ?? null,
+                  cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
+                  guardianAddress: item.metadata.guardianAddress ?? null,
+                },
+                provider,
               });
               markSessionVaultMetadata({
                 chainId: item.chainId,
@@ -178,12 +185,7 @@ export const useTransactionRecovery = ({
             chainId: item.chainId,
             ownerAddress: item.ownerAddress,
             vaultAddress: item.vaultAddress ?? null,
-            flow:
-              item.kind === "create_vault"
-                ? "create_vault"
-                : item.kind === "deposit"
-                  ? "deposit"
-                  : "withdraw",
+            flow: getRecoveryFlow(item.kind),
             txHash: item.txHash,
           });
         } catch {
@@ -193,7 +195,7 @@ export const useTransactionRecovery = ({
     };
 
     void recover();
-  }, [analyticsContext, connectionState, track, version]);
+  }, [analyticsContext, connectionState, getRecoveryFlow, provider, track, version]);
 
   const state: TransactionRecoveryState = useMemo(() => {
     if (items.length === 0) {
@@ -233,12 +235,7 @@ export const useTransactionRecovery = ({
         track(
           "transaction_recovery_action",
           {
-            flow:
-              item.kind === "create_vault"
-                ? "create_vault"
-                : item.kind === "deposit"
-                  ? "deposit"
-                  : "withdraw",
+            flow: getRecoveryFlow(item.kind),
             action: "dismiss",
           },
           {

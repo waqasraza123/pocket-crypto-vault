@@ -156,6 +156,7 @@ export const saveVaultMetadata = async (context: IndexerContext, payload: VaultM
       chainId: payload.chainId,
       contractAddress: payload.contractAddress,
       ownerWallet: payload.ownerWallet,
+      createdTxHash: payload.createdTxHash,
       targetAmountAtomic,
       ruleType: payload.ruleType,
       unlockDate: payload.unlockDate ? new Date(payload.unlockDate).toISOString() : null,

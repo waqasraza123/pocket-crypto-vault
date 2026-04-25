@@ -124,7 +124,6 @@ export const useCreateVaultMutation = () => {
     }): Promise<MetadataSaveResult> => {
       upsertSessionVaultMetadata({
         ...payload,
-        txHash,
         accentTone: review.accentTone,
       });
       invalidateVaultQueries();
@@ -150,7 +149,10 @@ export const useCreateVaultMutation = () => {
         syncFreshness: "syncing",
       });
 
-      const metadataSave = await saveVaultMetadata(payload);
+      const metadataSave = await saveVaultMetadata({
+        payload,
+        provider,
+      });
 
       markSessionVaultMetadata({
         chainId: payload.chainId,
@@ -167,7 +169,7 @@ export const useCreateVaultMutation = () => {
 
       return metadataSave;
     },
-    [analyticsContext, applyState, track],
+    [analyticsContext, applyState, provider, track],
   );
 
   const submit = useCallback(
@@ -376,6 +378,7 @@ export const useCreateVaultMutation = () => {
 
         const payload = buildCreateVaultMetadataPayload({
           chainId: connectionState.session.chain.id,
+          createdTxHash: txResult.txHash,
           ownerAddress: connectionState.session.address,
           vaultAddress: txResult.resolution.vaultAddress,
           review: txResult.review,
@@ -594,6 +597,7 @@ export const useCreateVaultMutation = () => {
 
       const payload = buildCreateVaultMetadataPayload({
         chainId: connectionState.session.chain.id,
+        createdTxHash: retryState.txHash,
         ownerAddress: connectionState.session.address,
         vaultAddress: resolution.vaultAddress,
         review: retryState.review,

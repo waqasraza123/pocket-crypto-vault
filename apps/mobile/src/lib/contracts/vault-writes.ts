@@ -5,6 +5,7 @@ import {
   buildRequestUnlockVaultWriteRequest,
   parseGuardianApprovalEvent,
   parseVaultDepositEvent,
+  type ParsedVaultUnlockEvent,
   parseVaultUnlockCanceledEvent,
   parseVaultUnlockRequestedEvent,
   parseVaultWithdrawalEvent,
@@ -32,7 +33,7 @@ export interface WithdrawFromVaultResult {
 export interface UnlockVaultResult {
   txHash: Hash;
   receipt: TransactionReceipt;
-  event: ReturnType<typeof parseVaultUnlockRequestedEvent>;
+  event: ParsedVaultUnlockEvent;
 }
 
 export interface GuardianDecisionResult {
@@ -208,7 +209,7 @@ export const requestUnlockFromVault = async ({
   return {
     txHash,
     receipt,
-    event: parseVaultUnlockCanceledEvent({
+    event: parseVaultUnlockRequestedEvent({
       receipt,
       vaultAddress,
     }),
@@ -258,7 +259,7 @@ export const cancelUnlockRequestOnVault = async ({
   return {
     txHash,
     receipt,
-    event: parseVaultUnlockRequestedEvent({
+    event: parseVaultUnlockCanceledEvent({
       receipt,
       vaultAddress,
     }),

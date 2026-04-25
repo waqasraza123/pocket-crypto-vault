@@ -116,9 +116,27 @@ export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
     }),
     createCheck({
       key: "data-dir",
-      label: "Data directory",
+      label: "Persistent store",
       status: "ready",
-      message: `Indexer data will persist under ${env.dataDir}.`,
+      message: `Indexer data will persist in SQLite under ${env.dataDir}.`,
+    }),
+    createCheck({
+      key: "internal-routes",
+      label: "Internal route protection",
+      status:
+        env.environment === "development"
+          ? env.internalToken
+            ? "ready"
+            : "warning"
+          : env.internalToken
+            ? "ready"
+            : "blocked",
+      message:
+        env.internalToken
+          ? "Internal routes require the configured token."
+          : env.environment === "development"
+            ? "Internal routes are restricted to loopback traffic during local development."
+            : "Set API_INTERNAL_TOKEN before exposing the API outside development.",
     }),
     createCheck({
       key: "indexer-mode",

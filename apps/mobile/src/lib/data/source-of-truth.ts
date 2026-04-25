@@ -18,6 +18,7 @@ import type {
 
 import { createSessionVaultDetail, createSessionVaultSummary } from "../contracts/mappers";
 import { mapActivityItemToViewEvent, mapActivityItemsToPreview, mapFreshnessToProductSyncState, getMetadataReconciliationState, createActivityDedupeKey } from "../api/mappers";
+import { applySessionRuleActivityToVault } from "./rule-overrides";
 
 const emptyFreshness: SyncFreshnessSnapshot = {
   freshness: "unavailable",
@@ -115,11 +116,13 @@ const toMetadataReconciliationState = ({
 export const mergeVaultSummaries = ({
   backendVaults,
   fallbackVaults,
+  sessionEvents,
   sessionMetadata,
   refreshState,
 }: {
   backendVaults: VaultSummaryApiModel[] | null;
   fallbackVaults: VaultSummary[] | null;
+  sessionEvents: VaultActivityEvent[];
   sessionMetadata: VaultMetadataRecord[];
   refreshState?: PostTransactionRefreshState | null;
 }): VaultSummaryViewModel[] => {
@@ -130,9 +133,12 @@ export const mergeVaultSummaries = ({
 
   for (const vault of sourceVaults) {
     const metadata = sessionMetadata.find((record) => record.contractAddress.toLowerCase() === vault.address.toLowerCase()) ?? null;
-    const merged = applyMetadataToVault({
-      vault,
-      metadata,
+    const merged = applySessionRuleActivityToVault({
+      sessionEvents,
+      vault: applyMetadataToVault({
+        vault,
+        metadata,
+      }),
     });
     const isBackendVault = isBackendSummary(vault);
     const freshness = isBackendVault ? vault.freshness : emptyFreshness;
@@ -166,7 +172,10 @@ export const mergeVaultSummaries = ({
     if (!vaultMap.has(key)) {
       const sessionVault = createSessionVaultSummary(metadata);
       vaultMap.set(key, {
-        ...sessionVault,
+        ...applySessionRuleActivityToVault({
+          sessionEvents,
+          vault: sessionVault,
+        }),
         reconciliationStatus: "metadata_pending",
         activityCount: 0,
         lastActivityAt: metadata.createdAt,
@@ -259,6 +268,10 @@ export const mergeVaultDetailRecord = ({
     vault: sourceVault,
     metadata: sessionMetadata,
   });
+  const mergedRuleAwareVault = applySessionRuleActivityToVault({
+    sessionEvents,
+    vault: mergedVault,
+  });
   const freshness = backendVault?.freshness ?? emptyFreshness;
   const syncState = getSyncState({
     freshness,
@@ -271,12 +284,12 @@ export const mergeVaultDetailRecord = ({
     syncState,
   });
   const metadataReconciliation = toMetadataReconciliationState({
-    metadataStatus: mergedVault.metadataStatus,
+    metadataStatus: mergedRuleAwareVault.metadataStatus,
     reconciliationStatus: backendVault?.reconciliationStatus ?? "metadata_pending",
   });
 
   return {
-    ...(mergedVault as VaultDetailApiModel),
+    ...(mergedRuleAwareVault as VaultDetailApiModel),
     reconciliationStatus: backendVault?.reconciliationStatus ?? "metadata_pending",
     freshness,
     normalizedActivity: backendVault?.normalizedActivity ?? [],

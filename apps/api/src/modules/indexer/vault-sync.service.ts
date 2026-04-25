@@ -25,7 +25,7 @@ const sortEventRecords = (items: PersistedVaultEventRecord[]): PersistedVaultEve
     return left.blockNumber - right.blockNumber;
   });
 
-const syncVaultAddress = async ({
+export const syncVaultAddressForChain = async ({
   context,
   chainId,
   latestChainBlock,
@@ -248,7 +248,7 @@ export const syncVaultEventsForChain = async (context: IndexerContext, chainId: 
   });
 
   for (const vault of vaults) {
-    await syncVaultAddress({
+    await syncVaultAddressForChain({
       context,
       chainId,
       latestChainBlock,

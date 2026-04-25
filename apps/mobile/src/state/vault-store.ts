@@ -9,10 +9,9 @@ import type {
   VaultMetadataPayload,
   VaultMetadataRecord,
 } from "@goal-vault/shared";
-import type { Address, Hash } from "viem";
+import type { Address } from "viem";
 
 interface SessionVaultInput extends VaultMetadataPayload {
-  txHash: Hash;
   accentTone: string;
 }
 
@@ -89,7 +88,7 @@ export const upsertSessionVaultMetadata = ({
   unlockDate,
   cooldownDurationSeconds,
   guardianAddress,
-  txHash,
+  createdTxHash,
   accentTone,
 }: SessionVaultInput) => {
   snapshot = {
@@ -100,6 +99,7 @@ export const upsertSessionVaultMetadata = ({
         contractAddress,
         chainId,
         ownerWallet,
+        createdTxHash,
         displayName,
         category,
         note,
@@ -109,7 +109,6 @@ export const upsertSessionVaultMetadata = ({
         unlockDate,
         cooldownDurationSeconds,
         guardianAddress,
-        txHash,
         accentTone,
         metadataStatus: "pending",
         createdAt: new Date().toISOString(),

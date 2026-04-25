@@ -36,6 +36,8 @@ const runtimeEnvSchema = z.object({
   API_SYNC_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
   API_ENABLE_INDEXER: optionalBooleanSchema,
   API_ENABLE_ANALYTICS: optionalBooleanSchema,
+  API_INTERNAL_TOKEN: z.string().trim().min(1).optional(),
+  API_SIGNED_REQUEST_MAX_AGE_SECONDS: z.coerce.number().int().positive().optional(),
   API_LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).optional(),
   API_BASE_START_BLOCK: z.coerce.number().int().min(0).optional(),
   API_BASE_SEPOLIA_START_BLOCK: z.coerce.number().int().min(0).optional(),
@@ -59,6 +61,8 @@ export interface ApiRuntimeEnv {
   syncIntervalMs: number;
   indexerEnabled: boolean;
   analyticsEnabled: boolean;
+  internalToken: string | null;
+  signedRequestMaxAgeSeconds: number;
   logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace";
   chains: Record<SupportedChainId, ApiChainRuntimeConfig>;
   validationErrors: string[];
@@ -129,6 +133,8 @@ export const readApiRuntimeEnv = (
       syncIntervalMs: 30_000,
       indexerEnabled: true,
       analyticsEnabled: true,
+      internalToken: null,
+      signedRequestMaxAgeSeconds: 900,
       logLevel: "info",
       chains: {
         8453: {
@@ -170,6 +176,10 @@ export const readApiRuntimeEnv = (
     validationErrors.push("API_PUBLIC_BASE_URL cannot point to localhost in production.");
   }
 
+  if (environment !== "development" && !parsed.data.API_INTERNAL_TOKEN) {
+    validationErrors.push("API_INTERNAL_TOKEN is required outside development.");
+  }
+
   return {
     environment,
     deploymentTarget,
@@ -181,6 +191,8 @@ export const readApiRuntimeEnv = (
     syncIntervalMs: parsed.data.API_SYNC_INTERVAL_MS ?? 30_000,
     indexerEnabled: parseBoolean(parsed.data.API_ENABLE_INDEXER) ?? true,
     analyticsEnabled: parseBoolean(parsed.data.API_ENABLE_ANALYTICS) ?? true,
+    internalToken: parsed.data.API_INTERNAL_TOKEN ?? null,
+    signedRequestMaxAgeSeconds: parsed.data.API_SIGNED_REQUEST_MAX_AGE_SECONDS ?? 900,
     logLevel: parsed.data.API_LOG_LEVEL || "info",
     chains: {
       8453: {

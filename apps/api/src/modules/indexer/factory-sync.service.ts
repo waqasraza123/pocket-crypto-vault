@@ -1,13 +1,10 @@
-import { parseEventLogs } from "viem";
-
 import type { SupportedChainId } from "@goal-vault/shared";
 
-import { goalVaultFactoryAbi } from "../../lib/contracts";
 import { classifyObservedError } from "../../lib/observability/event-classification";
 import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
 import { normalizeVaultCreatedLogs } from "./event-normalizer";
-import { createFactorySyncStateKey, isLogAfterCursor } from "./sync-state.service";
+import { createFactorySyncStateKey } from "./sync-state.service";
 
 export const syncFactoryEventsForChain = async (context: IndexerContext, chainId: SupportedChainId) => {
   const client = context.clients[chainId];
@@ -62,30 +59,12 @@ export const syncFactoryEventsForChain = async (context: IndexerContext, chainId
   });
 
   try {
-    const fromBlock = BigInt(
-      Math.max(
-        chainConfig.startBlock,
-        previousState?.latestIndexedBlock ? Math.max(previousState.latestIndexedBlock - 1, chainConfig.startBlock) : chainConfig.startBlock,
-      ),
-    );
+    const fromBlock = BigInt(chainConfig.startBlock);
     const rawLogs = await client.getLogs({
       address: chainConfig.factoryAddress,
       fromBlock,
       toBlock: BigInt(latestChainBlock),
     });
-    const parsedLogs = parseEventLogs({
-      abi: goalVaultFactoryAbi,
-      logs: rawLogs,
-      eventName: "VaultCreated",
-      strict: false,
-    }).filter(
-      (log) =>
-        isLogAfterCursor({
-          blockNumber: Number(log.blockNumber ?? 0n),
-          logIndex: log.logIndex ?? 0,
-          cursor: previousState,
-        }),
-    );
     const currentVaults = new Map(
       context.store
         .listVaults()
@@ -94,23 +73,24 @@ export const syncFactoryEventsForChain = async (context: IndexerContext, chainId
     );
     const normalized = normalizeVaultCreatedLogs({
       chainId,
-      logs: parsedLogs,
+      logs: rawLogs,
       currentVaults,
     });
 
     for (const item of normalized) {
       await context.store.upsertEvent(item.event);
       await context.store.upsertVault(item.vault);
+      currentVaults.set(item.vault.contractAddress.toLowerCase(), item.vault);
     }
 
-    const lastLog = parsedLogs.at(-1);
+    const lastLog = normalized.at(-1)?.event ?? null;
     await context.store.upsertSyncState({
       key: stateKey,
       chainId,
       streamType: "factory",
       scopeKey: "factory",
       lifecycle: "idle",
-      latestIndexedBlock: lastLog ? Number(lastLog.blockNumber ?? 0n) : previousState?.latestIndexedBlock ?? chainConfig.startBlock,
+      latestIndexedBlock: lastLog?.blockNumber ?? previousState?.latestIndexedBlock ?? chainConfig.startBlock,
       latestIndexedLogIndex: lastLog?.logIndex ?? previousState?.latestIndexedLogIndex ?? null,
       latestChainBlock,
       lastSyncedAt: new Date().toISOString(),

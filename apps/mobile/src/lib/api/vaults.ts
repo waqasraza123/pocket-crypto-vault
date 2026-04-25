@@ -5,16 +5,35 @@ import {
   parseVaultListResponse,
   parseVaultMetadataSavePayload,
 } from "@goal-vault/api-client";
-import type { MetadataSaveResult, SupportedChainId, VaultDetailApiModel, VaultMetadataPayload, VaultSummaryApiModel } from "@goal-vault/shared";
-import type { Address } from "viem";
+import type {
+  MetadataSaveResult,
+  SupportedChainId,
+  VaultDetailApiModel,
+  VaultMetadataPayload,
+  VaultMetadataWriteRequest,
+  VaultSummaryApiModel,
+} from "@goal-vault/shared";
+import * as metadataAuthModule from "@goal-vault/shared/src/validation/metadataAuth";
+import type { Address, EIP1193Provider } from "viem";
 
+import { signWalletMessage } from "../blockchain/wallet/sign-message";
 import { getBackendBaseUrl } from "../env/client";
 import { fetchBackendJson } from "./client";
+
+const metadataAuthExports = metadataAuthModule as typeof metadataAuthModule & {
+  default?: {
+    buildVaultMetadataAuthorizationMessage?: typeof metadataAuthModule.buildVaultMetadataAuthorizationMessage;
+  };
+};
+const buildVaultMetadataAuthorizationMessage =
+  metadataAuthExports.buildVaultMetadataAuthorizationMessage ??
+  metadataAuthExports.default?.buildVaultMetadataAuthorizationMessage;
 
 const normalizePayload = (payload: VaultMetadataPayload) => ({
   contractAddress: payload.contractAddress,
   chainId: payload.chainId,
   ownerWallet: payload.ownerWallet,
+  createdTxHash: payload.createdTxHash,
   displayName: payload.displayName,
   category: payload.category || null,
   note: payload.note || null,
@@ -26,7 +45,39 @@ const normalizePayload = (payload: VaultMetadataPayload) => ({
   guardianAddress: payload.guardianAddress ?? null,
 });
 
-export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<MetadataSaveResult> => {
+const buildVaultMetadataWriteRequest = async ({
+  payload,
+  provider,
+}: {
+  payload: VaultMetadataPayload;
+  provider: EIP1193Provider;
+}): Promise<VaultMetadataWriteRequest> => {
+  const issuedAt = new Date().toISOString();
+  const signature = await signWalletMessage({
+    account: payload.ownerWallet,
+    message: buildVaultMetadataAuthorizationMessage({
+      metadata: payload,
+      issuedAt,
+    }),
+    provider,
+  });
+
+  return {
+    metadata: payload,
+    auth: {
+      issuedAt,
+      signature,
+    },
+  };
+};
+
+export const saveVaultMetadata = async ({
+  payload,
+  provider,
+}: {
+  payload: VaultMetadataPayload;
+  provider: EIP1193Provider | null;
+}): Promise<MetadataSaveResult> => {
   const backendBaseUrl = getBackendBaseUrl();
 
   if (!backendBaseUrl) {
@@ -39,12 +90,42 @@ export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<
     };
   }
 
+  if (!provider) {
+    return {
+      status: "failed",
+      persistence: "backend",
+      message: "Reconnect your wallet before saving vault details to Goal Vault.",
+      retryable: true,
+      responseStatus: null,
+    };
+  }
+
+  let requestBody: VaultMetadataWriteRequest;
+
+  try {
+    requestBody = await buildVaultMetadataWriteRequest({
+      payload,
+      provider,
+    });
+  } catch (error) {
+    return {
+      status: "failed",
+      persistence: "backend",
+      message: error instanceof Error ? error.message : "Vault details still need wallet authorization.",
+      retryable: true,
+      responseStatus: null,
+    };
+  }
+
   const response = await fetch(`${backendBaseUrl}/vaults`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
-    body: JSON.stringify(normalizePayload(payload)),
+    body: JSON.stringify({
+      metadata: normalizePayload(requestBody.metadata),
+      auth: requestBody.auth,
+    }),
   }).catch(() => null);
 
   if (!response) {
@@ -57,12 +138,10 @@ export const saveVaultMetadata = async (payload: VaultMetadataPayload): Promise<
     };
   }
 
-  if (response.ok || response.status === 409) {
-    if (response.status !== 409) {
-      try {
-        parseVaultMetadataSavePayload(await response.json());
-      } catch {}
-    }
+  if (response.ok) {
+    try {
+      parseVaultMetadataSavePayload(await response.json());
+    } catch {}
     return {
       status: "saved",
       persistence: "backend",

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
+    "test": "tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "job:sync-factory": "tsx src/jobs/sync-factory-events.ts",
     "job:sync-vaults": "tsx src/jobs/sync-vault-events.ts",

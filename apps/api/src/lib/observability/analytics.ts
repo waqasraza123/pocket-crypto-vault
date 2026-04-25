@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 import { z } from "zod";
 
@@ -55,22 +56,111 @@ export const analyticsBatchSchema = z.object({
 type AnalyticsStoredEvent = z.infer<typeof analyticsEventSchema>;
 
 export class AnalyticsStore {
-  private readonly filePath: string;
-  private initialized = false;
-  private writeQueue: Promise<void> = Promise.resolve();
+  private readonly dbPath: string;
+  private database: DatabaseSync | null = null;
 
   constructor(dataDir: string) {
-    this.filePath = path.join(dataDir, "goal-vault-analytics.ndjson");
+    this.dbPath = path.join(dataDir, "goal-vault-analytics.sqlite");
   }
 
   async append(events: AnalyticsStoredEvent[]) {
-    if (!this.initialized) {
-      await fs.mkdir(path.dirname(this.filePath), { recursive: true });
-      this.initialized = true;
+    const database = await this.initialize();
+    const statement = database.prepare(
+      `INSERT INTO analytics_events (
+        name,
+        category,
+        occurred_at,
+        platform,
+        route,
+        environment,
+        deployment_target,
+        chain_id,
+        wallet_status,
+        sync_freshness,
+        vault_address,
+        tx_hash,
+        context_json,
+        payload_json
+      ) VALUES (
+        @name,
+        @category,
+        @occurredAt,
+        @platform,
+        @route,
+        @environment,
+        @deploymentTarget,
+        @chainId,
+        @walletStatus,
+        @syncFreshness,
+        @vaultAddress,
+        @txHash,
+        @contextJson,
+        @payloadJson
+      )`,
+    );
+    database.exec("BEGIN");
+
+    try {
+      for (const event of events) {
+        statement.run({
+          name: event.name,
+          category: event.category,
+          occurredAt: event.occurredAt,
+          platform: event.context.platform,
+          route: event.context.route,
+          environment: event.context.environment,
+          deploymentTarget: event.context.deploymentTarget,
+          chainId: event.context.chainId ?? null,
+          walletStatus: event.context.walletStatus ?? null,
+          syncFreshness: event.context.syncFreshness ?? null,
+          vaultAddress: event.context.vaultAddress ?? null,
+          txHash: event.context.txHash ?? null,
+          contextJson: JSON.stringify(event.context),
+          payloadJson: JSON.stringify(event.payload),
+        });
+      }
+
+      database.exec("COMMIT");
+    } catch (error) {
+      database.exec("ROLLBACK");
+      throw error;
+    }
+  }
+
+  private async initialize() {
+    if (this.database) {
+      return this.database;
     }
 
-    const batch = `${events.map((event) => JSON.stringify(event)).join("\n")}\n`;
-    this.writeQueue = this.writeQueue.then(() => fs.appendFile(this.filePath, batch, "utf8"));
-    await this.writeQueue;
+    await fs.mkdir(path.dirname(this.dbPath), { recursive: true });
+
+    const database = new DatabaseSync(this.dbPath);
+    database.exec(`
+      PRAGMA journal_mode = WAL;
+      PRAGMA synchronous = NORMAL;
+      CREATE TABLE IF NOT EXISTS analytics_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        category TEXT NOT NULL,
+        occurred_at TEXT NOT NULL,
+        platform TEXT NOT NULL,
+        route TEXT NOT NULL,
+        environment TEXT NOT NULL,
+        deployment_target TEXT NOT NULL,
+        chain_id INTEGER,
+        wallet_status TEXT,
+        sync_freshness TEXT,
+        vault_address TEXT,
+        tx_hash TEXT,
+        context_json TEXT NOT NULL,
+        payload_json TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS analytics_events_name_idx ON analytics_events (name, occurred_at);
+      CREATE INDEX IF NOT EXISTS analytics_events_route_idx ON analytics_events (route, occurred_at);
+      CREATE INDEX IF NOT EXISTS analytics_events_vault_idx ON analytics_events (vault_address, occurred_at);
+    `);
+
+    this.database = database;
+    return database;
   }
 }

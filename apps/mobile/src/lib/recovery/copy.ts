@@ -65,6 +65,33 @@ export const getTransactionRecoveryCopy = ({
     }
   }
 
+  if (kind === "unlock") {
+    switch (status) {
+      case "submitted":
+      case "confirming":
+        return {
+          title: messages.feedback.transactionPendingTitle,
+          description: messages.feedback.transactionPendingDescription,
+        };
+      case "confirmed":
+      case "syncing":
+        return {
+          title: messages.feedback.transactionRefreshingTitle,
+          description: messages.feedback.transactionRefreshingDescription,
+        };
+      case "failed":
+        return {
+          title: messages.feedback.dataUnavailableTitle,
+          description: messages.feedback.dataUnavailableDescription,
+        };
+      default:
+        return {
+          title: messages.feedback.transactionRefreshingTitle,
+          description: messages.feedback.transactionRefreshingDescription,
+        };
+    }
+  }
+
   switch (status) {
     case "submitted":
     case "confirming":

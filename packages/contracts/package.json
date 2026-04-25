@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
+    "test": "forge test",
     "typecheck": "echo \"contracts package boundary ready\""
   },
   "dependencies": {
