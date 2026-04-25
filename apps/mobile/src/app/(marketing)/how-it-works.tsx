@@ -1,29 +1,23 @@
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 
-import { FinalCtaSection, HowItWorksSection } from "../../components/marketing";
-import { PageContainer, Screen } from "../../components/primitives";
-import { ScreenHeader } from "../../components/layout";
+import { HowItWorksPageContent } from "../../components/marketing";
 import { useScreenTracking } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n";
-import { spacing } from "../../theme";
+import { routes } from "../../lib/routing";
 
 export default function HowItWorksScreen() {
+  const router = useRouter();
   const { messages } = useI18n();
 
   useScreenTracking("how_it_works_viewed", {}, "how-it-works");
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <>
       <Stack.Screen options={{ title: messages.pages.howItWorks.title }} />
-      <PageContainer width="dashboard" style={{ gap: spacing[10], paddingTop: spacing[6] }}>
-        <ScreenHeader
-          eyebrow={messages.pages.howItWorks.eyebrow}
-          title={messages.pages.howItWorks.title}
-          description={messages.pages.howItWorks.description}
-        />
-        <HowItWorksSection />
-        <FinalCtaSection />
-      </PageContainer>
-    </Screen>
+      <HowItWorksPageContent
+        onCreateVault={() => router.push(routes.createVault)}
+        onEnterVaults={() => router.push(routes.appHome)}
+      />
+    </>
   );
 }

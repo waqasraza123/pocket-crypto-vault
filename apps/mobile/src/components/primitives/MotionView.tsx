@@ -1,9 +1,10 @@
 import type { PropsWithChildren } from "react";
-import { Animated, type StyleProp, type ViewStyle } from "react-native";
+import { Animated, Platform, type StyleProp, type ViewStyle } from "react-native";
 import { useEffect, useMemo, useRef } from "react";
 
 import { useReducedMotionPreference } from "../../lib/motion/reduced-motion";
 import type { MotionIntensity, MotionPreset } from "../../lib/motion/presets";
+import { getMotionViewEntranceState } from "../../lib/motion/entrance-state";
 import { motionPresets } from "../../lib/motion/presets";
 import { createSpring, createTiming } from "../../lib/motion/transitions";
 
@@ -22,12 +23,17 @@ export const MotionView = ({
   delay = 0,
 }: PropsWithChildren<MotionViewProps>) => {
   const { isReducedMotion } = useReducedMotionPreference();
-  const opacity = useRef(new Animated.Value(isReducedMotion ? 1 : 0)).current;
-  const translateY = useRef(new Animated.Value(isReducedMotion ? 0 : motionPresets[preset].distance)).current;
-  const scale = useRef(new Animated.Value(isReducedMotion ? 1 : motionPresets[preset].scale)).current;
+  const initialState = getMotionViewEntranceState({
+    preset,
+    isReducedMotion,
+    platform: Platform.OS,
+  });
+  const opacity = useRef(new Animated.Value(initialState.opacity)).current;
+  const translateY = useRef(new Animated.Value(initialState.translateY)).current;
+  const scale = useRef(new Animated.Value(initialState.scale)).current;
 
   useEffect(() => {
-    if (isReducedMotion) {
+    if (!initialState.shouldAnimateOnMount) {
       opacity.setValue(1);
       translateY.setValue(0);
       scale.setValue(1);
@@ -59,7 +65,7 @@ export const MotionView = ({
     return () => {
       clearTimeout(timeout);
     };
-  }, [delay, intensity, isReducedMotion, opacity, preset, scale, translateY]);
+  }, [delay, initialState.shouldAnimateOnMount, intensity, opacity, preset, scale, translateY]);
 
   return (
     <Animated.View

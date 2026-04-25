@@ -1,16 +1,19 @@
-import { useRouter } from "expo-router";
 import { View } from "react-native";
 
 import { useAdaptiveLayout } from "../../hooks/useAdaptiveLayout";
 import { useI18n } from "../../lib/i18n";
-import { routes } from "../../lib/routing";
 import { colors, createShadowStyle, radii, spacing } from "../../theme";
 import { AppHeading, AppText, MotionView, PrimaryButton, SecondaryButton, SectionContainer } from "../primitives";
 import { HeroVaultPreviewCard } from "./HeroVaultPreviewCard";
 
-export const HeroSection = () => {
+export const HeroSection = ({
+  onEnterVaults,
+  onSeeHowItWorks,
+}: {
+  onEnterVaults: () => void;
+  onSeeHowItWorks: () => void;
+}) => {
   const adaptiveLayout = useAdaptiveLayout();
-  const router = useRouter();
   const { inlineDirection, messages } = useI18n();
 
   return (
@@ -90,15 +93,11 @@ export const HeroSection = () => {
           </AppText>
         </MotionView>
         <MotionView delay={250} style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
-          <PrimaryButton
-            icon="arrow-right"
-            label={messages.common.buttons.openAppShell}
-            onPress={() => router.push(routes.appHome)}
-          />
+          <PrimaryButton icon="arrow-right" label={messages.common.buttons.openAppShell} onPress={onEnterVaults} />
           <SecondaryButton
             icon="arrow-top-right"
             label={messages.common.buttons.seeHowItWorks}
-            onPress={() => router.push(routes.howItWorks)}
+            onPress={onSeeHowItWorks}
           />
         </MotionView>
       </MotionView>

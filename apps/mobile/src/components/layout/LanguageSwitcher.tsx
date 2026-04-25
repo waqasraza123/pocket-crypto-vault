@@ -3,12 +3,11 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { colors, radii, spacing } from "../../theme";
 import { useI18n, type AppLocale } from "../../lib/i18n";
+import { marketingLanguageOptions } from "../../lib/public/marketing-experience";
 import { AppText } from "../primitives";
 
-const locales: AppLocale[] = ["en", "ar"];
-
 export const LanguageSwitcher = () => {
-  const { inlineDirection, isRTL, locale, messages, setLocale } = useI18n();
+  const { inlineDirection, locale, messages, setLocale } = useI18n();
 
   return (
     <View
@@ -42,15 +41,14 @@ export const LanguageSwitcher = () => {
           gap: spacing[1],
         }}
       >
-        {locales.map((option) => {
-          const isActive = option === locale;
-          const label = option === "en" ? "English" : "العربية";
+        {marketingLanguageOptions.map((option) => {
+          const isActive = option.locale === locale;
 
           return (
             <Pressable
-              key={option}
+              key={option.locale}
               accessibilityRole="button"
-              onPress={() => setLocale(option)}
+              onPress={() => setLocale(option.locale as AppLocale)}
               style={({ pressed }) => ({
                 borderRadius: radii.pill,
                 backgroundColor: isActive ? colors.accent : pressed ? colors.surfaceStrong : colors.surface,
@@ -59,7 +57,7 @@ export const LanguageSwitcher = () => {
               })}
             >
               <AppText size="sm" style={{ color: isActive ? colors.white : colors.textPrimary }} weight="semibold">
-                {label}
+                {option.label}
               </AppText>
             </Pressable>
           );

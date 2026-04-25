@@ -1,4 +1,4 @@
-import { motion } from "../../theme";
+import { motion } from "../../theme/motion";
 
 export type MotionPreset = "fade" | "rise" | "scale" | "card" | "hero";
 export type MotionIntensity = "subtle" | "structural" | "emphasis" | "celebratory";

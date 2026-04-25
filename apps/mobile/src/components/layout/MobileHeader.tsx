@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { productConfig } from "@goal-vault/config";
 
 import { useI18n } from "../../lib/i18n";
+import { routes } from "../../lib/routing";
 import { colors, radii, spacing } from "../../theme";
 import { AppHeading, AppText, PageContainer } from "../primitives";
 import type { HeaderLink } from "./DesktopHeader";
@@ -25,7 +26,7 @@ export const MobileHeader = ({ links, ctaHref, ctaLabel }: MobileHeaderProps) =>
       <PageContainer>
         <View style={{ gap: spacing[3], paddingVertical: spacing[4] }}>
           <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between" }}>
-            <Link href="/" asChild>
+            <Link href={routes.landing} asChild>
               <Pressable>
                 <View style={{ gap: spacing[1] }}>
                   <AppHeading size="sm">{productConfig.shortName}</AppHeading>

@@ -2,15 +2,15 @@ import { Stack, useRouter } from "expo-router";
 import { useMemo } from "react";
 import { View } from "react-native";
 
-import { getUnlockedVaultCount, getTotalSaved } from "../../features/vault-list/selectors";
-import { formatUsdc } from "../../lib/format";
-import { createConnectionAnalyticsContext, normalizeAnalyticsDataSource, useScreenTracking, useTrackEventWhen } from "../../lib/analytics";
-import { useI18n } from "../../lib/i18n";
-import { routes } from "../../lib/routing";
-import { colors, radii, spacing } from "../../theme";
-import { useAppReadiness } from "../../hooks/useAppReadiness";
-import { useWalletConnection } from "../../hooks/useWalletConnection";
-import { useVaults } from "../../hooks/useVaults";
+import { getUnlockedVaultCount, getTotalSaved } from "../../../features/vault-list/selectors";
+import { formatUsdc } from "../../../lib/format";
+import { createConnectionAnalyticsContext, normalizeAnalyticsDataSource, useScreenTracking, useTrackEventWhen } from "../../../lib/analytics";
+import { useI18n } from "../../../lib/i18n";
+import { routes } from "../../../lib/routing";
+import { colors, radii, spacing } from "../../../theme";
+import { useAppReadiness } from "../../../hooks/useAppReadiness";
+import { useWalletConnection } from "../../../hooks/useWalletConnection";
+import { useVaults } from "../../../hooks/useVaults";
 import {
   AppErrorState,
   AppLoadingState,
@@ -18,10 +18,10 @@ import {
   DisconnectedState,
   GuidedStepsCard,
   StateBanner,
-} from "../../components/feedback";
-import { NetworkStatusBanner, ScreenHeader } from "../../components/layout";
-import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../components/primitives";
-import { VaultGrid } from "../../components/vaults";
+} from "../../../components/feedback";
+import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
+import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../../components/primitives";
+import { VaultGrid } from "../../../components/vaults";
 
 export default function MyVaultsScreen() {
   const router = useRouter();

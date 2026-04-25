@@ -1,19 +1,17 @@
-import { Stack } from "expo-router";
-import { View } from "react-native";
+import { Stack, useRouter } from "expo-router";
 
 import { useWalletConnection } from "../hooks/useWalletConnection";
 import { useScreenTracking } from "../lib/analytics";
-import { useI18n } from "../lib/i18n";
-import { GuidedStepsCard } from "../components/feedback";
+import { getMarketingExperienceState } from "../lib/public/marketing-experience";
+import { routes } from "../lib/routing";
 import { MarketingShell } from "../components/layout";
 import { WalletStatusCard } from "../components/layout/WalletStatusCard";
-import { FinalCtaSection, HeroSection, HowItWorksSection, SecurityTrustSection } from "../components/marketing";
-import { PageContainer, Screen } from "../components/primitives";
-import { spacing } from "../theme";
+import { LandingPageContent } from "../components/marketing";
 
 export default function LandingScreen() {
+  const router = useRouter();
   const { connectionState } = useWalletConnection();
-  const { messages } = useI18n();
+  const marketingState = getMarketingExperienceState(connectionState.status);
 
   useScreenTracking(
     "landing_viewed",
@@ -30,23 +28,13 @@ export default function LandingScreen() {
   return (
     <MarketingShell>
       <Stack.Screen options={{ title: "Goal Vault" }} />
-      <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
-        <PageContainer width="dashboard" style={{ gap: spacing[12], paddingTop: spacing[6] }}>
-          <HeroSection />
-          <GuidedStepsCard
-            description={messages.landing.demoPathDescription}
-            eyebrow={messages.landing.demoPathEyebrow}
-            icon="play-circle-outline"
-            steps={messages.landing.demoPathSteps}
-            title={messages.landing.demoPathTitle}
-          />
-          {connectionState.status !== "ready" ? <WalletStatusCard /> : null}
-          <HowItWorksSection />
-          <SecurityTrustSection />
-          <FinalCtaSection />
-          <View />
-        </PageContainer>
-      </Screen>
+      <LandingPageContent
+        connectionNotice={<WalletStatusCard />}
+        onCreateVault={() => router.push(routes.createVault)}
+        onEnterVaults={() => router.push(routes.appHome)}
+        onSeeHowItWorks={() => router.push(routes.howItWorks)}
+        showConnectionNotice={marketingState.showConnectionNotice}
+      />
     </MarketingShell>
   );
 }

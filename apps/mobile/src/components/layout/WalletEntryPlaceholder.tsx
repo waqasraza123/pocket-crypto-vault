@@ -44,5 +44,9 @@ export const WalletEntryPlaceholder = () => {
     return <SecondaryButton icon="timer-sand" label={messages.common.buttons.connecting} />;
   }
 
+  if (connectionState.status === "walletUnavailable") {
+    return <SecondaryButton disabled icon="wallet-outline" label={messages.common.buttons.walletSetupPending} />;
+  }
+
   return <SecondaryButton icon="wallet-outline" label={messages.common.buttons.connectWallet} onPress={() => void connect()} />;
 };

@@ -4,48 +4,30 @@
 2026-04-25
 
 ## Current Objective
-Implement and verify Phase 16 by remediating the audited rule-indexing, unlock-flow, persistence, security, and test-coverage gaps.
+Repair the broken universal web experience so the public Goal Vault shell renders correctly, routes work, and placeholder behavior is removed from the primary web paths.
 
 ## Last Completed Step
-Completed the Phase 16 remediation pass and verified both `pnpm typecheck` and `pnpm test`, including Foundry contract coverage plus backend and frontend logic tests.
+Fixed the public web shell by moving app-home navigation to `/vaults`, making marketing entrance motion render visible immediately on web, wiring real CTA targets, making the wallet header honest when runtime config is missing, and updating public copy away from phase-shell placeholders.
 
 ## Current Step
-The repo is in final handoff mode. Remaining work is summary only unless follow-up regressions are reported.
+The web repair pass is complete and verified. Remaining work is handoff only unless new browser regressions are reported.
 
 ## Why This Step Exists
-Phase 15 completed the planned rule system, but the audit found real gaps in creation-event ingestion, unlock receipt handling, unlock-flow hardening, backend persistence, backend mutation security, and automated coverage. Phase 16 closes those gaps without widening product scope.
+Manual browser testing showed the landing and marketing routes behaving like a broken shell: the app and landing root paths overlapped, marketing content shipped hidden on first paint through entrance-motion opacity, grouped-route CTA targets were ambiguous, and the header still exposed a fake wallet action when runtime config was missing.
 
 ## Files Touched
-- `packages/shared/src/{domain/recovery.ts,domain/vault.ts,index.ts,validation/metadataAuth.ts}`
-- `packages/contracts/test/GoalVault.t.sol`
-- `packages/contracts/package.json`
-- `packages/contracts-sdk/src/mappers/vault-mappers.test.ts`
-- `packages/contracts-sdk/package.json`
-- `packages/api-client/src/mappers.test.ts`
-- `packages/api-client/package.json`
-- `apps/api/src/{app.ts,app.test.ts,env.ts,lib/observability/analytics.ts,lib/security/internal-access.ts,test/logs.ts}`
-- `apps/api/src/modules/indexer/{event-normalizer.ts,factory-sync.service.ts,factory-sync.service.test.ts,indexer-store.ts,indexer.routes.ts,reconciliation.service.ts,vault-sync.service.ts}`
-- `apps/api/src/modules/health/readiness.service.ts`
-- `apps/api/src/modules/vaults/{metadata-security.ts,metadata-security.test.ts,vaults.routes.ts,vaults.serializers.test.ts}`
-- `apps/mobile/src/hooks/{useCreateVaultMutation.ts,useTransactionRecovery.ts,useVaultUnlockFlow.ts,useVaults.ts}`
-- `apps/mobile/src/lib/{api/vaults.ts,blockchain/wallet/index.ts,blockchain/wallet/sign-message.ts,contracts/create-vault.ts,contracts/unlock-flow.test.ts,contracts/unlock-flow.ts,contracts/vault-writes.ts,data/rule-overrides.test.ts,data/rule-overrides.ts,data/source-of-truth.ts,recovery/copy.ts}`
-- `apps/mobile/src/state/{index.ts,unlock-flow-state.ts,vault-store.ts}`
-- `apps/mobile/tsconfig.json`
-- `docs/plans/{goal-vault-universal-react-native-phase-16.md,goal-vault-test-coverage-notes.md}`
+- `apps/mobile/src/app/{index.tsx,(marketing)/how-it-works.tsx,(marketing)/security.tsx,(app)/vaults/index.tsx}`
+- `apps/mobile/src/components/{layout/LanguageSwitcher.tsx,layout/MobileHeader.tsx,layout/WalletEntryPlaceholder.tsx,marketing/HeroSection.tsx,marketing/FinalCtaSection.tsx,marketing/LandingPageContent.tsx,marketing/HowItWorksPageContent.tsx,marketing/SecurityPageContent.tsx,marketing/index.ts,primitives/MotionView.tsx}`
+- `apps/mobile/src/lib/{i18n/index.tsx,motion/entrance-state.ts,motion/entrance-state.test.ts,motion/presets.ts,public/marketing-experience.ts,public/marketing-experience.test.ts,routing/routes.ts,routing/routes.test.ts}`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
-- `package.json`
-- `turbo.json`
-- `pnpm-lock.yaml`
-- `apps/api/package.json`
 - `apps/mobile/package.json`
+- `pnpm-lock.yaml`
 
 ## Durable Decisions Captured
-- Backend creation indexing now intentionally normalizes both `VaultCreated` and `VaultCreatedV2` instead of assuming the legacy event is sufficient.
-- Core backend persistence is now SQLite-backed inside `apps/api/.data/` for indexed state and analytics rather than whole-file JSON or NDJSON rewrites.
-- Vault metadata writes now require a fresh owner signature and receipt-based verification against the creation transaction plus onchain vault summary.
-- Internal sync and status routes now require an internal token header outside local-development fallback behavior.
-- Unlock actions now use the same recovery and refresh architecture as the main create, deposit, and withdraw flows.
+- Public app-home navigation now lives on `/vaults` so the marketing landing page owns `/` without conflicting with grouped app routes.
+- Marketing entrance motion stays visible on web-first paint instead of shipping public sections at `opacity: 0` until hydration completes.
+- Public marketing CTAs must point at stable public routes and header wallet controls must be disabled when wallet runtime setup is unavailable.
 
 ## Scope Boundaries
 - No multichain, yield, swaps, lending, or social features.
@@ -53,16 +35,16 @@ Phase 15 completed the planned rule system, but the audit found real gaps in cre
 - The one-goal-per-vault model remains intact.
 
 ## Exact Next Steps
-1. If regressions appear, prioritize metadata auth, factory creation ingestion, and unlock-flow recovery first.
-2. Add deeper hook-level tests and CI only when that work is explicitly scheduled.
-3. Keep future backend persistence work additive to the current SQLite model instead of reintroducing file-backed state.
+1. If more web regressions appear, check route collisions and first-paint visibility before changing visual styling.
+2. If the repo later adopts a React Native-aware component test runner, add direct route-render tests for the landing and marketing screens.
+3. Keep app-home on `/vaults` and keep marketing pages usable without wallet readiness.
 
 ## Verification Commands
+- `pnpm --filter @goal-vault/mobile test`
 - `pnpm typecheck`
-- `pnpm test`
-- `pnpm --filter @goal-vault/api test`
-- `pnpm --filter @goal-vault/contracts test`
+- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-fixed`
+- `rg -n 'href=\"/vaults\"|opacity:1;transform:translateY\\(0px\\) scale\\(1\\)|Wallet setup pending' dist-web-fixed/index.html dist-web-fixed/how-it-works.html dist-web-fixed/security.html`
 - `git status --short`
 
 ## Handoff Note
-Phase 16 closes the main audit findings with real code changes: cooldown and guardian vaults now index through the backend path, unlock request or cancel parsing is corrected, unlock flows are recovery-aware, backend state is durably persisted, metadata writes are materially safer, internal routes are protected, and the repo now has meaningful automated coverage across the highest-risk contract, backend, and frontend logic paths.
+The universal web shell now behaves like a real product surface on first load: landing content stays visible even when the wallet is unavailable, How It Works and Security render real content statically on web, public CTAs resolve to stable routes, the language switcher stays honest, and the header no longer exposes a fake wallet action when runtime configuration is missing.

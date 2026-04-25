@@ -26,7 +26,7 @@ const enMessages = {
       create: "Create",
       activity: "Activity",
     },
-    marketingCta: "Open app",
+    marketingCta: "Enter My Vaults",
     appCta: "New vault",
   },
   common: {
@@ -35,7 +35,7 @@ const enMessages = {
     unsupported: "Unsupported",
     wallet: "Wallet",
     buttons: {
-      openAppShell: "Open the app shell",
+      openAppShell: "Enter My Vaults",
       seeHowItWorks: "See how it works",
       enterMyVaults: "Enter My Vaults",
       createVault: "Create vault",
@@ -43,6 +43,7 @@ const enMessages = {
       connectWallet: "Connect wallet",
       switchNetwork: "Switch network",
       disconnect: "Disconnect",
+      walletSetupPending: "Wallet setup pending",
       connecting: "Connecting...",
       retry: "Retry",
       reset: "Reset",
@@ -98,14 +99,14 @@ const enMessages = {
   },
   footer: {
     description:
-      "Goal Vault is a calm USDC savings shell for Base. Wallet, contract, and API wiring land in later phases.",
+      "Goal Vault is a calm USDC savings product on Base for one goal at a time, with clear withdrawal rules and honest progress tracking.",
   },
   landing: {
     heroBadge: "Base-native USDC saving",
     heroTitle: "Protect the money meant for something that matters.",
     heroSubtitle: "Create one goal, fund it in USDC, and keep withdrawals locked until the rule allows it.",
     heroHighlights: ["One goal per vault", "USDC only on Base", "Withdraw when the rule allows"],
-    heroPreviewLabel: "Launch candidate preview",
+    heroPreviewLabel: "Sample protected vault",
     heroPreviewGoal: "Emergency Reserve",
     heroPreviewDescription:
       "Protect six months of living costs until late summer, with deposits open whenever you are ready.",
@@ -164,10 +165,10 @@ const enMessages = {
         description: "Balances, deposits, and withdrawals follow confirmed onchain state. The backend helps the app catch up faster, but it does not control your funds.",
       },
     ],
-    finalCtaEyebrow: "Launch-candidate shell",
-    finalCtaTitle: "Build the habit before the integrations land.",
+    finalCtaEyebrow: "Start here",
+    finalCtaTitle: "Open the product and start your first protected vault.",
     finalCtaDescription:
-      "This phase ships the universal shell, adaptive layouts, and a clean product hierarchy for every later wallet, contract, and backend step.",
+      "View your vaults, create a goal-focused vault, and move straight into the real saving flow on Base without leaving the same product surface.",
   },
   pages: {
     howItWorks: {
@@ -601,7 +602,7 @@ const arMessages: AppMessages = {
       create: "إنشاء",
       activity: "النشاط",
     },
-    marketingCta: "افتح التطبيق",
+    marketingCta: "ادخل إلى خزائني",
     appCta: "خزنة جديدة",
   },
   common: {
@@ -610,7 +611,7 @@ const arMessages: AppMessages = {
     unsupported: "غير مدعوم",
     wallet: "المحفظة",
     buttons: {
-      openAppShell: "افتح واجهة التطبيق",
+      openAppShell: "ادخل إلى خزائني",
       seeHowItWorks: "اطلع على طريقة العمل",
       enterMyVaults: "ادخل إلى خزائني",
       createVault: "أنشئ خزنة",
@@ -618,6 +619,7 @@ const arMessages: AppMessages = {
       connectWallet: "اربط المحفظة",
       switchNetwork: "بدّل الشبكة",
       disconnect: "افصل الاتصال",
+      walletSetupPending: "إعداد المحفظة قيد التجهيز",
       connecting: "جارٍ الاتصال...",
       retry: "إعادة المحاولة",
       reset: "إعادة الضبط",
@@ -672,14 +674,14 @@ const arMessages: AppMessages = {
     },
   },
   footer: {
-    description: "Goal Vault واجهة ادخار هادئة بعملة USDC على Base. تكاملات المحفظة والعقود وواجهة البرمجة ستصل في مراحل لاحقة.",
+    description: "Goal Vault منتج ادخار هادئ بعملة USDC على Base لهدف واحد في كل مرة، مع قواعد سحب واضحة وتتبع تقدّم صادق.",
   },
   landing: {
     heroBadge: "ادخار USDC أصيل على Base",
     heroTitle: "احمِ المال المخصّص لشيء مهم فعلاً.",
     heroSubtitle: "أنشئ هدفاً واحداً، موّله بعملة USDC، وأبقِ السحب مقفلاً حتى تسمح القاعدة بذلك.",
     heroHighlights: ["هدف واحد لكل خزنة", "USDC فقط على Base", "السحب عندما تسمح القاعدة"],
-    heroPreviewLabel: "معاينة جاهزة للإطلاق",
+    heroPreviewLabel: "خزنة محمية نموذجية",
     heroPreviewGoal: "صندوق الطوارئ",
     heroPreviewDescription: "احمِ ستة أشهر من تكاليف المعيشة حتى أواخر الصيف، مع بقاء الإيداعات متاحة متى ما أصبحت جاهزاً.",
     heroPreviewFooter: "Base • USDC • السحب ينتظر التاريخ الذي اخترته",
@@ -736,9 +738,9 @@ const arMessages: AppMessages = {
         description: "الأرصدة والإيداعات والسحوبات تتبع الحالة المؤكدة على السلسلة. الخلفية تساعد الواجهة على التحديث بسرعة أكبر، لكنها لا تتحكم في أموالك.",
       },
     ],
-    finalCtaEyebrow: "واجهة جاهزة للإطلاق",
-    finalCtaTitle: "ابنِ العادة قبل وصول التكاملات.",
-    finalCtaDescription: "تطلق هذه المرحلة الواجهة الموحدة والتخطيطات المتكيفة وهيكلية منتج نظيفة لكل خطوة لاحقة تتعلق بالمحفظة والعقود والخلفية.",
+    finalCtaEyebrow: "ابدأ من هنا",
+    finalCtaTitle: "افتح المنتج وابدأ أول خزنة محمية لك.",
+    finalCtaDescription: "استعرض خزائنك وأنشئ خزنة لهدف واضح وادخل مباشرة إلى تدفق الادخار الحقيقي على Base من السطح نفسه.",
   },
   pages: {
     howItWorks: {

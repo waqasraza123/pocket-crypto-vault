@@ -165,6 +165,8 @@ Still not implemented:
 - Preserve strict clarity around lock rules and withdrawal state.
 - Avoid broadening the scope into general fintech or noisy crypto UX before `v1` is complete.
 - Preserve the one-codebase Expo Router structure instead of adding separate web/native surfaces during later integrations.
+- Keep the public marketing experience independent from wallet runtime readiness so landing, How It Works, and Security remain usable on web before any connection state is available.
+- Keep app-home navigation on an explicit `/vaults` route instead of relying on grouped-root paths that overlap the public landing URL.
 
 ## Standard Verification
 - `find docs -maxdepth 3 -type f | sort`
