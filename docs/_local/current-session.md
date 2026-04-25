@@ -4,43 +4,41 @@
 2026-04-25
 
 ## Current Objective
-Polish the homepage and public marketing routes so the Goal Vault web experience feels premium, coherent, and product-complete without changing scope.
+Stop generated Expo export artifacts from being created and tracked in root-level phase-specific directories.
 
 ## Last Completed Step
-Rebuilt the public route composition around a richer shared content model, stronger hero and vault artifact, deeper below-the-fold structure, and route-specific explanatory sections for How It Works and Security.
+Moved official mobile export targets under `dist/{web,ios,android}`, ignored legacy root `dist-*` outputs, removed the tracked `dist-android-phase12`, `dist-ios-phase12`, and `dist-web-phase12` artifacts from Git, and deleted the local generated folders.
 
 ## Current Step
-The public-surface polish pass is complete and verified. The branch is ready for review, commit, or follow-up refinement.
+The dist cleanup is complete, verified, and ready to commit and push.
 
 ## Why This Step Exists
-The public web routes were no longer technically broken, but they still felt thin and placeholder-like. The product needed a more convincing public story, stronger CTA hierarchy, better section rhythm, and route-specific content that matched the implemented Goal Vault experience.
+Expo exports were being written to root-level phase-specific folders and those generated files were tracked by Git. Official exports should live under the ignored root `dist/` directory instead.
 
 ## Files Touched
-- `apps/mobile/src/app/{index.tsx,(marketing)/how-it-works.tsx,(marketing)/security.tsx}`
-- `apps/mobile/src/components/layout/AppFooter.tsx`
-- `apps/mobile/src/components/marketing/{HeroSection.tsx,HeroVaultPreviewCard.tsx,LandingPageContent.tsx,HowItWorksSection.tsx,SecurityTrustSection.tsx,FinalCtaSection.tsx,HowItWorksPageContent.tsx,SecurityPageContent.tsx,index.ts,PublicRouteHero.tsx,RuleProtectionSection.tsx,SecurityDisclosureSection.tsx,StoryPrinciplesSection.tsx}`
-- `apps/mobile/src/lib/public/{marketing-content.ts,marketing-content.test.ts}`
-- `apps/mobile/src/lib/i18n/index.tsx`
+- `.gitignore`
+- `package.json`
+- `docs/project-state.md`
 - `docs/_local/current-session.md`
+- removed tracked generated artifacts under `dist-android-phase12/`, `dist-ios-phase12/`, and `dist-web-phase12/`
 
 ## Durable Decisions Captured
-- Public marketing routes should stay driven by shared content and route models instead of ad hoc copy embedded directly in page components.
-- The landing route keeps connection or wallet notices secondary to the product story rather than letting runtime state dominate the public experience.
+- Expo export outputs belong under root `dist/` by platform: `dist/web`, `dist/ios`, and `dist/android`.
+- Legacy root `dist-*` export folders are ignored defensively.
 
 ## Scope Boundaries
-- No new product scope, no separate web stack, and no fake features.
-- No wallet or chain behavior changes beyond preserving existing CTA routing and secondary notices.
-- No redesign of the authenticated product flows.
+- No app runtime behavior changes.
+- No release workflow implementation beyond correcting existing verification export targets.
 
 ## Exact Next Steps
-1. Review the public routes in a browser and tighten any purely visual details that still feel off after the stronger content pass.
-2. Commit this public-surface polish together with the already pending branch changes when ready.
-3. If further marketing refinements are needed, keep them inside the shared Expo Router and shared component architecture.
+1. Commit the cleanup.
+2. Push `dev` to origin.
 
 ## Verification Commands
-- `pnpm --filter @goal-vault/mobile typecheck`
-- `pnpm --filter @goal-vault/mobile test`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist-web-public-polish-check`
+- `pnpm typecheck`
+- `pnpm verify:mobile:web`
+- `git check-ignore -v dist/web/index.html dist/ios/metadata.json dist/android/metadata.json dist-web-phase12/index.html dist-ios-phase12/metadata.json dist-android-phase12/metadata.json`
+- `git ls-files | rg '(^|/)dist(-|/)|dist-(android|ios|web)-phase12|dist-web|dist-ios|dist-android' || true`
 
 ## Handoff Note
-The public-facing Goal Vault experience now has a stronger hero, a richer vault artifact, more intentional section flow, clearer CTA hierarchy, dedicated How It Works and Security route heroes, and regression coverage that protects the public route composition and copy contract from slipping back into placeholder shells.
+The generated web export now lands at `dist/web` and is ignored. The previous phase12 export directories are deleted locally and staged as removals from Git history going forward.
