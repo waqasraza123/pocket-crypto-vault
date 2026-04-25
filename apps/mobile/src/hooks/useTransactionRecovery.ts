@@ -132,7 +132,7 @@ export const useTransactionRecovery = ({
                 unlockDate: item.metadata.unlockDate ?? null,
                 cooldownDurationSeconds: item.metadata.cooldownDurationSeconds ?? null,
                 guardianAddress: item.metadata.guardianAddress ?? null,
-                accentTone: item.metadata.accentTone ?? "#1E2B26",
+                accentTone: item.metadata.accentTone ?? "#183126",
               });
               const metadataResult = await saveVaultMetadata({
                 payload: {

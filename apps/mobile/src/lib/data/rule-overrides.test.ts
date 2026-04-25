@@ -26,7 +26,7 @@ const baseVault: VaultSummary = {
   },
   status: "locked",
   accentTheme: "sage",
-  accentTone: "#66735c",
+  accentTone: "#64815c",
   metadataStatus: "saved",
   targetAmountAtomic: 5_000_000_000n,
   savedAmountAtomic: 1_500_000_000n,

@@ -123,6 +123,7 @@ Still not implemented:
 - Phase 10 keeps real product behavior honest while adding guided presentation paths, stronger screenshot states, and repo-local demo artifacts.
 - Phase 12 refreshes the universal app with brighter layered tokens, app-owned motion primitives, reduced-motion handling, and Apple-like polish translated into an original Goal Vault visual system.
 - Phase 12 intentionally keeps the existing Expo React Native styling model and uses a small shared `Animated`-based motion layer instead of introducing a heavier styling or animation stack late in the cycle.
+- The current visual direction uses warm white foundations, green primary actions, and restrained orange warmth across shared theme tokens instead of the earlier cool blue accent system.
 - Phase 11 adds a typed analytics boundary in the universal app, lean API-side event ingestion, structured backend observability signals, and post-launch metric definitions without collecting freeform private vault content.
 - Phase 13 makes the API-backed read model the default product path for dashboard, detail, and activity, while keeping chain reads limited to correctness fallbacks and session overlays limited to in-flight recovery.
 - Phase 13 centralizes frontend merge logic for backend, chain, and session state so create, deposit, withdraw, and recovery refresh the same product surfaces consistently.

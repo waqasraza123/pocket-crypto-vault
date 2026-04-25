@@ -56,21 +56,21 @@ export const createShadowStyle = ({
 
 export const shadows = {
   soft: createShadowStyle({
-    color: "#102030",
+    color: "#13231b",
     opacity: 0.08,
     radius: 24,
     offsetY: 12,
     elevation: 4,
   }),
   medium: createShadowStyle({
-    color: "#102030",
+    color: "#13231b",
     opacity: 0.12,
     radius: 34,
     offsetY: 18,
     elevation: 8,
   }),
   floating: createShadowStyle({
-    color: "#102030",
+    color: "#13231b",
     opacity: 0.16,
     radius: 42,
     offsetY: 22,

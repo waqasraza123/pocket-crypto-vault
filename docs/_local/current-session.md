@@ -4,34 +4,39 @@
 2026-04-25
 
 ## Current Objective
-Fix the broken English to Arabic toggle on web so locale changes apply immediately and persist reliably.
+Shift the shared Goal Vault theme to a green, orange, and white palette while keeping the universal app architecture intact.
 
 ## Last Completed Step
-Fixed the locale bootstrap race by initializing from web storage synchronously, preventing late async hydration from overwriting a manual language change, and adding regression coverage for the locale storage decisions.
+Published the locale-toggle race fix, then updated the shared palette tokens, gradients, shadows, app theme color, and vault accent tones to a calmer green/orange/white system.
 
 ## Current Step
-The locale-toggle repair is complete and verified. Remaining work is handoff only unless another web regression appears.
+The palette refresh is complete and verified. Remaining work is handoff only unless another visual regression appears.
 
 ## Why This Step Exists
-Manual browser testing showed the language toggle could be clicked without sticking. The provider booted in English, then hydrated locale asynchronously, so a late storage read could overwrite the user’s Arabic selection immediately after they pressed the toggle.
+The product shell had already been repaired functionally, but the user requested a warmer green/orange/white direction. The shared theme tokens still leaned on the earlier blue palette, so the app needed a centralized palette refresh rather than route-level styling edits.
 
 ## Files Touched
-- `apps/mobile/src/lib/i18n/{index.tsx,locale-storage.ts,locale-storage.test.ts}`
+- `apps/mobile/app.config.js`
+- `apps/mobile/src/theme/{colors.ts,gradients.ts,shadows.ts}`
+- `apps/mobile/src/lib/contracts/mappers.ts`
+- `apps/mobile/src/hooks/useTransactionRecovery.ts`
+- `apps/mobile/src/lib/data/rule-overrides.test.ts`
+- `docs/project-state.md`
 - `docs/_local/current-session.md`
 
 ## Durable Decisions Captured
-- Web locale changes must apply immediately from user interaction and must not be reverted by delayed persistence hydration.
-- Locale storage decisions should stay in a pure helper so this race remains regression-testable without a React Native renderer.
+- Goal Vault now uses a warm white base with green primary actions and orange secondary warmth across the shared app theme.
+- Palette changes should continue to flow through shared tokens first, with app config and branded accent constants updated only where they still leak old colors.
 
 ## Scope Boundaries
 - No multichain, yield, swaps, lending, or social features.
-- No product redesign, routing changes, or widened feature scope.
-- The fix stays within the existing universal Expo React Native i18n model.
+- No product redesign beyond the shared palette refresh.
+- The change stays within the existing universal Expo React Native theming model.
 
 ## Exact Next Steps
-1. If more locale bugs appear, inspect hydration order before changing header controls or translation data.
-2. If the repo later adopts a React Native-aware component test runner, add a direct LanguageSwitcher interaction test.
-3. Keep web locale initialization synchronous whenever the selected locale already exists in browser storage.
+1. If more visual tuning is needed, adjust shared tokens before editing individual screens.
+2. If screenshots or browser verification are needed later, validate contrast and hierarchy against the new palette rather than reintroducing the old blue accent.
+3. Keep new accent additions aligned with the green/orange/white direction instead of mixing in unrelated cool tones.
 
 ## Verification Commands
 - `pnpm --filter @goal-vault/mobile test`
@@ -39,4 +44,4 @@ Manual browser testing showed the language toggle could be clicked without stick
 - `git status --short`
 
 ## Handoff Note
-The English/Arabic toggle now behaves deterministically on web: the provider starts from browser storage when available, a manual toggle writes immediately, and delayed async hydration can no longer snap the UI back to English after the user selects Arabic.
+The mobile and web app now read from a warmer shared palette: backgrounds moved to warm white, primary emphasis moved to green, supporting warmth moved to orange, shadows shifted darker green, and branded accent defaults now align with the same system instead of the earlier blue theme.

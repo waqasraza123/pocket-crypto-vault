@@ -18,10 +18,10 @@ import { getContractConfigForChain } from "./registry";
 export { mapVaultDetail, mapVaultSummary };
 
 const vaultAccentThemeTones: Record<VaultAccentTheme, string> = {
-  sand: "#87684f",
-  sage: "#66735c",
-  sky: "#5f7f96",
-  terracotta: "#9a5f4d",
+  sand: "#c48a4d",
+  sage: "#64815c",
+  sky: "#6b9185",
+  terracotta: "#bf6c49",
 };
 
 const formatCooldownDurationLabel = (days: number) => `${days} day${days === 1 ? "" : "s"}`;

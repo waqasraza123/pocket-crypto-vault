@@ -59,7 +59,7 @@ module.exports = {
     policy: "appVersion",
   },
   splash: {
-    backgroundColor: "#f4efe8",
+    backgroundColor: "#f5f2e8",
   },
   experiments: {
     typedRoutes: true,
@@ -80,8 +80,8 @@ module.exports = {
     name: appIdentity.webTitle,
     shortName: appIdentity.shortName,
     description: "Protect the money you do not want to break with one Base-native USDC vault at a time.",
-    backgroundColor: "#f4efe8",
-    themeColor: "#87684f",
+    backgroundColor: "#f5f2e8",
+    themeColor: "#2f8f5b",
     lang: "en",
   },
   extra: {
