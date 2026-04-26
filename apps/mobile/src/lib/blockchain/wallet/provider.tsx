@@ -13,7 +13,7 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
     return <WebWalletProvider>{children}</WebWalletProvider>;
   }
 
-  if (!walletRuntimeConfig.isEnabled || !walletRuntimeConfig.projectId || !isNativeWalletRuntimeSupported(Constants.appOwnership)) {
+  if (!walletRuntimeConfig.isEnabled || !walletRuntimeConfig.projectId || !isNativeWalletRuntimeSupported(Constants)) {
     return <UnconfiguredWalletProvider>{children}</UnconfiguredWalletProvider>;
   }
 

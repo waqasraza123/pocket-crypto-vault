@@ -85,7 +85,7 @@ const nativeStorage: Storage = {
 const nativeWalletRuntimeEnabled =
   walletRuntimeConfig.isEnabled &&
   walletRuntimeConfig.projectId &&
-  isNativeWalletRuntimeSupported(Constants.appOwnership);
+  isNativeWalletRuntimeSupported(Constants);
 
 const nativeWalletInstance =
   nativeWalletRuntimeEnabled

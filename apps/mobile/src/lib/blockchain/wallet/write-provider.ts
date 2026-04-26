@@ -12,7 +12,7 @@ export const useWalletWriteProvider = (): EIP1193Provider | null => {
     return useWebWalletWriteProvider();
   }
 
-  if (!walletRuntimeConfig.isEnabled || !walletRuntimeConfig.projectId || !isNativeWalletRuntimeSupported(Constants.appOwnership)) {
+  if (!walletRuntimeConfig.isEnabled || !walletRuntimeConfig.projectId || !isNativeWalletRuntimeSupported(Constants)) {
     return null;
   }
 
