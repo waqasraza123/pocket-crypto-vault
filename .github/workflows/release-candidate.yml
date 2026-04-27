@@ -1,0 +1,109 @@
+name: Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Release environment to verify.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      export_web:
+        description: Export the Expo web target.
+        type: boolean
+        default: true
+      export_ios:
+        description: Export the Expo iOS target.
+        type: boolean
+        default: true
+      export_android:
+        description: Export the Expo Android target.
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-candidate-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+
+jobs:
+  release-candidate:
+    name: Verify ${{ inputs.target }} candidate
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: ${{ inputs.target }}
+    env:
+      APP_ENV: ${{ inputs.target }}
+      EXPO_PUBLIC_APP_ENV: ${{ inputs.target }}
+      EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
+      EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+      EXPO_PUBLIC_API_TIMEOUT_MS: ${{ vars.EXPO_PUBLIC_API_TIMEOUT_MS || '8000' }}
+      EXPO_PUBLIC_ANALYTICS_ENABLED: ${{ vars.EXPO_PUBLIC_ANALYTICS_ENABLED || 'true' }}
+      EXPO_PUBLIC_REOWN_PROJECT_ID: ${{ vars.EXPO_PUBLIC_REOWN_PROJECT_ID }}
+      EXPO_PUBLIC_WALLETCONNECT_METADATA_URL: ${{ vars.EXPO_PUBLIC_WALLETCONNECT_METADATA_URL }}
+      EXPO_PUBLIC_BASE_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_RPC_URL }}
+      EXPO_PUBLIC_BASE_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_FACTORY_ADDRESS }}
+      EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL }}
+      EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS }}
+      API_PUBLIC_BASE_URL: ${{ vars.API_PUBLIC_BASE_URL }}
+      IOS_BUILD_NUMBER: ${{ vars.IOS_BUILD_NUMBER }}
+      ANDROID_VERSION_CODE: ${{ vars.ANDROID_VERSION_CODE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Typecheck release candidate
+        run: pnpm typecheck
+
+      - name: Check deployed API readiness
+        if: ${{ vars.API_PUBLIC_BASE_URL != '' }}
+        run: curl --fail --show-error --silent "$API_PUBLIC_BASE_URL/ready"
+
+      - name: Export web candidate
+        if: ${{ inputs.export_web }}
+        run: pnpm verify:mobile:web
+
+      - name: Export iOS candidate
+        if: ${{ inputs.export_ios }}
+        run: pnpm verify:mobile:ios
+
+      - name: Export Android candidate
+        if: ${{ inputs.export_android }}
+        run: pnpm verify:mobile:android
+
+      - name: Upload web artifact
+        if: ${{ inputs.export_web }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-${{ inputs.target }}-web
+          path: dist/web
+          if-no-files-found: error
+
+      - name: Upload iOS artifact
+        if: ${{ inputs.export_ios }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-${{ inputs.target }}-ios-export
+          path: dist/ios
+          if-no-files-found: error
+
+      - name: Upload Android artifact
+        if: ${{ inputs.export_android }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-${{ inputs.target }}-android-export
+          path: dist/android
+          if-no-files-found: error

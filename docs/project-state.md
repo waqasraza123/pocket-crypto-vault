@@ -23,10 +23,11 @@ The repository now has a real v1 foundation:
 - signed metadata writes tied to owner wallet authorization plus verified creation receipts
 - protected internal indexer routes and SQLite-backed backend persistence for indexed state and analytics
 - hybrid product screens that use real connection/network state and fall back safely when chain config is incomplete
+- GitHub Actions CI and release-candidate verification workflows
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- production CI and release workflows
+- automated contract deployment, backend promotion, mobile store submission, and external managed database infrastructure
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -88,6 +89,7 @@ Still not implemented:
 - Phase 14: final production cleanup, dead-code removal, duplicate-path consolidation, and repository hardening
 - Phase 15: cooldown unlock plus guardian approval, with rule-system completion across contracts, backend, and app flows
 - Phase 16: remediation pass for indexed rule correctness, unlock-flow hardening, signed metadata security, SQLite persistence, and critical automated coverage
+- Phase 17: GitHub Actions CI, manual release-candidate verification, environment documentation, and operator-facing automation guardrails
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -116,6 +118,8 @@ Still not implemented:
 - Phase 16 hardens metadata writes by requiring a fresh owner signature bound to the vault metadata payload and verified against the creation transaction receipt plus onchain summary.
 - Phase 16 protects internal sync and status routes with an internal token header model, while still allowing local loopback development when no token is configured.
 - Phase 16 closes the audited rule-system gap by intentionally normalizing both `VaultCreated` and `VaultCreatedV2` creation events into one backend creation model.
+- Phase 17 adds CI and release-candidate automation without automatic deployment, contract promotion, store submission, or production traffic changes.
+- GitHub release-candidate workflows bind staging and production configuration through GitHub Environments. Public release metadata belongs in environment variables, while RPC URLs belong in environment secrets.
 - Confirmed create, deposit, and withdraw flows now trigger a thin backend sync endpoint and then invalidate reads so backend-enriched vaults and activity refresh more cleanly.
 - Phase 7 adds shared readiness and recovery models, persistent mobile transaction recovery, app-shell readiness banners, calmer degraded-state handling, and explicit staging health summaries from the API.
 - Phase 7 removes connected-user mock live fallbacks when real reads fail. The app now prefers honest chain/session data plus syncing or recovery messaging.
@@ -135,6 +139,7 @@ Still not implemented:
 - Phase 14 removes unused authenticated mocks, dead wrapper modules, and duplicate backend freshness helpers so the repository reads as a cleaner production codebase instead of layered phase scaffolding.
 - Phase 15 completes the original Goal Vault rule system with generalized rule typing, backward-aware vault reads, cooldown unlock, guardian approval, and rule-aware activity or API responses.
 - Phase 15 keeps the existing legacy time-lock summary read path available while introducing richer rule-state reads and `VaultCreatedV2` for new deployments so old time-lock vaults can still be rendered cleanly.
+- Phase 17 adds GitHub Actions CI and manual release-candidate verification for staging and production artifact checks.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -162,10 +167,12 @@ Still not implemented:
 - The Phase 16 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-16.md`.
 - The Phase 15 rule-system note lives at `docs/plans/goal-vault-rule-system.md`.
 - The Phase 16 test coverage note lives at `docs/plans/goal-vault-test-coverage-notes.md`.
+- The Phase 17 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-17.md`.
+- The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 
 ## Deferred / Not Yet Implemented
 - External managed database infrastructure beyond the current in-repo SQLite persistence
-- CI, linting, formatting, and release workflows
+- Automated contract deployment, backend promotion, mobile store submission, and traffic rollback workflows
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

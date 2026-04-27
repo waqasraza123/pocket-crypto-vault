@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+
+jobs:
+  workspace:
+    name: Workspace TypeScript and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Typecheck workspace
+        run: pnpm typecheck
+
+      - name: Run TypeScript unit tests
+        run: pnpm test:ts
+
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Run contract tests
+        run: pnpm test:contracts
+
+  mobile-exports:
+    name: Expo export ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - workspace
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - web
+          - ios
+          - android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Export mobile target
+        run: pnpm verify:mobile:${{ matrix.platform }}

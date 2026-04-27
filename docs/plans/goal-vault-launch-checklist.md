@@ -19,13 +19,20 @@
 - Confirm `API_PUBLIC_BASE_URL` matches the public deployment URL.
 - Confirm indexer mode and sync interval are appropriate for the target environment.
 
+## CI And Release Candidate
+- Confirm the GitHub Environment exists for the target release.
+- Confirm production requires environment reviewer approval.
+- Confirm required GitHub Environment variables and secrets match `docs/plans/goal-vault-ci-release-workflows.md`.
+- Run the `Release Candidate` workflow for `staging` or `production`.
+- Confirm the workflow typechecks, checks API readiness when configured, and uploads the expected export artifacts.
+
 ## Web
 - Run `pnpm verify:mobile:web`.
 - Open the exported web build and confirm route titles, landing copy, and app-shell packaging look correct.
 - Confirm the deployed web build points to the correct API base URL.
 
 ## Mobile
-- Confirm `apps/mobile/app.config.ts` resolves the expected environment-specific package identity.
+- Confirm `apps/mobile/app.config.js` resolves the expected environment-specific package identity.
 - Confirm `eas.json` profile matches the intended target.
 - Run `pnpm verify:mobile:ios`.
 - If building Android externally, confirm package name and version code assumptions before release.

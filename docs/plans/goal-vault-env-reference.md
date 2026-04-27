@@ -56,6 +56,12 @@
 - `ANDROID_VERSION_CODE`
   - Android version code used by Expo config
 
+## GitHub Actions Variables And Secrets
+- Use GitHub Environment variables for public release metadata, package identifiers, API URLs, factory addresses, build numbers, and feature toggles.
+- Use GitHub Environment secrets for RPC URLs.
+- Keep `staging` and `production` values separate through GitHub Environments instead of branching inside workflow YAML.
+- The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
+
 ## Environment Expectations
 - Development:
   - local URLs are acceptable

@@ -1,48 +1,40 @@
 # Current Session
 
 ## Date
-2026-04-26
+2026-04-27
 
 ## Current Objective
-Refresh the public mobile homepage into a production-grade NativeWind-backed iPhone experience.
+Commit and push current work, then implement the next production-grade step focused on code and detailed documentation without running full tests or builds.
 
 ## Last Completed Step
-Added NativeWind v5 preview and Tailwind CSS v4 setup, refreshed the public mobile header and homepage, removed mobile decorative blob whitespace, and moved the compact footer into the scroll content.
+Added Phase 17 GitHub Actions CI and manual release-candidate verification for staging and production.
 
 ## Files Touched
-- `apps/mobile/global.css`
-- `apps/mobile/metro.config.js`
-- `apps/mobile/nativewind-env.d.ts`
-- `apps/mobile/package.json`
-- `apps/mobile/postcss.config.mjs`
-- `apps/mobile/src/app/_layout.tsx`
-- `apps/mobile/src/components/layout/`
-- `apps/mobile/src/components/marketing/`
-- `apps/mobile/src/components/primitives/`
-- `apps/mobile/src/lib/i18n/`
-- `apps/mobile/src/lib/public/marketing-content.ts`
-- `apps/mobile/src/theme/`
-- `apps/mobile/tsconfig.json`
+- `.github/actions/setup-pnpm/action.yml`
+- `.github/workflows/ci.yml`
+- `.github/workflows/release-candidate.yml`
 - `package.json`
-- `pnpm-lock.yaml`
+- `README.md`
+- `docs/plans/goal-vault-ci-release-workflows.md`
+- `docs/plans/goal-vault-universal-react-native-phase-17.md`
+- `docs/plans/goal-vault-env-reference.md`
+- `docs/plans/goal-vault-launch-checklist.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 
 ## Durable Decisions Captured
-- `apps/mobile` now uses NativeWind v5 preview with Tailwind CSS v4 and CSS-first tokens for mobile marketing polish.
-- Metro must continue preserving the root `valtio` alias while wrapping the config with `withNativewind`.
-- Compact public marketing screens should avoid decorative blob backgrounds, oversized pill-only layouts, and footer positioning that creates empty mobile scroll regions.
+- CI now runs workspace typechecks, TypeScript unit tests, Foundry contract tests, and Expo exports on pull requests and pushes to `dev` or `main`.
+- Release candidates are manual GitHub Actions runs bound to `staging` or `production` GitHub Environments.
+- Release-candidate workflows create verification artifacts only and do not deploy contracts, promote backends, submit store builds, or change traffic.
+- Public release metadata belongs in GitHub Environment variables; RPC URLs belong in GitHub Environment secrets.
 
 ## Scope Boundaries
-- Public homepage, marketing shell/header/footer, shared styling foundation, and i18n import boundaries were touched.
-- Authenticated vault behavior and onchain flows were intentionally left unchanged.
+- No local test, build, or Expo export commands were run by request.
+- No deployment, contract promotion, EAS cloud build, app-store submission, or backend infrastructure automation was added.
 
 ## Verification Commands
-- `pnpm --filter @goal-vault/mobile typecheck`
-- `pnpm --filter @goal-vault/mobile test`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist/ios`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist/web`
-- Headless Chrome screenshots from `dist/web` at 390px and 430px widths
+- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path); puts path }' .github/actions/setup-pnpm/action.yml .github/workflows/ci.yml .github/workflows/release-candidate.yml`
+- `git diff --check`
 
 ## Handoff Note
-NativeWind export compatibility is currently passing. Headless Chrome emits macOS display and updater noise after writing screenshots, so those screenshot processes were manually killed after output was produced.
+Before relying on the release-candidate workflow, create `staging` and `production` GitHub Environments and populate the variables and secrets listed in `docs/plans/goal-vault-ci-release-workflows.md`.

@@ -1,6 +1,6 @@
 # Goal Vault
 
-![Status](https://img.shields.io/badge/status-phase%209-b07d4f)
+![Status](https://img.shields.io/badge/status-phase%2017-b07d4f)
 ![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android%20%7C%20Web-456b66)
 ![Expo](https://img.shields.io/badge/expo-sdk%2055-111827?logo=expo&logoColor=white)
 ![React%20Native](https://img.shields.io/badge/react%20native-0.83.6-61dafb?logo=react&logoColor=111827)
@@ -23,13 +23,12 @@ This repository now contains a deployment-oriented universal Goal Vault v1:
 - real wallet-first create, deposit, withdraw, vault detail, and activity flows
 - Fastify API with health/readiness endpoints, indexer sync, metadata reconciliation, and enriched vault/activity reads
 - deployment-aware Expo config, EAS profiles, env reference, and launch checklist docs
+- GitHub Actions CI and manual release-candidate verification workflows
 
 Still deferred:
 
-- cooldown unlock
-- guardian approval
 - external database-backed backend persistence
-- CI and automated release workflows
+- automatic contract deployment, backend promotion, and store submission workflows
 
 ## Product Scope
 
@@ -183,12 +182,20 @@ Root scripts:
   - runs the Android target
 - `pnpm typecheck`
   - runs workspace TypeScript checks through Turbo
+- `pnpm test:ts`
+  - runs Node/TypeScript unit tests for the API, mobile app, API client, and contracts SDK
+- `pnpm test:contracts`
+  - runs Foundry contract tests
+- `pnpm verify:ci`
+  - runs workspace typecheck, TypeScript unit tests, and contract tests
 - `pnpm verify:mobile:web`
   - exports the Expo web target
 - `pnpm verify:mobile:ios`
   - exports the Expo iOS bundle
+- `pnpm verify:mobile:android`
+  - exports the Expo Android bundle
 - `pnpm verify:release`
-  - runs typecheck plus the web and iOS export checks
+  - runs typecheck plus the web, iOS, and Android export checks
 
 App-level scripts in `apps/mobile`:
 
@@ -209,6 +216,7 @@ curl -s http://127.0.0.1:3001/health
 curl -s http://127.0.0.1:3001/ready
 pnpm verify:mobile:web
 pnpm verify:mobile:ios
+pnpm verify:mobile:android
 ```
 
 What these checks cover:
@@ -216,7 +224,7 @@ What these checks cover:
 - workspace dependency resolution
 - TypeScript validity across all packages
 - Expo Router bundling for web
-- app boot on the Expo web target
+- Expo export packaging for web, iOS, and Android
 
 ## Docs
 
@@ -232,6 +240,8 @@ Key documentation files:
   - env variables and deployment assumptions
 - `docs/plans/goal-vault-launch-checklist.md`
   - operator-facing launch checklist
+- `docs/plans/goal-vault-ci-release-workflows.md`
+  - CI and release-candidate workflow setup
 - `docs/plans/goal-vault-universal-react-native-phase-9.md`
   - Phase 9 implementation note
 - `docs/product/goal-vault/goal.md`
@@ -247,10 +257,10 @@ The next major implementation steps are:
 
 1. Complete Base Sepolia and Base mainnet deployment configuration with real RPC and factory values.
 2. Run full create, deposit, and withdraw smoke checks against staging.
-3. Resume roadmap work with cooldown unlock after deployment review.
+3. Decide whether deployment promotion, contract deployment, or store submission should be automated next.
 
 ## Notes
 
-- This repository now has deployment-aware configuration, but still does not include full CI/CD automation.
+- This repository now has CI and release-candidate verification, but deployment promotion remains manual.
 - `.env.example` provides the expected variable names without secrets.
 - Use the launch checklist and env reference docs before staging or production deployment.
