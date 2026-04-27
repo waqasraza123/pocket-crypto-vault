@@ -14,6 +14,8 @@ It is not a deployment workflow. It does not move traffic, deploy the API image,
   - manual staging or production workflow
   - binds to the matching GitHub Environment
   - uploads the release manifest artifact
+- `docs/deployment/api-preflight.md`
+  - produces the redacted API environment readiness report that should accompany backend promotion records
 
 ## Required Inputs
 - `target`
@@ -67,10 +69,11 @@ Use this manifest before manual promotion:
 
 1. Confirm contract deployment manifest matches the factory address.
 2. Confirm API image manifest matches the API image tag.
-3. Confirm mobile distribution manifest or EAS dashboard matches the build references.
-4. Confirm `/ready` is acceptable on the target API.
-5. Save the release manifest artifact with the release notes.
-6. Promote traffic manually through the selected hosting provider.
+3. Confirm API preflight report is passing for the target environment.
+4. Confirm mobile distribution manifest or EAS dashboard matches the build references.
+5. Confirm `/ready` is acceptable on the target API.
+6. Save the release manifest artifact with the release notes.
+7. Promote traffic manually through the selected hosting provider.
 
 ## Rollback Use
 Use this manifest during rollback:

@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API image publishing, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -33,6 +33,11 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - builds by default
   - publishes to GHCR only after explicit confirmation
   - uploads an image manifest artifact
+- `.github/workflows/api-preflight.yml`
+  - manual staging or production API runtime validation
+  - binds to the matching GitHub Environment
+  - validates target-chain RPC and factory configuration without printing secret values
+  - uploads a preflight report artifact even on failure
 - `.github/workflows/mobile-distribution.yml`
   - manual staging or production EAS mobile build and submit operations
   - starts remote EAS builds in build mode
@@ -63,6 +68,16 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `EXPO_PUBLIC_BASE_FACTORY_ADDRESS`
 - `EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS`
 - `API_PUBLIC_BASE_URL`
+- `API_HOST`
+- `API_PORT`
+- `API_DATA_DIR`
+- `API_SYNC_INTERVAL_MS`
+- `API_ENABLE_INDEXER`
+- `API_ENABLE_ANALYTICS`
+- `API_SIGNED_REQUEST_MAX_AGE_SECONDS`
+- `API_LOG_LEVEL`
+- `API_BASE_START_BLOCK`
+- `API_BASE_SEPOLIA_START_BLOCK`
 - `IOS_BUILD_NUMBER`
 - `ANDROID_VERSION_CODE`
 
@@ -72,10 +87,11 @@ Use GitHub Environment secrets for RPC URLs:
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
 - `CONTRACT_DEPLOY_RPC_URL`
 - `CONTRACT_DEPLOYER_PRIVATE_KEY`
+- `API_INTERNAL_TOKEN`
 
 Contract deployment also requires `USDC_ADDRESS` as a GitHub Environment variable.
 
-The current workflows do not require app-store credentials, backend deploy keys, or backend internal sync tokens in repository secrets.
+The current workflows do not require app-store credentials or backend deploy keys in repository secrets.
 Mobile distribution requires `EXPO_TOKEN` as a GitHub Environment secret. Store credentials are managed in EAS, not in repository secrets.
 
 ## Pull Request Gate
@@ -114,6 +130,15 @@ Use the manual API image workflow when the API release candidate is ready:
 4. Download the image manifest artifact.
 5. Deploy the published image manually on the selected backend host.
 
+## API Preflight Gate
+Use the manual API preflight workflow before deploying or promoting a backend image:
+
+1. Choose `staging` or `production`.
+2. Confirm the target GitHub Environment has API variables and secrets configured.
+3. Run `API Preflight`.
+4. Download the preflight report artifact.
+5. Fix any validation errors before API image deployment or traffic movement.
+
 ## Mobile Distribution Gate
 Use the manual mobile distribution workflow after app, API, and contract release candidates are coherent:
 
@@ -138,6 +163,7 @@ Use the manual release manifest workflow before traffic movement:
 - Treat release-candidate artifacts as verification outputs, not deployable store releases.
 - Use `docs/deployment/contract-deployment.md` for contract simulation, broadcast, post-deploy config, and rollback handling.
 - Use `docs/deployment/api-image.md` for API image build, publish, runtime config, promotion, and rollback handling.
+- Use `docs/deployment/api-preflight.md` for API runtime env validation before backend deployment.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.
 - Use `docs/deployment/release-manifest.md` to record promotion and rollback pointers before manual traffic changes.
 - Add backend promotion jobs only after the staging backend and rollback policy are finalized.

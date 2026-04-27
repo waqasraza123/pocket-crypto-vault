@@ -45,12 +45,18 @@
   - public API URL for deployment readiness and operator checks
 - `API_DATA_DIR`
   - file-backed indexer data directory
+- `API_PREFLIGHT_OUTPUT`
+  - optional output path for the redacted API runtime preflight report
 - `API_SYNC_INTERVAL_MS`
   - background sync interval in milliseconds
 - `API_ENABLE_INDEXER`
   - `true` or `false`
 - `API_ENABLE_ANALYTICS`
   - `true` or `false`; stores app analytics batches to the API-side NDJSON file for post-launch review
+- `API_INTERNAL_TOKEN`
+  - internal sync and status token; required outside development and stored as a GitHub Environment secret
+- `API_SIGNED_REQUEST_MAX_AGE_SECONDS`
+  - maximum accepted age for signed metadata requests
 - `API_LOG_LEVEL`
   - one of `fatal`, `error`, `warn`, `info`, `debug`, `trace`
 - `API_BASE_START_BLOCK`
@@ -63,6 +69,16 @@
   - use `0.0.0.0` inside container hosting
 - `API_DATA_DIR`
   - should point to mounted durable storage before relying on SQLite-backed indexed state
+
+## API Preflight Variables
+- `API_PREFLIGHT_OUTPUT`
+  - artifact path for the preflight report
+- `API_INTERNAL_TOKEN`
+  - reported only as configured or missing
+- `EXPO_PUBLIC_BASE_RPC_URL`
+  - reported only as configured or missing
+- `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
+  - reported only as configured or missing
 
 ## API Data Snapshot Variables
 - `API_DATA_DIR`
@@ -106,6 +122,7 @@
 - Keep `staging` and `production` values separate through GitHub Environments instead of branching inside workflow YAML.
 - The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
 - The API image workflow publishes to GHCR through `GITHUB_TOKEN` and does not require provider deployment credentials.
+- The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status.
 - The mobile distribution workflow uses `EXPO_TOKEN`; App Store Connect and Google Play credentials should stay in EAS.
 - The release manifest workflow records non-secret deployment pointers only and must not include private keys, RPC URLs, or internal API tokens.
 

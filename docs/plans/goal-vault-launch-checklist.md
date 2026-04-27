@@ -20,6 +20,8 @@
 - Copy the deployed factory address into the matching app/API environment variables.
 
 ## Backend
+- Run the `API Preflight` workflow for the target environment before deploying or promoting the backend image.
+- Download the API preflight report artifact and resolve any validation errors.
 - Start the API with launch env values.
 - Check `GET /health` for service liveness.
 - Check `GET /ready` for blocked or degraded checks.
@@ -38,6 +40,7 @@
 - Confirm the workflow typechecks, checks API readiness when configured, and uploads the expected export artifacts.
 
 ## API Image
+- Confirm API preflight passes for the target environment.
 - Run the `API Image` workflow in `build` mode first.
 - Publish only after release-candidate review by setting `mode` to `publish` and `confirm_publish` to `publish`.
 - Download the API image manifest artifact.
@@ -63,6 +66,7 @@
 - Confirm store metadata, privacy details, screenshots, and support URLs are ready before submission.
 
 ## Release Manifest
+- Attach or reference the passing API preflight report when preparing release notes.
 - Run the `Release Manifest` workflow before manual traffic movement.
 - Confirm the manifest records the intended API image tag.
 - Confirm the manifest records the intended factory address.

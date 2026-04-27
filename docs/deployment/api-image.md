@@ -21,6 +21,8 @@ The workflow builds an immutable API image and can publish it to GitHub Containe
   - binds to `staging` or `production` GitHub Environments
   - pushes to GHCR only with explicit confirmation
   - uploads an image manifest artifact
+- `docs/deployment/api-preflight.md`
+  - validates runtime environment wiring before image deployment or traffic movement
 
 ## Workflow Modes
 ### Build
@@ -85,13 +87,14 @@ Use `API_HOST=0.0.0.0` in container hosting. Mount or provision durable storage 
 
 ## Promotion Flow
 1. Run release-candidate verification for the target.
-2. Run `API Image` in build mode.
-3. Run `API Image` in publish mode with explicit confirmation.
-4. Deploy the published image in the hosting provider.
-5. Configure runtime environment variables and durable storage.
-6. Check `/health`.
-7. Check `/ready`.
-8. Run create, deposit, withdraw smoke checks before opening broader traffic.
+2. Run `API Preflight` for the target and resolve any validation errors.
+3. Run `API Image` in build mode.
+4. Run `API Image` in publish mode with explicit confirmation.
+5. Deploy the published image in the hosting provider.
+6. Configure runtime environment variables and durable storage.
+7. Check `/health`.
+8. Check `/ready`.
+9. Run create, deposit, withdraw smoke checks before opening broader traffic.
 
 ## Rollback Flow
 1. Stop traffic promotion.
@@ -101,4 +104,4 @@ Use `API_HOST=0.0.0.0` in container hosting. Mount or provision durable storage 
 5. Confirm indexer freshness before claiming activity freshness.
 
 ## Current Boundary
-This phase creates and publishes a backend artifact. It intentionally does not choose the hosting platform or automate traffic movement.
+This phase creates and publishes a backend artifact. API preflight validates runtime environment readiness, but the repository still intentionally does not choose the hosting platform or automate traffic movement.

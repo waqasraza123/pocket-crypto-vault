@@ -1,6 +1,6 @@
 # Goal Vault
 
-![Status](https://img.shields.io/badge/status-phase%2022-b07d4f)
+![Status](https://img.shields.io/badge/status-phase%2023-b07d4f)
 ![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android%20%7C%20Web-456b66)
 ![Expo](https://img.shields.io/badge/expo-sdk%2055-111827?logo=expo&logoColor=white)
 ![React%20Native](https://img.shields.io/badge/react%20native-0.83.6-61dafb?logo=react&logoColor=111827)
@@ -29,6 +29,7 @@ This repository now contains a deployment-oriented universal Goal Vault v1:
 - guarded EAS mobile build and production store submission workflow
 - release manifest workflow for promotion and rollback records
 - API data snapshot and restore tooling for current SQLite-backed persistence
+- API runtime preflight workflow for staging and production env validation
 
 Still deferred:
 
@@ -137,6 +138,7 @@ Included:
 - API startup validation plus separated `/health` and `/ready`
 - guarded Foundry deployment script and GitHub Actions contract deployment workflow
 - API Dockerfile and manual image build/publish workflow for GHCR
+- API runtime preflight job and manual workflow for release env validation
 - guarded mobile EAS build and submit workflow
 - release manifest generation before manual traffic movement
 - API data snapshot and restore scripts for the current SQLite persistence layer
@@ -194,6 +196,8 @@ Root scripts:
   - snapshots API data files from `API_DATA_DIR`
 - `pnpm api:data:restore`
   - restores API data files from a snapshot with explicit confirmation
+- `pnpm api:preflight`
+  - writes a redacted API runtime preflight report and exits nonzero on invalid staging or production configuration
 - `pnpm typecheck`
   - runs workspace TypeScript checks through Turbo
 - `pnpm test:ts`
@@ -270,6 +274,8 @@ Key documentation files:
   - guarded contract deployment runbook
 - `docs/deployment/api-image.md`
   - API image build, publish, runtime, promotion, and rollback runbook
+- `docs/deployment/api-preflight.md`
+  - API runtime preflight runbook
 - `docs/deployment/mobile-distribution.md`
   - EAS mobile build, submit, manifest, and rollback runbook
 - `docs/deployment/release-manifest.md`
@@ -286,6 +292,8 @@ Key documentation files:
   - Phase 21 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-22.md`
   - Phase 22 implementation note
+- `docs/plans/goal-vault-universal-react-native-phase-23.md`
+  - Phase 23 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-9.md`
   - Phase 9 implementation note
 - `docs/product/goal-vault/goal.md`
@@ -302,14 +310,15 @@ The next major implementation steps are:
 1. Configure GitHub Environment values and secrets for staging contract deployment and API runtime.
 2. Run staging contract deployment simulation, then broadcast only after review.
 3. Feed the staged factory address into app/API env and run release-candidate verification.
-4. Build and publish the staging API image, then deploy it manually to the selected backend host.
-5. Run staging mobile EAS builds after backend and contract configuration are stable.
-6. Create an API data snapshot before manually moving traffic.
-7. Generate a release manifest before manually moving traffic.
-8. Decide whether hosting-provider backend promotion should be automated next.
+4. Run API preflight for the target environment and fix any runtime configuration errors.
+5. Build and publish the staging API image, then deploy it manually to the selected backend host.
+6. Run staging mobile EAS builds after backend and contract configuration are stable.
+7. Create an API data snapshot before manually moving traffic.
+8. Generate a release manifest before manually moving traffic.
+9. Decide whether hosting-provider backend promotion should be automated next.
 
 ## Notes
 
-- This repository now has CI, release-candidate verification, guarded contract deployment, API image packaging, mobile EAS distribution automation, release manifests, and API data snapshot tooling, but backend traffic promotion remains manual.
+- This repository now has CI, release-candidate verification, guarded contract deployment, API image packaging, API runtime preflight, mobile EAS distribution automation, release manifests, and API data snapshot tooling, but backend traffic promotion remains manual.
 - `.env.example` provides the expected variable names without secrets.
 - Use the launch checklist and env reference docs before staging or production deployment.

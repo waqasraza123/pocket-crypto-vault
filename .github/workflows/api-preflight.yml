@@ -1,0 +1,66 @@
+name: API Preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment to validate.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-preflight-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  APP_ENV: ${{ inputs.target }}
+  EXPO_PUBLIC_APP_ENV: ${{ inputs.target }}
+  API_HOST: ${{ vars.API_HOST || '0.0.0.0' }}
+  API_PORT: ${{ vars.API_PORT || '3001' }}
+  API_PUBLIC_BASE_URL: ${{ vars.API_PUBLIC_BASE_URL }}
+  API_DATA_DIR: ${{ vars.API_DATA_DIR || '/data' }}
+  API_SYNC_INTERVAL_MS: ${{ vars.API_SYNC_INTERVAL_MS || '30000' }}
+  API_ENABLE_INDEXER: ${{ vars.API_ENABLE_INDEXER || 'true' }}
+  API_ENABLE_ANALYTICS: ${{ vars.API_ENABLE_ANALYTICS || 'true' }}
+  API_INTERNAL_TOKEN: ${{ secrets.API_INTERNAL_TOKEN }}
+  API_SIGNED_REQUEST_MAX_AGE_SECONDS: ${{ vars.API_SIGNED_REQUEST_MAX_AGE_SECONDS || '900' }}
+  API_LOG_LEVEL: ${{ vars.API_LOG_LEVEL || 'info' }}
+  EXPO_PUBLIC_BASE_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_RPC_URL }}
+  EXPO_PUBLIC_BASE_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_FACTORY_ADDRESS }}
+  EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL }}
+  EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS }}
+  API_BASE_START_BLOCK: ${{ vars.API_BASE_START_BLOCK || '0' }}
+  API_BASE_SEPOLIA_START_BLOCK: ${{ vars.API_BASE_SEPOLIA_START_BLOCK || '0' }}
+  API_PREFLIGHT_OUTPUT: artifacts/goal-vault-api-preflight-${{ inputs.target }}.json
+
+jobs:
+  api-preflight:
+    name: Validate API runtime for ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Run API runtime preflight
+        run: pnpm api:preflight
+
+      - name: Upload preflight report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-api-preflight-${{ inputs.target }}
+          path: artifacts/goal-vault-api-preflight-${{ inputs.target }}.json
+          if-no-files-found: error
