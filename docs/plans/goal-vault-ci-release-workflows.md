@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -38,6 +38,11 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - binds to the matching GitHub Environment
   - validates target-chain RPC and factory configuration without printing secret values
   - uploads a preflight report artifact even on failure
+- `.github/workflows/api-traffic-plan.yml`
+  - manual staging or production API traffic plan generation
+  - supports promotion, rollback, and disablement planning
+  - validates non-secret URLs, image tags, artifact references, and rollback inputs
+  - uploads a traffic plan artifact without moving traffic
 - `.github/workflows/mobile-distribution.yml`
   - manual staging or production EAS mobile build and submit operations
   - starts remote EAS builds in build mode
@@ -78,6 +83,21 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `API_LOG_LEVEL`
 - `API_BASE_START_BLOCK`
 - `API_BASE_SEPOLIA_START_BLOCK`
+- `API_TRAFFIC_TARGET`
+- `API_TRAFFIC_ACTION`
+- `API_TRAFFIC_PLAN_LABEL`
+- `API_TRAFFIC_CURRENT_URL`
+- `API_TRAFFIC_CANDIDATE_URL`
+- `API_TRAFFIC_ROLLBACK_URL`
+- `API_TRAFFIC_API_IMAGE`
+- `API_TRAFFIC_ROLLBACK_API_IMAGE`
+- `API_TRAFFIC_RELEASE_MANIFEST`
+- `API_TRAFFIC_PREFLIGHT_REPORT`
+- `API_TRAFFIC_DATA_SNAPSHOT`
+- `API_TRAFFIC_CHANGE_WINDOW`
+- `API_TRAFFIC_OBSERVE_MINUTES`
+- `API_TRAFFIC_OPERATOR`
+- `API_TRAFFIC_NOTES`
 - `IOS_BUILD_NUMBER`
 - `ANDROID_VERSION_CODE`
 
@@ -139,6 +159,15 @@ Use the manual API preflight workflow before deploying or promoting a backend im
 4. Download the preflight report artifact.
 5. Fix any validation errors before API image deployment or traffic movement.
 
+## API Traffic Plan Gate
+Use the manual API traffic plan workflow before provider-specific traffic changes:
+
+1. Choose `staging` or `production`.
+2. Choose `promote`, `rollback`, or `disable`.
+3. Provide a stable plan label.
+4. For promotion, provide candidate URL, rollback URL, candidate image, rollback image, release manifest reference, API preflight report reference, and API data snapshot reference.
+5. Download the traffic plan artifact and review the steps with the hosting-provider operator.
+
 ## Mobile Distribution Gate
 Use the manual mobile distribution workflow after app, API, and contract release candidates are coherent:
 
@@ -164,9 +193,10 @@ Use the manual release manifest workflow before traffic movement:
 - Use `docs/deployment/contract-deployment.md` for contract simulation, broadcast, post-deploy config, and rollback handling.
 - Use `docs/deployment/api-image.md` for API image build, publish, runtime config, promotion, and rollback handling.
 - Use `docs/deployment/api-preflight.md` for API runtime env validation before backend deployment.
+- Use `docs/deployment/api-traffic-plan.md` for provider-neutral traffic movement, rollback, and disablement planning.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.
 - Use `docs/deployment/release-manifest.md` to record promotion and rollback pointers before manual traffic changes.
-- Add backend promotion jobs only after the staging backend and rollback policy are finalized.
+- Add provider-specific backend promotion jobs only after the staging backend host and rollback policy are finalized.
 
 ## Deferred Automation
 - Hosting-provider backend deployment

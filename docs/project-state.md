@@ -30,10 +30,11 @@ The repository now has a real v1 foundation:
 - release manifest workflow for promotion records and rollback pointers
 - API data snapshot and restore tooling for the current SQLite-backed persistence layer
 - API runtime preflight tooling for redacted staging and production environment validation
+- provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- hosting-provider backend promotion, traffic rollback workflows, and external managed database infrastructure
+- hosting-provider backend promotion, provider-specific traffic rollback automation, and external managed database infrastructure
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -102,6 +103,7 @@ Still not implemented:
 - Phase 21: release manifest automation for promotion records, artifact stitching, and rollback pointers
 - Phase 22: API data snapshot and restore tooling for SQLite-backed backend persistence
 - Phase 23: API runtime preflight workflow for provider-neutral backend promotion readiness
+- Phase 24: API traffic plan workflow for provider-neutral promotion, rollback, and disablement records
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -169,6 +171,8 @@ Still not implemented:
 - Phase 22 adds SQLite snapshot and restore tooling as an operational bridge before managed database infrastructure.
 - Phase 23 adds a provider-neutral API runtime preflight that validates staging and production API environment wiring before backend deployment or traffic movement.
 - API preflight reports must not include RPC URLs, internal API tokens, private keys, EAS tokens, or wallet project secrets.
+- Phase 24 adds a provider-neutral API traffic plan artifact that records promotion, rollback, and disablement steps without mutating hosting infrastructure.
+- API traffic plans must include rollback URL and rollback image references before promotion.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -203,17 +207,19 @@ Still not implemented:
 - The Phase 21 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-21.md`.
 - The Phase 22 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-22.md`.
 - The Phase 23 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-23.md`.
+- The Phase 24 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-24.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
 - The API preflight runbook lives at `docs/deployment/api-preflight.md`.
+- The API traffic plan runbook lives at `docs/deployment/api-traffic-plan.md`.
 - The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.
 - The release manifest runbook lives at `docs/deployment/release-manifest.md`.
 - The API data snapshot runbook lives at `docs/deployment/api-data-snapshots.md`.
 
 ## Deferred / Not Yet Implemented
 - External managed database infrastructure beyond the current in-repo SQLite persistence
-- Hosting-provider backend promotion and traffic rollback workflows
+- Provider-specific backend deployment, traffic switching, and automated rollback workflows
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

@@ -101,7 +101,7 @@ Use this gate before deploying or promoting a backend image:
 2. Run `API Preflight` for the target.
 3. Download the preflight report artifact.
 4. Fix any validation errors before deploying the API image.
-5. Keep the passing report with the API image manifest and release manifest.
+5. Keep the passing report with the API image manifest, release manifest, and API traffic plan.
 
 ## Failure Handling
 If the workflow fails, download the uploaded report and inspect `validationErrors`.

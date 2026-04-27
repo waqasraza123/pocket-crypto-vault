@@ -1,0 +1,122 @@
+name: API Traffic Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      action:
+        description: Traffic action to plan.
+        type: choice
+        required: true
+        default: promote
+        options:
+          - promote
+          - rollback
+          - disable
+      plan_label:
+        description: Stable plan label, such as v0.1.0-rc.1.
+        type: string
+        required: true
+      current_api_url:
+        description: Current public API URL.
+        type: string
+        required: false
+      candidate_api_url:
+        description: Candidate API URL for promotion.
+        type: string
+        required: false
+      rollback_api_url:
+        description: Previous known-good API URL.
+        type: string
+        required: false
+      api_image:
+        description: Candidate API image reference with tag.
+        type: string
+        required: false
+      rollback_api_image:
+        description: Previous known-good API image reference with tag.
+        type: string
+        required: false
+      release_manifest_artifact:
+        description: Release manifest artifact name or URL.
+        type: string
+        required: false
+      preflight_report_artifact:
+        description: API preflight report artifact name or URL.
+        type: string
+        required: false
+      data_snapshot_artifact:
+        description: API data snapshot artifact name or storage reference.
+        type: string
+        required: false
+      change_window:
+        description: Approved change window.
+        type: string
+        required: false
+      observe_minutes:
+        description: Minimum observation window after promotion.
+        type: string
+        required: false
+        default: "15"
+      operator:
+        description: Operator or team responsible for executing the plan.
+        type: string
+        required: false
+      notes:
+        description: Optional operator notes.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-traffic-plan-${{ inputs.target }}-${{ inputs.action }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  API_TRAFFIC_TARGET: ${{ inputs.target }}
+  API_TRAFFIC_ACTION: ${{ inputs.action }}
+  API_TRAFFIC_PLAN_LABEL: ${{ inputs.plan_label }}
+  API_TRAFFIC_CURRENT_URL: ${{ inputs.current_api_url }}
+  API_TRAFFIC_CANDIDATE_URL: ${{ inputs.candidate_api_url }}
+  API_TRAFFIC_ROLLBACK_URL: ${{ inputs.rollback_api_url }}
+  API_TRAFFIC_API_IMAGE: ${{ inputs.api_image }}
+  API_TRAFFIC_ROLLBACK_API_IMAGE: ${{ inputs.rollback_api_image }}
+  API_TRAFFIC_RELEASE_MANIFEST: ${{ inputs.release_manifest_artifact }}
+  API_TRAFFIC_PREFLIGHT_REPORT: ${{ inputs.preflight_report_artifact }}
+  API_TRAFFIC_DATA_SNAPSHOT: ${{ inputs.data_snapshot_artifact }}
+  API_TRAFFIC_CHANGE_WINDOW: ${{ inputs.change_window }}
+  API_TRAFFIC_OBSERVE_MINUTES: ${{ inputs.observe_minutes }}
+  API_TRAFFIC_OPERATOR: ${{ inputs.operator }}
+  API_TRAFFIC_NOTES: ${{ inputs.notes }}
+  API_TRAFFIC_PLAN_DIR: artifacts
+
+jobs:
+  api-traffic-plan:
+    name: Write ${{ inputs.target }} API ${{ inputs.action }} plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write API traffic plan
+        id: plan
+        run: node scripts/write-api-traffic-plan.mjs
+
+      - name: Upload API traffic plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-api-traffic-${{ inputs.target }}-${{ inputs.action }}
+          path: ${{ steps.plan.outputs.plan_path }}
+          if-no-files-found: error

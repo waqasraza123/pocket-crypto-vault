@@ -73,6 +73,12 @@
 - Add rollback API image and previous factory address when applicable.
 - Store the manifest artifact with release notes.
 
+## API Traffic Plan
+- Run the `API Traffic Plan` workflow before manual API traffic movement.
+- For promotion, include candidate URL, rollback URL, candidate image, rollback image, release manifest, API preflight report, and API data snapshot references.
+- Download the API traffic plan artifact and review it with the hosting-provider operator.
+- Confirm the plan says `noTrafficMoved: true` before treating it as a review artifact.
+
 ## Product Smoke Checks
 - Connect wallet on the supported target network.
 - Create one vault.
@@ -95,6 +101,7 @@
 ## Rollback / Disable
 - If the API is unhealthy, disable public launch traffic or point the app back to a known-good API base URL.
 - If an API image is unhealthy, redeploy the previous known-good image tag.
+- Generate an `API Traffic Plan` rollback or disable plan before manual provider changes when time allows.
 - Restore API data from the intended snapshot only with the API stopped.
 - If indexer background sync is disabled, do not claim indexed activity freshness until manual sync procedures are in place.
 - If a new factory deployment is wrong, restore the previous factory address in app/API configuration and stop promotion.

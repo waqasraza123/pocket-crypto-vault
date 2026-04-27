@@ -23,6 +23,8 @@ The workflow builds an immutable API image and can publish it to GitHub Containe
   - uploads an image manifest artifact
 - `docs/deployment/api-preflight.md`
   - validates runtime environment wiring before image deployment or traffic movement
+- `docs/deployment/api-traffic-plan.md`
+  - records the intended promotion, rollback, or disablement steps before provider-specific traffic changes
 
 ## Workflow Modes
 ### Build
@@ -94,7 +96,10 @@ Use `API_HOST=0.0.0.0` in container hosting. Mount or provision durable storage 
 6. Configure runtime environment variables and durable storage.
 7. Check `/health`.
 8. Check `/ready`.
-9. Run create, deposit, withdraw smoke checks before opening broader traffic.
+9. Create an API data snapshot.
+10. Generate the release manifest.
+11. Generate an API traffic plan.
+12. Run create, deposit, withdraw smoke checks before opening broader traffic.
 
 ## Rollback Flow
 1. Stop traffic promotion.
@@ -104,4 +109,4 @@ Use `API_HOST=0.0.0.0` in container hosting. Mount or provision durable storage 
 5. Confirm indexer freshness before claiming activity freshness.
 
 ## Current Boundary
-This phase creates and publishes a backend artifact. API preflight validates runtime environment readiness, but the repository still intentionally does not choose the hosting platform or automate traffic movement.
+This phase creates and publishes a backend artifact. API preflight validates runtime environment readiness, and API traffic plans record promotion or rollback intent, but the repository still intentionally does not choose the hosting platform or automate traffic movement.

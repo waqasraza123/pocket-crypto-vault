@@ -80,6 +80,40 @@
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
   - reported only as configured or missing
 
+## API Traffic Plan Variables
+- `API_TRAFFIC_TARGET`
+  - `staging` or `production`
+- `API_TRAFFIC_ACTION`
+  - `promote`, `rollback`, or `disable`
+- `API_TRAFFIC_PLAN_LABEL`
+  - stable label used in artifact naming
+- `API_TRAFFIC_CURRENT_URL`
+  - current public API URL
+- `API_TRAFFIC_CANDIDATE_URL`
+  - candidate API URL for promotion
+- `API_TRAFFIC_ROLLBACK_URL`
+  - previous known-good API URL
+- `API_TRAFFIC_API_IMAGE`
+  - candidate API image reference with explicit tag
+- `API_TRAFFIC_ROLLBACK_API_IMAGE`
+  - previous known-good API image reference with explicit tag
+- `API_TRAFFIC_RELEASE_MANIFEST`
+  - release manifest artifact name or URL
+- `API_TRAFFIC_PREFLIGHT_REPORT`
+  - API preflight report artifact name or URL
+- `API_TRAFFIC_DATA_SNAPSHOT`
+  - API data snapshot artifact name or approved storage reference
+- `API_TRAFFIC_CHANGE_WINDOW`
+  - approved operator change window
+- `API_TRAFFIC_OBSERVE_MINUTES`
+  - minimum post-promotion observation window
+- `API_TRAFFIC_OPERATOR`
+  - operator or team responsible for executing the plan
+- `API_TRAFFIC_NOTES`
+  - optional non-secret notes
+- `API_TRAFFIC_PLAN_DIR`
+  - output directory for local traffic plan artifacts
+
 ## API Data Snapshot Variables
 - `API_DATA_DIR`
   - source or restore target for API data files
@@ -123,6 +157,7 @@
 - The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
 - The API image workflow publishes to GHCR through `GITHUB_TOKEN` and does not require provider deployment credentials.
 - The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status.
+- The API traffic plan workflow uses only non-secret operator inputs and does not require hosting-provider credentials.
 - The mobile distribution workflow uses `EXPO_TOKEN`; App Store Connect and Google Play credentials should stay in EAS.
 - The release manifest workflow records non-secret deployment pointers only and must not include private keys, RPC URLs, or internal API tokens.
 

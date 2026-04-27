@@ -16,6 +16,8 @@ It is not a deployment workflow. It does not move traffic, deploy the API image,
   - uploads the release manifest artifact
 - `docs/deployment/api-preflight.md`
   - produces the redacted API environment readiness report that should accompany backend promotion records
+- `docs/deployment/api-traffic-plan.md`
+  - records the provider-neutral traffic movement or rollback plan that should be reviewed before manual provider changes
 
 ## Required Inputs
 - `target`
@@ -71,18 +73,20 @@ Use this manifest before manual promotion:
 2. Confirm API image manifest matches the API image tag.
 3. Confirm API preflight report is passing for the target environment.
 4. Confirm mobile distribution manifest or EAS dashboard matches the build references.
-5. Confirm `/ready` is acceptable on the target API.
-6. Save the release manifest artifact with the release notes.
-7. Promote traffic manually through the selected hosting provider.
+5. Generate and review the API traffic plan.
+6. Confirm `/ready` is acceptable on the target API.
+7. Save the release manifest and traffic plan artifacts with the release notes.
+8. Promote traffic manually through the selected hosting provider.
 
 ## Rollback Use
 Use this manifest during rollback:
 
 1. Stop or pause traffic promotion.
-2. Redeploy `rollback.previousApiImage` if it is present.
-3. Restore `rollback.previousFactoryAddress` if the new factory address caused the issue.
-4. Verify `/health` and `/ready`.
-5. Confirm app clients still point to a coherent API and factory combination.
+2. Generate an API traffic rollback plan when time allows.
+3. Redeploy `rollback.previousApiImage` if it is present.
+4. Restore `rollback.previousFactoryAddress` if the new factory address caused the issue.
+5. Verify `/health` and `/ready`.
+6. Confirm app clients still point to a coherent API and factory combination.
 
 ## Boundary
 This workflow creates a source-of-truth artifact for operators. Provider-specific promotion and rollback remain manual until a backend host and traffic policy are chosen.
