@@ -45,6 +45,12 @@
   - public API URL for deployment readiness and operator checks
 - `API_DATA_DIR`
   - file-backed indexer data directory
+- `API_PERSISTENCE_DRIVER`
+  - `sqlite` or `postgresql`; only `sqlite` is runtime-ready today
+- `API_DATABASE_URL`
+  - managed database connection string for future PostgreSQL runtime adapter; secret and currently blocked when selected
+- `API_PERSISTENCE_SCHEMA_NAME`
+  - PostgreSQL schema name for future managed database runtime adapter; defaults to `goal_vault_api`
 - `API_PREFLIGHT_OUTPUT`
   - optional output path for the redacted API runtime preflight report
 - `API_SYNC_INTERVAL_MS`
@@ -73,6 +79,12 @@
 ## API Preflight Variables
 - `API_PREFLIGHT_OUTPUT`
   - artifact path for the preflight report
+- `API_PERSISTENCE_DRIVER`
+  - reported as `sqlite` or `postgresql`
+- `API_DATABASE_URL`
+  - reported only as configured or missing
+- `API_PERSISTENCE_SCHEMA_NAME`
+  - reported as the selected schema name
 - `API_INTERNAL_TOKEN`
   - reported only as configured or missing
 - `EXPO_PUBLIC_BASE_RPC_URL`
@@ -282,7 +294,7 @@
 - Keep `staging` and `production` values separate through GitHub Environments instead of branching inside workflow YAML.
 - The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
 - The API image workflow publishes to GHCR through `GITHUB_TOKEN` and does not require provider deployment credentials.
-- The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status.
+- The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status. PostgreSQL persistence is intentionally blocked until the runtime adapter is implemented.
 - The API traffic plan workflow uses only non-secret operator inputs and does not require hosting-provider credentials.
 - The API managed database plan workflow uses only non-secret operator inputs and rejects target references that look like connection strings or credentials.
 - The API managed database export workflow reads a snapshot directory, verifies snapshot checksums, and writes JSONL files only; export bundles are sensitive and should not be committed.

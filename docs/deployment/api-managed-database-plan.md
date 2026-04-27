@@ -79,8 +79,8 @@ The generated steps require:
 1. Stop public API traffic or enter a maintenance window.
 2. Create a fresh API data snapshot.
 3. Restore the snapshot into the managed database target through an operator-owned procedure.
-4. Run API preflight against the managed database runtime environment.
-5. Deploy the API image pointed at the managed database target.
+4. Run API preflight with the selected persistence driver and confirm PostgreSQL mode remains blocked until the adapter exists.
+5. Deploy the API image pointed at the managed database target only after the PostgreSQL runtime adapter is implemented.
 6. Generate an API traffic plan before public traffic resumes.
 
 ### Shadow Restore
@@ -91,8 +91,8 @@ The generated steps require:
 1. Create a fresh API data snapshot.
 2. Restore the snapshot into a non-public managed database target.
 3. Run read-only parity checks.
-4. Run API preflight against the managed database runtime environment.
-5. Deploy a candidate API host pointed at the managed database target.
+4. Run API preflight with the selected persistence driver and confirm PostgreSQL mode remains blocked until the adapter exists.
+5. Deploy a candidate API host pointed at the managed database target only after the PostgreSQL runtime adapter is implemented.
 6. Generate an API traffic plan before public traffic movement.
 
 ## Parity Expectations
@@ -132,7 +132,7 @@ Use the managed database plan before adding provider-specific database infrastru
 9. Import the JSONL export through an operator-owned procedure.
 10. Generate the managed database parity plan.
 11. Run parity checks through approved operational access.
-12. Run API preflight with the managed database runtime configuration.
+12. Run API preflight with the selected persistence driver and keep `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL adapter is implemented.
 13. Generate the release manifest and API traffic plan.
 14. Move traffic manually only after the selected hosting-provider operator approves the plan.
 

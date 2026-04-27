@@ -97,6 +97,8 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `API_HOST`
 - `API_PORT`
 - `API_DATA_DIR`
+- `API_PERSISTENCE_DRIVER`
+- `API_PERSISTENCE_SCHEMA_NAME`
 - `API_SYNC_INTERVAL_MS`
 - `API_ENABLE_INDEXER`
 - `API_ENABLE_ANALYTICS`
@@ -181,6 +183,7 @@ Use GitHub Environment variables for public, non-secret release metadata:
 
 Use GitHub Environment secrets for RPC URLs:
 
+- `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
 - `CONTRACT_DEPLOY_RPC_URL`
@@ -235,7 +238,8 @@ Use the manual API preflight workflow before deploying or promoting a backend im
 2. Confirm the target GitHub Environment has API variables and secrets configured.
 3. Run `API Preflight`.
 4. Download the preflight report artifact.
-5. Fix any validation errors before API image deployment or traffic movement.
+5. Confirm `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL runtime adapter exists.
+6. Fix any validation errors before API image deployment or traffic movement.
 
 ## API Traffic Plan Gate
 Use the manual API traffic plan workflow before provider-specific traffic changes:

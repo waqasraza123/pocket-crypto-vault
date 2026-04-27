@@ -220,6 +220,7 @@ export const ServiceHealthResponseSchema = z.object({
   environment: appEnvironmentSchema,
   deploymentTarget: deploymentTargetSchema,
   indexerEnabled: z.boolean(),
+  persistenceDriver: z.enum(["sqlite", "postgresql"]),
   version: z.string(),
   readyPath: z.string(),
 });

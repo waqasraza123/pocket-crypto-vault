@@ -82,12 +82,13 @@ Use this manifest before manual promotion:
 1. Confirm contract deployment manifest matches the factory address.
 2. Confirm API image manifest matches the API image tag.
 3. Confirm API preflight report is passing for the target environment.
-4. Confirm managed database plan, schema bundle, export bundle, import plan, and parity plan are reviewed when persistence is changing.
-5. Confirm mobile distribution manifest or EAS dashboard matches the build references.
-6. Generate and review the API traffic plan.
-7. Confirm `/ready` is acceptable on the target API.
-8. Save the release manifest, managed database plan/schema/export/import/parity artifacts when applicable, and traffic plan artifacts with the release notes.
-9. Promote traffic manually through the selected hosting provider.
+4. Confirm `API_PERSISTENCE_DRIVER=sqlite` unless the PostgreSQL runtime adapter is implemented and accepted.
+5. Confirm managed database plan, schema bundle, export bundle, import plan, and parity plan are reviewed when persistence is changing.
+6. Confirm mobile distribution manifest or EAS dashboard matches the build references.
+7. Generate and review the API traffic plan.
+8. Confirm `/ready` is acceptable on the target API.
+9. Save the release manifest, managed database plan/schema/export/import/parity artifacts when applicable, and traffic plan artifacts with the release notes.
+10. Promote traffic manually through the selected hosting provider.
 
 ## Rollback Use
 Use this manifest during rollback:

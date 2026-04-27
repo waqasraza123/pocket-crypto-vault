@@ -74,10 +74,13 @@ The image expects environment configuration at runtime:
 - `API_PORT`
 - `API_PUBLIC_BASE_URL`
 - `API_DATA_DIR`
+- `API_PERSISTENCE_DRIVER`
+- `API_PERSISTENCE_SCHEMA_NAME`
 - `API_SYNC_INTERVAL_MS`
 - `API_ENABLE_INDEXER`
 - `API_ENABLE_ANALYTICS`
 - `API_INTERNAL_TOKEN`
+- `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
 - `EXPO_PUBLIC_BASE_FACTORY_ADDRESS`
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
@@ -85,7 +88,7 @@ The image expects environment configuration at runtime:
 - `API_BASE_START_BLOCK`
 - `API_BASE_SEPOLIA_START_BLOCK`
 
-Use `API_HOST=0.0.0.0` in container hosting. Mount or provision durable storage for `API_DATA_DIR` when relying on SQLite persistence.
+Use `API_HOST=0.0.0.0` in container hosting. Keep `API_PERSISTENCE_DRIVER=sqlite` for the current API image and mount durable storage for `API_DATA_DIR` when relying on indexed history. `API_DATABASE_URL` is reserved for the future PostgreSQL adapter and must remain secret.
 
 ## Promotion Flow
 1. Run release-candidate verification for the target.

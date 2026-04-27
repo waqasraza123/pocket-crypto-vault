@@ -17,12 +17,26 @@ const optionalBooleanSchema = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
+const optionalSecretSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .optional()
+  .or(z.literal("").transform(() => undefined));
+
 const optionalAddressSchema = z
   .string()
   .trim()
   .optional()
   .or(z.literal("").transform(() => undefined))
   .refine((value) => !value || isAddress(value), "Expected a valid EVM address.");
+
+const optionalPostgresqlIdentifierSchema = z
+  .string()
+  .trim()
+  .optional()
+  .or(z.literal("").transform(() => undefined))
+  .refine((value) => !value || /^[a-z_][a-z0-9_]*$/.test(value), "Expected a lowercase PostgreSQL identifier.");
 
 const runtimeEnvSchema = z.object({
   EXPO_PUBLIC_BASE_RPC_URL: optionalUrlSchema,
@@ -33,6 +47,9 @@ const runtimeEnvSchema = z.object({
   API_PORT: z.coerce.number().int().positive().optional(),
   API_PUBLIC_BASE_URL: optionalUrlSchema,
   API_DATA_DIR: z.string().trim().min(1).optional(),
+  API_PERSISTENCE_DRIVER: z.enum(["sqlite", "postgresql"]).optional(),
+  API_DATABASE_URL: optionalSecretSchema,
+  API_PERSISTENCE_SCHEMA_NAME: optionalPostgresqlIdentifierSchema,
   API_SYNC_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
   API_ENABLE_INDEXER: optionalBooleanSchema,
   API_ENABLE_ANALYTICS: optionalBooleanSchema,
@@ -50,6 +67,15 @@ export interface ApiChainRuntimeConfig {
   startBlock: number;
 }
 
+export interface ApiPersistenceRuntimeConfig {
+  driver: "sqlite" | "postgresql";
+  sqliteDataDir: string;
+  postgresUrlConfigured: boolean;
+  schemaName: string;
+  runtimeReady: boolean;
+  message: string;
+}
+
 export interface ApiRuntimeEnv {
   environment: "development" | "staging" | "production";
   deploymentTarget: "local" | "staging" | "production";
@@ -58,6 +84,7 @@ export interface ApiRuntimeEnv {
   version: string;
   publicBaseUrl: string | null;
   dataDir: string;
+  persistence: ApiPersistenceRuntimeConfig;
   syncIntervalMs: number;
   indexerEnabled: boolean;
   analyticsEnabled: boolean;
@@ -92,6 +119,38 @@ const parseBoolean = (value: string | undefined) => {
   }
 
   return ["true", "1", "yes"].includes(value);
+};
+
+const createPersistenceRuntimeConfig = ({
+  driver,
+  sqliteDataDir,
+  postgresUrlConfigured,
+  schemaName,
+}: {
+  driver: "sqlite" | "postgresql";
+  sqliteDataDir: string;
+  postgresUrlConfigured: boolean;
+  schemaName: string;
+}): ApiPersistenceRuntimeConfig => {
+  if (driver === "postgresql") {
+    return {
+      driver,
+      sqliteDataDir,
+      postgresUrlConfigured,
+      schemaName,
+      runtimeReady: false,
+      message: "PostgreSQL persistence is recognized but no runtime adapter is implemented yet.",
+    };
+  }
+
+  return {
+    driver,
+    sqliteDataDir,
+    postgresUrlConfigured,
+    schemaName,
+    runtimeReady: true,
+    message: "SQLite persistence is active.",
+  };
 };
 
 const isLocalUrl = (value: string | null) => {
@@ -130,6 +189,12 @@ export const readApiRuntimeEnv = (
       version: source.npm_package_version?.trim() || "0.1.0",
       publicBaseUrl: null,
       dataDir: path.resolve(process.cwd(), ".data"),
+      persistence: createPersistenceRuntimeConfig({
+        driver: "sqlite",
+        sqliteDataDir: path.resolve(process.cwd(), ".data"),
+        postgresUrlConfigured: Boolean(source.API_DATABASE_URL?.trim()),
+        schemaName: "goal_vault_api",
+      }),
       syncIntervalMs: 30_000,
       indexerEnabled: true,
       analyticsEnabled: true,
@@ -155,6 +220,13 @@ export const readApiRuntimeEnv = (
   }
 
   const publicBaseUrl = parsed.data.API_PUBLIC_BASE_URL || null;
+  const dataDir = parsed.data.API_DATA_DIR || path.resolve(process.cwd(), ".data");
+  const persistence = createPersistenceRuntimeConfig({
+    driver: parsed.data.API_PERSISTENCE_DRIVER || "sqlite",
+    sqliteDataDir: dataDir,
+    postgresUrlConfigured: Boolean(parsed.data.API_DATABASE_URL),
+    schemaName: parsed.data.API_PERSISTENCE_SCHEMA_NAME || "goal_vault_api",
+  });
   const rpcUrls = {
     8453: parsed.data.EXPO_PUBLIC_BASE_RPC_URL || null,
     84532: parsed.data.EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL || null,
@@ -180,6 +252,14 @@ export const readApiRuntimeEnv = (
     validationErrors.push("API_INTERNAL_TOKEN is required outside development.");
   }
 
+  if (persistence.driver === "postgresql") {
+    if (!persistence.postgresUrlConfigured) {
+      validationErrors.push("API_DATABASE_URL is required when API_PERSISTENCE_DRIVER=postgresql.");
+    }
+
+    validationErrors.push("API_PERSISTENCE_DRIVER=postgresql is blocked until the managed database runtime adapter is implemented.");
+  }
+
   return {
     environment,
     deploymentTarget,
@@ -187,7 +267,8 @@ export const readApiRuntimeEnv = (
     port: parsed.data.API_PORT ?? 3001,
     version: source.npm_package_version?.trim() || "0.1.0",
     publicBaseUrl,
-    dataDir: parsed.data.API_DATA_DIR || path.resolve(process.cwd(), ".data"),
+    dataDir,
+    persistence,
     syncIntervalMs: parsed.data.API_SYNC_INTERVAL_MS ?? 30_000,
     indexerEnabled: parseBoolean(parsed.data.API_ENABLE_INDEXER) ?? true,
     analyticsEnabled: parseBoolean(parsed.data.API_ENABLE_ANALYTICS) ?? true,

@@ -9,6 +9,7 @@ It does not start the server, connect to RPC providers, run database migrations,
 - `apps/api/src/jobs/runtime-preflight.ts`
   - reads API runtime configuration through `readApiRuntimeEnv`
   - validates target-chain RPC and factory configuration
+  - validates persistence driver selection and blocks PostgreSQL runtime mode until the adapter exists
   - reports booleans for secrets instead of printing secret values
   - writes a JSON preflight report
   - exits nonzero when runtime validation fails
@@ -54,6 +55,8 @@ Variables:
 - `API_HOST`
 - `API_PORT`
 - `API_DATA_DIR`
+- `API_PERSISTENCE_DRIVER`
+- `API_PERSISTENCE_SCHEMA_NAME`
 - `API_SYNC_INTERVAL_MS`
 - `API_ENABLE_INDEXER`
 - `API_ENABLE_ANALYTICS`
@@ -67,6 +70,7 @@ Variables:
 Secrets:
 
 - `API_INTERNAL_TOKEN`
+- `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
 
@@ -84,6 +88,11 @@ The preflight report records:
 - public API base URL
 - host, port, and data directory path
 - whether the data directory currently exists
+- selected persistence driver
+- SQLite data directory
+- whether `API_DATABASE_URL` is configured
+- PostgreSQL schema name selected for future managed database runtime
+- whether the selected persistence runtime is ready
 - sync interval, indexer mode, analytics mode, and log level
 - whether the internal token is configured
 - signed request maximum age
@@ -114,6 +123,8 @@ Common failures:
 - target-chain factory address missing or invalid
 - `APP_ENV` and `EXPO_PUBLIC_APP_ENV` mismatch
 - malformed numeric or boolean env values
+- `API_PERSISTENCE_DRIVER=postgresql` before the managed database runtime adapter exists
+- `API_DATABASE_URL` missing when `API_PERSISTENCE_DRIVER=postgresql`
 
 ## Boundary
 This preflight closes a promotion-readiness gap without selecting a hosting provider. Provider-specific deploy, traffic shifting, rollback automation, and managed database infrastructure remain deferred.

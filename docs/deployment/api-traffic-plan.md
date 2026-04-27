@@ -126,11 +126,12 @@ Use the traffic plan after the supporting artifacts exist:
 8. Generate the managed database import plan when persistence is changing.
 9. Import data through the selected provider or future migration tool when persistence is changing.
 10. Generate the managed database parity plan when persistence is changing.
-11. Generate the release manifest.
-12. Generate the API traffic plan.
-13. Review the plan with the operator who owns the hosting provider.
-14. Move traffic manually in the selected hosting provider.
-15. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
+11. Keep `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL runtime adapter exists and has passed preflight.
+12. Generate the release manifest.
+13. Generate the API traffic plan.
+14. Review the plan with the operator who owns the hosting provider.
+15. Move traffic manually in the selected hosting provider.
+16. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
 
 ## Rollback Sequence
 Use the plan during rollback:

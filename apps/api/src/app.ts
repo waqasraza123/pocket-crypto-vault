@@ -26,6 +26,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
     deploymentTarget: env.deploymentTarget,
     publicBaseUrl: env.publicBaseUrl,
     indexerEnabled: env.indexerEnabled,
+    persistenceDriver: env.persistence.driver,
     readyPath: "/ready",
     validationErrors: env.validationErrors,
   }));

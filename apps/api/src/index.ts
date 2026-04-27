@@ -42,6 +42,9 @@ const start = async () => {
       publicBaseUrl: env.publicBaseUrl,
       indexerEnabled: env.indexerEnabled,
       analyticsEnabled: env.analyticsEnabled,
+      persistenceDriver: env.persistence.driver,
+      postgresPersistenceConfigured: env.persistence.postgresUrlConfigured,
+      persistenceSchemaName: env.persistence.schemaName,
       syncIntervalMs: env.syncIntervalMs,
       chains: Object.values(env.chains).map((chain) => ({
         chainId: chain.chainId,

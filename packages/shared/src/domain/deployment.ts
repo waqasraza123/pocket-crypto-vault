@@ -3,6 +3,7 @@ import type { SupportedChainId } from "./chain";
 export type AppEnvironment = "development" | "staging" | "production";
 export type DeploymentTarget = "local" | "staging" | "production";
 export type AppConfigStatus = "valid" | "invalid";
+export type ApiPersistenceDriver = "sqlite" | "postgresql";
 export type ReleaseCheckStatus = "ready" | "warning" | "blocked";
 export type ReleaseReadinessStatus = "ready" | "degraded" | "blocked";
 export type LaunchChecklistItemStatus = "pending" | "ready" | "optional";
@@ -45,6 +46,7 @@ export interface BackendReadinessState {
   deploymentTarget: DeploymentTarget;
   status: "alive" | "ready" | "blocked";
   indexerEnabled: boolean;
+  persistenceDriver?: ApiPersistenceDriver;
   publicBaseUrl: string | null;
 }
 

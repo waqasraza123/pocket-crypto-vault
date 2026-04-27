@@ -7,35 +7,42 @@
 Commit and push current work, then implement the next production-grade step focused on code and detailed documentation without running full tests or builds.
 
 ## Last Completed Step
-Added Phase 29 API managed database import plan tooling and documentation for PostgreSQL import SQL handoff.
+Added Phase 30 API persistence runtime guardrails for explicit SQLite mode and blocked PostgreSQL mode.
 
 ## Files Touched
 - `.env.example`
-- `.github/workflows/api-managed-database-import-plan.yml`
+- `.github/workflows/api-preflight.yml`
 - `README.md`
-- `package.json`
-- `scripts/write-api-managed-database-import-plan.mjs`
-- `docs/deployment/api-data-snapshots.md`
-- `docs/deployment/api-managed-database-export.md`
-- `docs/deployment/api-managed-database-import-plan.md`
+- `apps/api/src/app.ts`
+- `apps/api/src/app.test.ts`
+- `apps/api/src/env.ts`
+- `apps/api/src/index.ts`
+- `apps/api/src/jobs/runtime-preflight.ts`
+- `apps/api/src/modules/health/health.service.ts`
+- `apps/api/src/modules/health/readiness.service.ts`
+- `apps/api/src/modules/indexer/factory-sync.service.test.ts`
+- `apps/api/src/modules/vaults/metadata-security.test.ts`
+- `packages/api-client/src/schemas.ts`
+- `packages/shared/src/domain/deployment.ts`
+- `docs/deployment/api-image.md`
 - `docs/deployment/api-managed-database-plan.md`
-- `docs/deployment/api-managed-database-parity.md`
-- `docs/deployment/api-managed-database-schema.md`
+- `docs/deployment/api-persistence-runtime.md`
+- `docs/deployment/api-preflight.md`
 - `docs/deployment/api-traffic-plan.md`
 - `docs/deployment/release-manifest.md`
 - `docs/plans/goal-vault-ci-release-workflows.md`
 - `docs/plans/goal-vault-env-reference.md`
 - `docs/plans/goal-vault-launch-checklist.md`
-- `docs/plans/goal-vault-universal-react-native-phase-29.md`
+- `docs/plans/goal-vault-universal-react-native-phase-30.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 
 ## Durable Decisions Captured
-- Managed database import plans are provider-neutral and turn verified JSONL export bundles into psql-compatible PostgreSQL import SQL.
-- Import plan artifacts do not connect to PostgreSQL, use credentials, apply schema, import data, run parity checks, deploy the API, or move traffic.
-- Import plan manifests include verified export row counts, bytes, SHA-256 checksums, psql variables, controls, rollback triggers, and optional plan/schema/parity references.
-- Artifact-based GitHub import plans require both `export_artifact` and `export_run_id` so the source export is explicit.
-- Import plan artifacts should sit beside managed database plans, schema bundles, export bundles, parity plans, API preflight reports, release manifests, and API traffic plans.
+- SQLite remains the only runtime-ready API persistence driver.
+- `API_PERSISTENCE_DRIVER=postgresql` is recognized but blocked by env validation until a real adapter is implemented.
+- `API_DATABASE_URL` is treated as secret and is reported only as configured or missing.
+- `/health`, `/ready`, API startup logs, and API preflight now expose the selected persistence driver without printing secrets.
+- Managed database artifacts remain handoff artifacts until runtime adapter, rollback, and parity procedures are accepted.
 
 ## Scope Boundaries
 - No tests, builds, Docker builds, EAS builds, Expo exports, live data exports, import plan execution, snapshots, restores, deployments, database connections, live parity queries, data comparisons, migrations, provider changes, or traffic changes were run by request.
@@ -45,10 +52,10 @@ Added Phase 29 API managed database import plan tooling and documentation for Po
 - No provider-specific deployment integration was added.
 
 ## Verification Commands
-- `node --check scripts/write-api-managed-database-import-plan.mjs`
-- `node -e 'JSON.parse(require("fs").readFileSync("package.json", "utf8"));'`
-- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/api-managed-database-import-plan.yml")'`
+- `pnpm --filter @goal-vault/api typecheck`
+- `node -e 'JSON.parse(require("fs").readFileSync("package.json", "utf8")); JSON.parse(require("fs").readFileSync("apps/api/package.json", "utf8"));'`
+- `ruby -e 'require "yaml"; YAML.load_file(".github/workflows/api-preflight.yml")'`
 - `git diff --check`
 
 ## Handoff Note
-Generate a managed database import plan after export bundle review, then execute the generated SQL only through approved provider-owned access before parity review. The import plan is a handoff artifact only; live import execution, runtime adapter changes, parity automation, and traffic movement remain manual/deferred.
+Keep `API_PERSISTENCE_DRIVER=sqlite` for current releases. PostgreSQL mode is intentionally blocked until a real runtime adapter, provider credential model, rollback path, and preflight checks are implemented and accepted.

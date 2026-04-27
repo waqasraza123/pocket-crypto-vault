@@ -117,8 +117,22 @@ export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
     createCheck({
       key: "data-dir",
       label: "Persistent store",
-      status: "ready",
-      message: `Indexer data will persist in SQLite under ${env.dataDir}.`,
+      status: env.persistence.runtimeReady ? "ready" : "blocked",
+      message:
+        env.persistence.driver === "sqlite"
+          ? `Indexer data will persist in SQLite under ${env.persistence.sqliteDataDir}.`
+          : "PostgreSQL persistence is configured but the API runtime adapter is not implemented yet.",
+    }),
+    createCheck({
+      key: "persistence-driver",
+      label: "Persistence driver",
+      status: env.persistence.runtimeReady ? "ready" : "blocked",
+      message:
+        env.persistence.driver === "sqlite"
+          ? "SQLite is the active API persistence driver."
+          : env.persistence.postgresUrlConfigured
+            ? "PostgreSQL credentials are configured but blocked until the runtime adapter exists."
+            : "PostgreSQL persistence requires API_DATABASE_URL and the runtime adapter before use.",
     }),
     createCheck({
       key: "internal-routes",
@@ -236,6 +250,15 @@ export const buildReleaseReadinessSummary = (env: ApiRuntimeEnv): ReleaseReadine
       message: env.indexerEnabled
         ? "Indexer background sync is enabled."
         : "Indexer background sync is disabled. Manual sync runs are required.",
+    },
+    {
+      key: "persistence-driver",
+      label: "Persistence driver",
+      status: env.persistence.runtimeReady ? "ready" : "blocked",
+      message:
+        env.persistence.driver === "sqlite"
+          ? "SQLite persistence is active for this API release."
+          : "PostgreSQL persistence is not release-ready until the runtime adapter is implemented.",
     },
     {
       key: `launch-chain-${expectedChain.chainId}`,

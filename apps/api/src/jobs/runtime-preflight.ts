@@ -30,6 +30,14 @@ interface RuntimePreflightReport {
   port: number;
   dataDir: string;
   dataDirExists: boolean;
+  persistence: {
+    driver: "sqlite" | "postgresql";
+    sqliteDataDir: string;
+    postgresUrlConfigured: boolean;
+    schemaName: string;
+    runtimeReady: boolean;
+    message: string;
+  };
   syncIntervalMs: number;
   indexerEnabled: boolean;
   analyticsEnabled: boolean;
@@ -122,6 +130,14 @@ const buildRuntimePreflightReport = (): RuntimePreflightReport => {
     port: env.port,
     dataDir: env.dataDir,
     dataDirExists: existsSync(env.dataDir),
+    persistence: {
+      driver: env.persistence.driver,
+      sqliteDataDir: env.persistence.sqliteDataDir,
+      postgresUrlConfigured: env.persistence.postgresUrlConfigured,
+      schemaName: env.persistence.schemaName,
+      runtimeReady: env.persistence.runtimeReady,
+      message: env.persistence.message,
+    },
     syncIntervalMs: env.syncIntervalMs,
     indexerEnabled: env.indexerEnabled,
     analyticsEnabled: env.analyticsEnabled,
