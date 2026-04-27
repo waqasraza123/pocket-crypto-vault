@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -43,6 +43,11 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - supports promotion, rollback, and disablement planning
   - validates non-secret URLs, image tags, artifact references, and rollback inputs
   - uploads a traffic plan artifact without moving traffic
+- `.github/workflows/vercel-api-traffic-command.yml`
+  - manual staging or production Vercel API traffic command plan generation
+  - validates Vercel project references, deployment URLs, production domain, and traffic plan evidence
+  - uploads exact promote or rollback command strings without running Vercel CLI
+  - emits manual-only disablement steps because disablement depends on project routing policy
 - `.github/workflows/api-managed-database-plan.yml`
   - manual staging or production managed database planning
   - records current SQLite schema inventory and PostgreSQL cutover requirements
@@ -126,6 +131,20 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `API_TRAFFIC_OBSERVE_MINUTES`
 - `API_TRAFFIC_OPERATOR`
 - `API_TRAFFIC_NOTES`
+- `VERCEL_API_TRAFFIC_TARGET`
+- `VERCEL_API_TRAFFIC_ACTION`
+- `VERCEL_API_TRAFFIC_LABEL`
+- `VERCEL_API_TRAFFIC_PLAN`
+- `VERCEL_API_PROJECT`
+- `VERCEL_SCOPE`
+- `VERCEL_API_CANDIDATE_DEPLOYMENT_URL`
+- `VERCEL_API_ROLLBACK_DEPLOYMENT_URL`
+- `VERCEL_API_PRODUCTION_DOMAIN`
+- `VERCEL_API_TRAFFIC_CHANGE_WINDOW`
+- `VERCEL_API_TRAFFIC_OBSERVE_MINUTES`
+- `VERCEL_API_TRAFFIC_OPERATOR`
+- `VERCEL_API_TRAFFIC_NOTES`
+- `VERCEL_API_TRAFFIC_DIR`
 - `API_DATABASE_PLAN_TARGET`
 - `API_DATABASE_PLAN_LABEL`
 - `API_DATABASE_ENGINE`
@@ -229,7 +248,7 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `IOS_BUILD_NUMBER`
 - `ANDROID_VERSION_CODE`
 
-Use GitHub Environment secrets for RPC URLs:
+Use GitHub Environment secrets for RPC URLs and protected execution credentials:
 
 - `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
@@ -237,9 +256,13 @@ Use GitHub Environment secrets for RPC URLs:
 - `CONTRACT_DEPLOY_RPC_URL`
 - `CONTRACT_DEPLOYER_PRIVATE_KEY`
 - `API_INTERNAL_TOKEN`
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
 Contract deployment also requires `USDC_ADDRESS` as a GitHub Environment variable.
 
+The Vercel command plan workflow records required Vercel secret names but does not read them or execute Vercel CLI.
 The current workflows do not require app-store credentials or backend deploy keys in repository secrets.
 Mobile distribution requires `EXPO_TOKEN` as a GitHub Environment secret. Store credentials are managed in EAS, not in repository secrets.
 
@@ -305,6 +328,16 @@ Use the manual API traffic plan workflow before provider-specific traffic change
 3. Provide a stable plan label.
 4. For promotion, provide candidate URL, rollback URL, candidate image, rollback image, release manifest reference, API preflight report reference, and API data snapshot reference.
 5. Download the traffic plan artifact and review the steps with the hosting-provider operator.
+
+## Vercel API Traffic Command Gate
+Use the manual Vercel API traffic command workflow after the provider-neutral API traffic plan:
+
+1. Choose `staging` or `production`.
+2. Choose `promote`, `rollback`, or `disable`.
+3. Provide the reviewed API traffic plan reference.
+4. Provide the non-secret Vercel project reference, optional scope, production API domain, and deployment URLs required by the selected action.
+5. Download the command plan artifact and confirm it says `noDeploymentPerformed: true` and `noTrafficMoved: true`.
+6. Execute any generated `vercel promote` or `vercel rollback` command only from an approved operator environment.
 
 ## API Managed Database Plan Gate
 Use the manual API managed database plan workflow before external database work:
@@ -394,9 +427,10 @@ Use the manual release manifest workflow before traffic movement:
 - Use `docs/deployment/api-managed-database-import-plan.md` for generated PostgreSQL import SQL and execution boundaries.
 - Use `docs/deployment/api-preflight.md` for API runtime env validation before backend deployment.
 - Use `docs/deployment/api-traffic-plan.md` for provider-neutral traffic movement, rollback, and disablement planning.
+- Use `docs/deployment/vercel-api-traffic.md` for Vercel-specific command planning after a provider-neutral traffic plan exists.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.
 - Use `docs/deployment/release-manifest.md` to record promotion and rollback pointers before manual traffic changes.
-- Add provider-specific backend promotion jobs only after the staging backend host and rollback policy are finalized.
+- Add provider-specific backend execution jobs only after the staging backend host, Vercel project policy, approval model, and rollback policy are finalized.
 
 ## Deferred Automation
 - Hosting-provider backend deployment

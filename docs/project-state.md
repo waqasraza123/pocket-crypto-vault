@@ -46,6 +46,7 @@ The repository now has a real v1 foundation:
 - beta support intake across the app and API with durable SQLite/PostgreSQL persistence for structured real-user issue reports
 - operator-only beta support triage API for listing, reading, and updating support request status through internal access
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
+- Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote or rollback commands without moving traffic
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
 - provider-neutral managed database export bundles that convert API data snapshots into JSONL handoff files
@@ -55,7 +56,7 @@ The repository now has a real v1 foundation:
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- hosting-provider backend promotion, provider-specific traffic rollback automation, accepted managed database schema/import/parity execution, production PostgreSQL traffic cutover, and rollback operation
+- execution of hosting-provider backend promotion, automated provider-specific traffic rollback, accepted managed database schema/import/parity execution, production PostgreSQL traffic cutover, and rollback operation
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -146,6 +147,7 @@ Still not implemented:
 - Phase 43: limited beta readiness artifact for real-audience operational approval
 - Phase 44: beta support intake surface with durable API persistence and managed database artifact coverage
 - Phase 45: internal beta support triage API for operator review and status updates
+- Phase 46: Vercel API traffic command artifacts for provider-specific promotion and rollback handoff without automatic traffic movement
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -246,6 +248,8 @@ Still not implemented:
 - Phase 44 adds a `/support` app route and `POST /support/requests` API route so beta users can submit structured issue reports with wallet/runtime context. Support records are operational private data and must stay out of committed artifacts.
 - PostgreSQL API runtime mode now requires `support_requests` alongside `vaults`, `vault_events`, `sync_states`, and `analytics_events`.
 - Phase 45 adds internal support triage routes behind `API_INTERNAL_TOKEN` so operators can list support requests, inspect one request, and move it between `open`, `triage`, and `closed` without direct database access.
+- Phase 46 adds a Vercel-specific API traffic command plan that validates the provider-neutral traffic plan, records required Vercel secret names, and emits exact promote or rollback command strings without executing Vercel CLI.
+- Vercel API traffic command artifacts must keep `noDeploymentPerformed: true` and `noTrafficMoved: true`; any actual `vercel promote` or `vercel rollback` execution remains an explicit operator action outside this artifact generation workflow.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -303,6 +307,7 @@ Still not implemented:
 - The Phase 43 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-43.md`.
 - The Phase 44 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-44.md`.
 - The Phase 45 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-45.md`.
+- The Phase 46 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-46.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
@@ -315,6 +320,7 @@ Still not implemented:
 - The API persistence runtime runbook lives at `docs/deployment/api-persistence-runtime.md`.
 - The API preflight runbook lives at `docs/deployment/api-preflight.md`.
 - The API traffic plan runbook lives at `docs/deployment/api-traffic-plan.md`.
+- The Vercel API traffic command runbook lives at `docs/deployment/vercel-api-traffic.md`.
 - The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.
 - The release manifest runbook lives at `docs/deployment/release-manifest.md`.
 - The API data snapshot runbook lives at `docs/deployment/api-data-snapshots.md`.
@@ -323,7 +329,7 @@ Still not implemented:
 
 ## Deferred / Not Yet Implemented
 - Accepted managed database schema/import/parity execution, production PostgreSQL cutover, and rollback operation
-- Provider-specific backend deployment, traffic switching, and automated rollback workflows
+- Actual provider-specific backend deployment, traffic switching, and automated rollback execution workflows
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

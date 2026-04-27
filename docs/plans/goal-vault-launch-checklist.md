@@ -111,6 +111,13 @@
 - Download the API traffic plan artifact and review it with the hosting-provider operator.
 - Confirm the plan says `noTrafficMoved: true` before treating it as a review artifact.
 
+## Vercel API Traffic Command
+- Run the `Vercel API Traffic Command` workflow after the API traffic plan when Vercel owns the API host.
+- Provide the reviewed traffic plan reference, Vercel project reference, production API domain, and deployment URLs required by the selected action.
+- Download the command plan artifact and confirm it says `noDeploymentPerformed: true` and `noTrafficMoved: true`.
+- Confirm the artifact names only required Vercel secret names and does not include secret values.
+- Execute any generated `vercel promote` or `vercel rollback` command only from an approved operator environment.
+
 ## Product Smoke Checks
 - Connect wallet on the supported target network.
 - Create one vault.
@@ -134,6 +141,7 @@
 - If the API is unhealthy, disable public launch traffic or point the app back to a known-good API base URL.
 - If an API image is unhealthy, redeploy the previous known-good image tag.
 - Generate an `API Traffic Plan` rollback or disable plan before manual provider changes when time allows.
+- Generate a `Vercel API Traffic Command` rollback plan before running Vercel rollback when the API host is Vercel and time allows.
 - Restore API data from the intended snapshot only with the API stopped.
 - If indexer background sync is disabled, do not claim indexed activity freshness until manual sync procedures are in place.
 - If a new factory deployment is wrong, restore the previous factory address in app/API configuration and stop promotion.

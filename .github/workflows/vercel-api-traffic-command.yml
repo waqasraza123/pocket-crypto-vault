@@ -1,0 +1,112 @@
+name: Vercel API Traffic Command
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      action:
+        description: Vercel traffic action to prepare.
+        type: choice
+        required: true
+        default: promote
+        options:
+          - promote
+          - rollback
+          - disable
+      command_label:
+        description: Stable command label, such as v0.1.0-rc.1.
+        type: string
+        required: true
+      traffic_plan:
+        description: API traffic plan artifact reference or runner-local JSON path.
+        type: string
+        required: true
+      vercel_project:
+        description: Non-secret Vercel API project name or slug.
+        type: string
+        required: true
+      vercel_scope:
+        description: Optional non-secret Vercel team scope.
+        type: string
+        required: false
+      candidate_deployment_url:
+        description: Candidate Vercel deployment URL for promotion.
+        type: string
+        required: false
+      rollback_deployment_url:
+        description: Previous known-good Vercel deployment URL.
+        type: string
+        required: false
+      production_domain:
+        description: Current production API domain.
+        type: string
+        required: true
+      change_window:
+        description: Approved change window.
+        type: string
+        required: false
+      observe_minutes:
+        description: Minimum observation window after traffic movement.
+        type: string
+        required: false
+        default: "15"
+      operator:
+        description: Operator or team responsible for execution.
+        type: string
+        required: false
+      notes:
+        description: Optional operator notes.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-api-traffic-command-${{ inputs.target }}-${{ inputs.action }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  VERCEL_API_TRAFFIC_TARGET: ${{ inputs.target }}
+  VERCEL_API_TRAFFIC_ACTION: ${{ inputs.action }}
+  VERCEL_API_TRAFFIC_LABEL: ${{ inputs.command_label }}
+  VERCEL_API_TRAFFIC_PLAN: ${{ inputs.traffic_plan }}
+  VERCEL_API_PROJECT: ${{ inputs.vercel_project }}
+  VERCEL_SCOPE: ${{ inputs.vercel_scope }}
+  VERCEL_API_CANDIDATE_DEPLOYMENT_URL: ${{ inputs.candidate_deployment_url }}
+  VERCEL_API_ROLLBACK_DEPLOYMENT_URL: ${{ inputs.rollback_deployment_url }}
+  VERCEL_API_PRODUCTION_DOMAIN: ${{ inputs.production_domain }}
+  VERCEL_API_TRAFFIC_CHANGE_WINDOW: ${{ inputs.change_window }}
+  VERCEL_API_TRAFFIC_OBSERVE_MINUTES: ${{ inputs.observe_minutes }}
+  VERCEL_API_TRAFFIC_OPERATOR: ${{ inputs.operator }}
+  VERCEL_API_TRAFFIC_NOTES: ${{ inputs.notes }}
+  VERCEL_API_TRAFFIC_DIR: artifacts
+
+jobs:
+  vercel-api-traffic-command:
+    name: Write ${{ inputs.target }} Vercel API ${{ inputs.action }} command plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write Vercel API traffic command plan
+        id: command-plan
+        run: node scripts/write-vercel-api-traffic-command.mjs
+
+      - name: Upload Vercel API traffic command plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-vercel-api-traffic-${{ inputs.target }}-${{ inputs.action }}
+          path: ${{ steps.command-plan.outputs.command_plan_path }}
+          if-no-files-found: error

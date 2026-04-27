@@ -15,6 +15,8 @@ It is not a deployment workflow. It does not deploy images, update DNS, change l
   - supports `promote`, `rollback`, and `disable`
   - binds to the matching GitHub Environment
   - uploads the traffic plan artifact
+- `docs/deployment/vercel-api-traffic.md`
+  - records the Vercel-specific command handoff generated after this provider-neutral plan
 - `package.json`
   - exposes `pnpm api:traffic:plan`
 - `docs/deployment/api-managed-database-plan.md`
@@ -131,8 +133,9 @@ Use the traffic plan after the supporting artifacts exist:
 13. Generate the API traffic plan.
 14. When generating a managed database runtime cutover plan, prefer passing the downloaded traffic plan JSON file path so local evidence validation can confirm target, action, image, release manifest, and preflight alignment.
 15. Review the plan with the operator who owns the hosting provider.
-16. Move traffic manually in the selected hosting provider.
-17. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
+16. When the backend provider is Vercel, generate a Vercel API traffic command plan from the reviewed traffic plan artifact.
+17. Move traffic manually in the selected hosting provider or execute the generated Vercel command from an approved operator environment.
+18. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
 
 ## Rollback Sequence
 Use the plan during rollback:
@@ -144,4 +147,4 @@ Use the plan during rollback:
 5. Record the rollback reason, restored URL, restored image, and data handling notes.
 
 ## Boundary
-This phase creates a reviewable traffic-change record. Provider-specific traffic shifting, deployment automation, DNS changes, managed database promotion, and automated rollback remain deferred until the hosting provider and traffic policy are selected.
+This phase creates a reviewable traffic-change record. The Vercel command plan can now emit provider-specific promote or rollback command strings, but provider-specific traffic shifting, command execution, deployment automation, DNS changes, managed database promotion, and automated rollback execution remain explicit operator actions.
