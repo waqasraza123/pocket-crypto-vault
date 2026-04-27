@@ -70,12 +70,21 @@
 - `ANDROID_VERSION_CODE`
   - Android version code used by Expo config
 
+## Mobile Distribution Variables And Secrets
+- `EXPO_TOKEN`
+  - GitHub Environment secret used by the mobile distribution workflow to run EAS commands
+- `IOS_BUILD_NUMBER`
+  - increment before production iOS builds
+- `ANDROID_VERSION_CODE`
+  - increment before production Android builds
+
 ## GitHub Actions Variables And Secrets
 - Use GitHub Environment variables for public release metadata, package identifiers, API URLs, factory addresses, build numbers, and feature toggles.
 - Use GitHub Environment secrets for RPC URLs and contract deployer credentials.
 - Keep `staging` and `production` values separate through GitHub Environments instead of branching inside workflow YAML.
 - The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
 - The API image workflow publishes to GHCR through `GITHUB_TOKEN` and does not require provider deployment credentials.
+- The mobile distribution workflow uses `EXPO_TOKEN`; App Store Connect and Google Play credentials should stay in EAS.
 
 ## Environment Expectations
 - Development:

@@ -1,0 +1,132 @@
+name: Mobile Distribution
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Mobile release environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      platform:
+        description: Platform to build or submit.
+        type: choice
+        required: true
+        default: all
+        options:
+          - ios
+          - android
+          - all
+      mode:
+        description: Build with EAS or submit the latest successful build.
+        type: choice
+        required: true
+        default: build
+        options:
+          - build
+          - submit
+      confirm_submit:
+        description: Type submit to allow store submission mode.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-distribution-${{ inputs.target }}-${{ inputs.platform }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  APP_ENV: ${{ inputs.target }}
+  EXPO_PUBLIC_APP_ENV: ${{ inputs.target }}
+  EXPO_PUBLIC_APP_URL: ${{ vars.EXPO_PUBLIC_APP_URL }}
+  EXPO_PUBLIC_API_BASE_URL: ${{ vars.EXPO_PUBLIC_API_BASE_URL }}
+  EXPO_PUBLIC_API_TIMEOUT_MS: ${{ vars.EXPO_PUBLIC_API_TIMEOUT_MS || '8000' }}
+  EXPO_PUBLIC_ANALYTICS_ENABLED: ${{ vars.EXPO_PUBLIC_ANALYTICS_ENABLED || 'true' }}
+  EXPO_PUBLIC_REOWN_PROJECT_ID: ${{ vars.EXPO_PUBLIC_REOWN_PROJECT_ID }}
+  EXPO_PUBLIC_WALLETCONNECT_METADATA_URL: ${{ vars.EXPO_PUBLIC_WALLETCONNECT_METADATA_URL }}
+  EXPO_PUBLIC_BASE_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_RPC_URL }}
+  EXPO_PUBLIC_BASE_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_FACTORY_ADDRESS }}
+  EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL: ${{ secrets.EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL }}
+  EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS }}
+  IOS_BUILD_NUMBER: ${{ vars.IOS_BUILD_NUMBER }}
+  ANDROID_VERSION_CODE: ${{ vars.ANDROID_VERSION_CODE }}
+  EAS_BUILD_PROFILE: ${{ inputs.target == 'production' && 'production' || 'preview' }}
+  EAS_SUBMIT_PROFILE: production
+
+jobs:
+  mobile-distribution:
+    name: ${{ inputs.mode }} ${{ inputs.platform }} for ${{ inputs.target }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: ${{ inputs.target }}
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Validate submit confirmation
+        if: ${{ inputs.mode == 'submit' && inputs.confirm_submit != 'submit' }}
+        run: |
+          echo "Submit mode requires confirm_submit=submit."
+          exit 1
+
+      - name: Validate submit target
+        if: ${{ inputs.mode == 'submit' && inputs.target != 'production' }}
+        run: |
+          echo "Store submission is only enabled for production."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Validate EAS token
+        run: test -n "$EXPO_TOKEN"
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build with EAS
+        if: ${{ inputs.mode == 'build' }}
+        run: eas build --platform "${{ inputs.platform }}" --profile "$EAS_BUILD_PROFILE" --non-interactive --no-wait
+
+      - name: Submit latest build
+        if: ${{ inputs.mode == 'submit' }}
+        run: eas submit --platform "${{ inputs.platform }}" --profile "$EAS_SUBMIT_PROFILE" --latest --non-interactive
+
+      - name: Write mobile distribution manifest
+        run: |
+          mkdir -p ../../artifacts
+          cat > ../../artifacts/goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json <<EOF
+          {
+            "app": "goal-vault",
+            "component": "mobile",
+            "target": "${{ inputs.target }}",
+            "platform": "${{ inputs.platform }}",
+            "mode": "${{ inputs.mode }}",
+            "buildProfile": "$EAS_BUILD_PROFILE",
+            "submitProfile": "$EAS_SUBMIT_PROFILE",
+            "commitSha": "${{ github.sha }}",
+            "workflowRunId": "${{ github.run_id }}",
+            "generatedAt": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          }
+          EOF
+
+      - name: Upload mobile distribution manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}
+          path: artifacts/goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json
+          if-no-files-found: error

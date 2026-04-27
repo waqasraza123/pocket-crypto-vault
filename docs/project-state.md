@@ -26,10 +26,11 @@ The repository now has a real v1 foundation:
 - GitHub Actions CI and release-candidate verification workflows
 - guarded manual contract deployment workflow with Foundry simulation, broadcast confirmation, chain checks, and manifest artifacts
 - production-shaped API container image and manual GHCR publishing workflow
+- guarded EAS mobile build and production store submission workflow
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- hosting-provider backend promotion, mobile store submission, traffic rollback workflows, and external managed database infrastructure
+- hosting-provider backend promotion, traffic rollback workflows, and external managed database infrastructure
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -94,6 +95,7 @@ Still not implemented:
 - Phase 17: GitHub Actions CI, manual release-candidate verification, environment documentation, and operator-facing automation guardrails
 - Phase 18: guarded contract deployment automation, Foundry deployment script hardening, deployment manifests, and contract deployment runbook
 - Phase 19: API container image packaging, manual GHCR publishing, image manifests, and backend image runbook
+- Phase 20: guarded EAS mobile build and production store submission automation with mobile distribution runbook
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -128,6 +130,8 @@ Still not implemented:
 - Contract deployment requires `USDC_ADDRESS` as a GitHub Environment variable plus `CONTRACT_DEPLOY_RPC_URL` and `CONTRACT_DEPLOYER_PRIVATE_KEY` as GitHub Environment secrets.
 - Phase 19 packages the Fastify API/indexer as a Docker image and adds a guarded manual GHCR publishing workflow. It creates backend artifacts but does not choose a host or promote traffic.
 - The API image currently runs the existing TypeScript API start path, so `tsx` is an API runtime dependency until a compiled backend artifact replaces it.
+- Phase 20 moves EAS configuration beside the Expo app, adds guarded manual mobile distribution workflow, and keeps store credentials in EAS instead of repository secrets.
+- Mobile submission is production-only and requires explicit `confirm_submit=submit`.
 - Confirmed create, deposit, and withdraw flows now trigger a thin backend sync endpoint and then invalidate reads so backend-enriched vaults and activity refresh more cleanly.
 - Phase 7 adds shared readiness and recovery models, persistent mobile transaction recovery, app-shell readiness banners, calmer degraded-state handling, and explicit staging health summaries from the API.
 - Phase 7 removes connected-user mock live fallbacks when real reads fail. The app now prefers honest chain/session data plus syncing or recovery messaging.
@@ -150,6 +154,7 @@ Still not implemented:
 - Phase 17 adds GitHub Actions CI and manual release-candidate verification for staging and production artifact checks.
 - Phase 18 adds guarded Foundry deployment automation for `GoalVaultFactory` on Base Sepolia and Base mainnet.
 - Phase 19 adds API image packaging and publishing so backend releases can be promoted from immutable image tags.
+- Phase 20 adds EAS mobile build and production submit automation for iOS and Android.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -180,13 +185,15 @@ Still not implemented:
 - The Phase 17 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-17.md`.
 - The Phase 18 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-18.md`.
 - The Phase 19 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-19.md`.
+- The Phase 20 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-20.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
+- The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.
 
 ## Deferred / Not Yet Implemented
 - External managed database infrastructure beyond the current in-repo SQLite persistence
-- Hosting-provider backend promotion, mobile store submission, and traffic rollback workflows
+- Hosting-provider backend promotion and traffic rollback workflows
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

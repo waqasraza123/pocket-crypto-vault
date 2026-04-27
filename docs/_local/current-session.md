@@ -7,40 +7,38 @@
 Commit and push current work, then implement the next production-grade step focused on code and detailed documentation without running full tests or builds.
 
 ## Last Completed Step
-Added Phase 19 API image packaging and guarded GHCR publishing workflow.
+Added Phase 20 guarded mobile distribution automation for EAS build and production submit operations.
 
 ## Files Touched
-- `.dockerignore`
-- `.github/workflows/api-image.yml`
+- `.env.example`
+- `.github/workflows/mobile-distribution.yml`
 - `README.md`
-- `package.json`
-- `pnpm-lock.yaml`
-- `apps/api/Dockerfile`
-- `apps/api/package.json`
-- `docs/deployment/api-image.md`
+- `apps/mobile/.easignore`
+- `apps/mobile/eas.json`
+- `docs/deployment/mobile-distribution.md`
 - `docs/plans/goal-vault-ci-release-workflows.md`
 - `docs/plans/goal-vault-env-reference.md`
 - `docs/plans/goal-vault-launch-checklist.md`
-- `docs/plans/goal-vault-universal-react-native-phase-19.md`
+- `docs/plans/goal-vault-universal-react-native-phase-20.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
+- `eas.json`
 
 ## Durable Decisions Captured
-- API releases can now be packaged as Docker images from the monorepo root.
-- API image publishing is manual, environment-scoped, and requires `confirm_publish=publish`.
-- API images are pushed to GHCR only in publish mode.
-- Image manifest artifacts capture target, mode, image, tags, commit SHA, and workflow run ID.
-- `tsx` is an API runtime dependency while the API production start path executes TypeScript directly.
+- EAS configuration now lives beside the Expo app in `apps/mobile/eas.json`.
+- Mobile distribution is manual and environment-scoped through GitHub Actions.
+- Build mode starts remote EAS builds with `--no-wait`.
+- Submit mode is production-only and requires `confirm_submit=submit`.
+- Store credentials stay in EAS; repository GitHub secrets only need `EXPO_TOKEN`.
 
 ## Scope Boundaries
-- No local tests, builds, Docker builds, exports, or deployments were run by request.
-- No image was published.
-- No backend host, traffic promotion, rollback automation, store submission, or managed database infrastructure was added.
+- No local tests, builds, Docker builds, EAS builds, exports, submissions, or deployments were run by request.
+- No store credentials were added.
+- No backend traffic promotion, rollback automation, or managed database infrastructure was added.
 
 ## Verification Commands
-- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path); puts path }' .github/workflows/api-image.yml`
-- `node -e 'JSON.parse(require("fs").readFileSync("package.json", "utf8")); JSON.parse(require("fs").readFileSync("apps/api/package.json", "utf8"));'`
+- `ruby -e 'require "yaml"; ARGV.each { |path| YAML.load_file(path); puts path }' .github/workflows/mobile-distribution.yml apps/mobile/eas.json`
 - `git diff --check`
 
 ## Handoff Note
-Use the `API Image` workflow in build mode first. Publish to GHCR only after release-candidate review, then deploy the image manually on the selected backend host with durable storage for `API_DATA_DIR`.
+Use `Mobile Distribution` in build mode first. Use submit mode only for production after EAS store credentials, release-candidate verification, backend readiness, contract configuration, and store metadata are all ready.

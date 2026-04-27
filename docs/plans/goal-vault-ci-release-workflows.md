@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment and API image publishing have separate guarded manual workflows. No workflow publishes mobile store builds, mutates backend production infrastructure, or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API image publishing, and mobile distribution have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -33,6 +33,11 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - builds by default
   - publishes to GHCR only after explicit confirmation
   - uploads an image manifest artifact
+- `.github/workflows/mobile-distribution.yml`
+  - manual staging or production EAS mobile build and submit operations
+  - starts remote EAS builds in build mode
+  - submits only production builds and only after explicit confirmation
+  - uploads a mobile distribution manifest artifact
 
 ## Required GitHub Environments
 Create two GitHub Environments before relying on release-candidate runs:
@@ -66,7 +71,8 @@ Use GitHub Environment secrets for RPC URLs:
 
 Contract deployment also requires `USDC_ADDRESS` as a GitHub Environment variable.
 
-The current workflows do not require EAS tokens, app-store credentials, backend deploy keys, or backend internal sync tokens.
+The current workflows do not require app-store credentials, backend deploy keys, or backend internal sync tokens in repository secrets.
+Mobile distribution requires `EXPO_TOKEN` as a GitHub Environment secret. Store credentials are managed in EAS, not in repository secrets.
 
 ## Pull Request Gate
 The CI workflow is the default repository quality gate:
@@ -104,16 +110,25 @@ Use the manual API image workflow when the API release candidate is ready:
 4. Download the image manifest artifact.
 5. Deploy the published image manually on the selected backend host.
 
+## Mobile Distribution Gate
+Use the manual mobile distribution workflow after app, API, and contract release candidates are coherent:
+
+1. Choose `staging` or `production`.
+2. Run `build` mode first.
+3. Use `preview` builds for staging and `production` builds for production.
+4. Run `submit` only for production with `confirm_submit` set to `submit`.
+5. Review EAS build logs, store metadata, and rollout controls outside GitHub.
+
 ## Operator Notes
 - Keep GitHub Environment values aligned with `docs/plans/goal-vault-env-reference.md`.
 - Keep production approval on the GitHub Environment instead of adding custom approval logic to workflow YAML.
 - Treat release-candidate artifacts as verification outputs, not deployable store releases.
 - Use `docs/deployment/contract-deployment.md` for contract simulation, broadcast, post-deploy config, and rollback handling.
 - Use `docs/deployment/api-image.md` for API image build, publish, runtime config, promotion, and rollback handling.
+- Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.
 - Add backend promotion jobs only after the staging backend and rollback policy are finalized.
 
 ## Deferred Automation
-- EAS cloud builds and app-store submission
 - Hosting-provider backend deployment
 - Database migration orchestration
 - Traffic promotion and rollback automation

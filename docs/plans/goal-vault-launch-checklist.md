@@ -49,9 +49,16 @@
 
 ## Mobile
 - Confirm `apps/mobile/app.config.js` resolves the expected environment-specific package identity.
-- Confirm `eas.json` profile matches the intended target.
+- Confirm `apps/mobile/eas.json` profile matches the intended target.
 - Run `pnpm verify:mobile:ios`.
 - If building Android externally, confirm package name and version code assumptions before release.
+
+## Mobile Distribution
+- Confirm `EXPO_TOKEN` is set on the target GitHub Environment.
+- Confirm `IOS_BUILD_NUMBER` and `ANDROID_VERSION_CODE` are incremented before production builds.
+- Run the `Mobile Distribution` workflow in `build` mode first.
+- Use `submit` mode only for production and only with `confirm_submit` set to `submit`.
+- Confirm store metadata, privacy details, screenshots, and support URLs are ready before submission.
 
 ## Product Smoke Checks
 - Connect wallet on the supported target network.
@@ -77,3 +84,4 @@
 - If an API image is unhealthy, redeploy the previous known-good image tag.
 - If indexer background sync is disabled, do not claim indexed activity freshness until manual sync procedures are in place.
 - If a new factory deployment is wrong, restore the previous factory address in app/API configuration and stop promotion.
+- If a mobile build is wrong, stop store rollout and submit a fixed build through EAS.

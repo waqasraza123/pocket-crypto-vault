@@ -1,6 +1,6 @@
 # Goal Vault
 
-![Status](https://img.shields.io/badge/status-phase%2019-b07d4f)
+![Status](https://img.shields.io/badge/status-phase%2020-b07d4f)
 ![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android%20%7C%20Web-456b66)
 ![Expo](https://img.shields.io/badge/expo-sdk%2055-111827?logo=expo&logoColor=white)
 ![React%20Native](https://img.shields.io/badge/react%20native-0.83.6-61dafb?logo=react&logoColor=111827)
@@ -26,11 +26,12 @@ This repository now contains a deployment-oriented universal Goal Vault v1:
 - GitHub Actions CI and manual release-candidate verification workflows
 - guarded manual contract deployment workflow for `GoalVaultFactory`
 - production-shaped API container image and manual GHCR publishing workflow
+- guarded EAS mobile build and production store submission workflow
 
 Still deferred:
 
 - external database-backed backend persistence
-- hosting-provider backend promotion, traffic rollback, and store submission workflows
+- hosting-provider backend promotion and traffic rollback workflows
 
 ## Product Scope
 
@@ -130,10 +131,11 @@ Included:
 
 - centralized public env parsing in `packages/config`
 - environment-aware Expo package config in `apps/mobile/app.config.js`
-- EAS build profiles in `eas.json`
+- EAS build and submit profiles in `apps/mobile/eas.json`
 - API startup validation plus separated `/health` and `/ready`
 - guarded Foundry deployment script and GitHub Actions contract deployment workflow
 - API Dockerfile and manual image build/publish workflow for GHCR
+- guarded mobile EAS build and submit workflow
 - launch checklist and env reference docs in `docs/plans/`
 - repeatable release verification scripts at the repo root
 
@@ -258,10 +260,14 @@ Key documentation files:
   - guarded contract deployment runbook
 - `docs/deployment/api-image.md`
   - API image build, publish, runtime, promotion, and rollback runbook
+- `docs/deployment/mobile-distribution.md`
+  - EAS mobile build, submit, manifest, and rollback runbook
 - `docs/plans/goal-vault-universal-react-native-phase-18.md`
   - Phase 18 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-19.md`
   - Phase 19 implementation note
+- `docs/plans/goal-vault-universal-react-native-phase-20.md`
+  - Phase 20 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-9.md`
   - Phase 9 implementation note
 - `docs/product/goal-vault/goal.md`
@@ -279,10 +285,11 @@ The next major implementation steps are:
 2. Run staging contract deployment simulation, then broadcast only after review.
 3. Feed the staged factory address into app/API env and run release-candidate verification.
 4. Build and publish the staging API image, then deploy it manually to the selected backend host.
-5. Decide whether hosting-provider promotion or store submission should be automated next.
+5. Run staging mobile EAS builds after backend and contract configuration are stable.
+6. Decide whether hosting-provider backend promotion should be automated next.
 
 ## Notes
 
-- This repository now has CI, release-candidate verification, guarded contract deployment, and API image packaging, but backend traffic promotion and app-store promotion remain manual.
+- This repository now has CI, release-candidate verification, guarded contract deployment, API image packaging, and mobile EAS distribution automation, but backend traffic promotion remains manual.
 - `.env.example` provides the expected variable names without secrets.
 - Use the launch checklist and env reference docs before staging or production deployment.
