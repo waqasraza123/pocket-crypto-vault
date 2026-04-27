@@ -35,6 +35,7 @@ The repository now has a real v1 foundation:
 - typed API persistence ports for indexer records, sync state, and analytics batches
 - asynchronous API persistence read boundary for future external database adapters
 - inactive PostgreSQL persistence store core behind the same API ports
+- transaction-aware PostgreSQL query executor boundary for future driver wiring
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
@@ -126,6 +127,7 @@ Still not implemented:
 - Phase 33: asynchronous API persistence read boundary for external database readiness
 - Phase 34: inactive PostgreSQL persistence store core behind the API ports
 - Phase 35: managed database runtime activation plan artifacts before PostgreSQL mode is enabled
+- Phase 36: transaction-aware PostgreSQL query executor boundary for future driver wiring
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -214,6 +216,7 @@ Still not implemented:
 - Phase 33 makes persistence reads asynchronous across API routes, sync services, metadata verification, metadata reconciliation, and readiness checks so a network-backed store can satisfy the same ports.
 - Phase 34 adds `PostgresqlIndexerStore` and `PostgresqlAnalyticsStore` around an injected query executor, but PostgreSQL runtime mode remains blocked until driver, credentials, schema/import/parity, and rollback procedures are accepted.
 - Phase 35 adds a provider-neutral managed database runtime activation plan workflow that validates schema/import/parity/preflight/release/traffic/image/snapshot evidence before PostgreSQL mode is enabled.
+- Phase 36 adds transaction-aware PostgreSQL query executor support to the inactive store core; future pooled runtime wiring must implement transactions with one checked-out client.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -260,6 +263,7 @@ Still not implemented:
 - The Phase 33 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-33.md`.
 - The Phase 34 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-34.md`.
 - The Phase 35 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-35.md`.
+- The Phase 36 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-36.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.

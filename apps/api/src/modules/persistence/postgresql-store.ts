@@ -26,6 +26,7 @@ export interface PostgresqlQueryResult<Row> {
 
 export interface PostgresqlQueryExecutor {
   query<Row>(sql: string, values?: readonly PostgresqlQueryValue[]): Promise<PostgresqlQueryResult<Row>>;
+  transaction?<Result>(operation: (executor: PostgresqlQueryExecutor) => Promise<Result>): Promise<Result>;
 }
 
 interface PostgresqlStoreOptions {
@@ -255,6 +256,26 @@ const syncStateColumns = [
 
 const buildPlaceholders = (start: number, count: number) =>
   Array.from({ length: count }, (_, index) => `$${start + index}`).join(", ");
+
+const runInTransaction = async <Result>(
+  queryExecutor: PostgresqlQueryExecutor,
+  operation: (executor: PostgresqlQueryExecutor) => Promise<Result>,
+) => {
+  if (queryExecutor.transaction) {
+    return queryExecutor.transaction(operation);
+  }
+
+  await queryExecutor.query("BEGIN");
+
+  try {
+    const result = await operation(queryExecutor);
+    await queryExecutor.query("COMMIT");
+    return result;
+  } catch (error) {
+    await queryExecutor.query("ROLLBACK");
+    throw error;
+  }
+};
 
 export class PostgresqlIndexerStore implements ApiIndexerStore {
   private readonly queryExecutor: PostgresqlQueryExecutor;
@@ -500,9 +521,13 @@ export class PostgresqlAnalyticsStore implements ApiAnalyticsStore {
     ]);
     const rows = events.map((_, index) => `(${buildPlaceholders(index * columnNames.length + 1, columnNames.length)})`);
 
-    await this.queryExecutor.query(
-      `INSERT INTO ${this.analyticsEventsTable} (${columnNames.join(", ")}) VALUES ${rows.join(", ")}`,
-      values,
+    await runInTransaction(
+      this.queryExecutor,
+      async (executor) =>
+        executor.query(
+          `INSERT INTO ${this.analyticsEventsTable} (${columnNames.join(", ")}) VALUES ${rows.join(", ")}`,
+          values,
+        ),
     );
   }
 }

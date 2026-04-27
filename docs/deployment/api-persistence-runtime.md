@@ -39,6 +39,7 @@ In SQLite mode:
 - API route and service modules consume `ApiIndexerStore` and `ApiAnalyticsStore` ports
 - API read paths await persistence port methods so future external database adapters can perform network I/O
 - an inactive PostgreSQL store core exists but is not constructed by the runtime factory
+- the inactive PostgreSQL store core accepts a transaction-aware query executor for future pooled runtime wiring
 - runtime activation must be planned with `pnpm api:database:runtime:plan` before PostgreSQL mode is enabled
 - the API keeps using `goal-vault-indexer.sqlite` and `goal-vault-analytics.sqlite`
 - managed database plan, schema, export, import plan, and parity artifacts remain handoff artifacts only
@@ -67,6 +68,8 @@ The factory returns:
 Route modules should consume stores from the API context instead of constructing persistence adapters directly. They should also import persisted record types from the persistence port module rather than from SQLite implementation files, and they should await persistence reads even when the current SQLite implementation resolves immediately. This keeps the future PostgreSQL adapter isolated to the persistence boundary.
 
 `apps/api/src/modules/persistence/postgresql-store.ts` provides the inactive PostgreSQL store core. It depends only on an injected query executor and does not read secrets, open connections, run migrations, apply import SQL, or change runtime driver selection.
+
+Future pooled runtime wiring should provide a transaction-aware executor whose `transaction` method uses one checked-out database client for the full operation, rolls back on failure, and releases the client after commit or rollback.
 
 ## Blocked PostgreSQL Mode
 PostgreSQL mode is reserved for the future runtime adapter:

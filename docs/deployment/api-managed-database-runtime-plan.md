@@ -82,6 +82,7 @@ Before PostgreSQL runtime activation, operators must confirm:
 
 - PostgreSQL driver package and lockfile changes are reviewed.
 - PostgreSQL connection pooling and shutdown behavior are reviewed.
+- PostgreSQL transaction execution uses one checked-out client per transaction and releases it after commit or rollback.
 - Managed database schema execution is complete.
 - Managed database import execution is complete.
 - Parity review accepts row counts, latest sync state, metadata samples, and analytics bounds.
