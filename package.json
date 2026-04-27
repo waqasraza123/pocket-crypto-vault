@@ -12,6 +12,7 @@
     "api:data:restore": "node scripts/restore-api-data-snapshot.mjs",
     "api:data:snapshot": "node scripts/create-api-data-snapshot.mjs",
     "api:database:plan": "node scripts/write-api-managed-database-plan.mjs",
+    "api:database:schema": "node scripts/write-api-managed-database-schema.mjs",
     "api:preflight": "pnpm --filter @goal-vault/api preflight",
     "api:traffic:plan": "node scripts/write-api-traffic-plan.mjs",
     "test": "turbo run test",

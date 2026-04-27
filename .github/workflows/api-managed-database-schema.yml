@@ -1,0 +1,65 @@
+name: API Managed Database Schema
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      schema_label:
+        description: Stable schema label, such as v0.1.0-db-schema.
+        type: string
+        required: true
+      schema_name:
+        description: PostgreSQL schema name.
+        type: string
+        required: false
+        default: goal_vault_api
+      source_plan:
+        description: Managed database plan artifact name or URL.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-managed-database-schema-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  API_DATABASE_SCHEMA_TARGET: ${{ inputs.target }}
+  API_DATABASE_SCHEMA_LABEL: ${{ inputs.schema_label }}
+  API_DATABASE_SCHEMA_ENGINE: postgresql
+  API_DATABASE_SCHEMA_NAME: ${{ inputs.schema_name }}
+  API_DATABASE_SCHEMA_SOURCE_PLAN: ${{ inputs.source_plan }}
+  API_DATABASE_SCHEMA_DIR: artifacts
+
+jobs:
+  api-managed-database-schema:
+    name: Write ${{ inputs.target }} API managed database schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write API managed database schema
+        id: schema
+        run: node scripts/write-api-managed-database-schema.mjs
+
+      - name: Upload API managed database schema
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-api-managed-database-schema-${{ inputs.target }}
+          path: |
+            ${{ steps.schema.outputs.schema_path }}
+            ${{ steps.schema.outputs.manifest_path }}
+          if-no-files-found: error

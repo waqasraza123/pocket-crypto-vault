@@ -156,6 +156,20 @@
 - `API_DATABASE_PLAN_DIR`
   - output directory for local managed database plan artifacts
 
+## API Managed Database Schema Variables
+- `API_DATABASE_SCHEMA_TARGET`
+  - `staging` or `production`
+- `API_DATABASE_SCHEMA_LABEL`
+  - stable label used in SQL and manifest artifact naming
+- `API_DATABASE_SCHEMA_ENGINE`
+  - currently `postgresql`
+- `API_DATABASE_SCHEMA_NAME`
+  - lowercase PostgreSQL schema identifier; defaults to `goal_vault_api`
+- `API_DATABASE_SCHEMA_SOURCE_PLAN`
+  - optional managed database plan artifact name or URL
+- `API_DATABASE_SCHEMA_DIR`
+  - output directory for local schema artifacts
+
 ## Build Variables
 - `IOS_BUILD_NUMBER`
   - iOS build number used by Expo config
@@ -189,6 +203,7 @@
 - The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status.
 - The API traffic plan workflow uses only non-secret operator inputs and does not require hosting-provider credentials.
 - The API managed database plan workflow uses only non-secret operator inputs and rejects target references that look like connection strings or credentials.
+- The API managed database schema workflow emits SQL and JSON artifacts only; it does not connect to or mutate a database.
 - The mobile distribution workflow uses `EXPO_TOKEN`; App Store Connect and Google Play credentials should stay in EAS.
 - The release manifest workflow records non-secret deployment pointers only and must not include private keys, RPC URLs, or internal API tokens.
 

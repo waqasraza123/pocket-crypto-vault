@@ -19,6 +19,8 @@ It is not a deployment workflow. It does not deploy images, update DNS, change l
   - exposes `pnpm api:traffic:plan`
 - `docs/deployment/api-managed-database-plan.md`
   - records the managed database cutover plan when API persistence is moving away from SQLite
+- `docs/deployment/api-managed-database-schema.md`
+  - records the PostgreSQL schema artifact when API persistence is moving away from SQLite
 
 ## Actions
 ### Promote
@@ -113,11 +115,12 @@ Use the traffic plan after the supporting artifacts exist:
 3. Build and publish the API image.
 4. Create an API data snapshot.
 5. Generate the managed database plan when persistence is changing.
-6. Generate the release manifest.
-7. Generate the API traffic plan.
-8. Review the plan with the operator who owns the hosting provider.
-9. Move traffic manually in the selected hosting provider.
-10. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
+6. Generate the managed database schema bundle when persistence is changing.
+7. Generate the release manifest.
+8. Generate the API traffic plan.
+9. Review the plan with the operator who owns the hosting provider.
+10. Move traffic manually in the selected hosting provider.
+11. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
 
 ## Rollback Sequence
 Use the plan during rollback:

@@ -38,6 +38,9 @@
 - Include source and rollback API data snapshot references.
 - Review the schema inventory and private data classification before any provider-specific migration work.
 - Confirm the plan says `noDatabaseMutated: true` before treating it as a review artifact.
+- Run the `API Managed Database Schema` workflow after the managed database plan.
+- Review the generated PostgreSQL SQL and JSON manifest before any provider-specific DDL application.
+- Confirm the schema manifest says `noDatabaseMutated: true` before treating it as a review artifact.
 
 ## CI And Release Candidate
 - Confirm the GitHub Environment exists for the target release.

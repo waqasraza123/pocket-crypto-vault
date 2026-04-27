@@ -32,6 +32,7 @@ The repository now has a real v1 foundation:
 - API runtime preflight tooling for redacted staging and production environment validation
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - provider-neutral managed database planning for future PostgreSQL migration
+- provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
@@ -106,6 +107,7 @@ Still not implemented:
 - Phase 23: API runtime preflight workflow for provider-neutral backend promotion readiness
 - Phase 24: API traffic plan workflow for provider-neutral promotion, rollback, and disablement records
 - Phase 25: managed database migration planning and schema inventory for future PostgreSQL infrastructure
+- Phase 26: managed database PostgreSQL schema bundle for the current API persistence contract
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -177,6 +179,8 @@ Still not implemented:
 - API traffic plans must include rollback URL and rollback image references before promotion.
 - Phase 25 adds a provider-neutral managed database plan artifact that records current SQLite schema inventory, data classification, cutover steps, and rollback requirements before external PostgreSQL infrastructure is selected.
 - Managed database plan inputs must not contain connection strings, passwords, tokens, private keys, or other credentials.
+- Phase 26 adds a provider-neutral PostgreSQL schema bundle artifact for the current API persistence tables without applying DDL or changing runtime storage.
+- Managed database schema bundles preserve atomic amounts and timestamp-like values as text until an explicit runtime migration transform is implemented.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -213,10 +217,12 @@ Still not implemented:
 - The Phase 23 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-23.md`.
 - The Phase 24 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-24.md`.
 - The Phase 25 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-25.md`.
+- The Phase 26 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-26.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
 - The API managed database plan runbook lives at `docs/deployment/api-managed-database-plan.md`.
+- The API managed database schema runbook lives at `docs/deployment/api-managed-database-schema.md`.
 - The API preflight runbook lives at `docs/deployment/api-preflight.md`.
 - The API traffic plan runbook lives at `docs/deployment/api-traffic-plan.md`.
 - The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.

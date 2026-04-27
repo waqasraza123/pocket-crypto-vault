@@ -18,6 +18,8 @@ It is not a migration workflow. It does not connect to a database, create schema
   - uploads the managed database plan artifact
 - `package.json`
   - exposes `pnpm api:database:plan`
+- `docs/deployment/api-managed-database-schema.md`
+  - turns this plan into reviewable PostgreSQL SQL and schema manifest artifacts
 
 ## Required Inputs
 - `API_DATABASE_PLAN_TARGET`
@@ -115,13 +117,15 @@ Use the managed database plan before adding provider-specific database infrastru
 
 1. Create an API data snapshot.
 2. Generate the managed database plan.
-3. Review schema inventory and data classification.
-4. Provision the managed database outside this repository.
-5. Run an operator-owned restore procedure.
-6. Run parity checks.
-7. Run API preflight with the managed database runtime configuration.
-8. Generate the release manifest and API traffic plan.
-9. Move traffic manually only after the selected hosting-provider operator approves the plan.
+3. Generate the managed database schema bundle.
+4. Review schema inventory, SQL, and data classification.
+5. Provision the managed database outside this repository.
+6. Apply DDL through the selected provider or future migration tool.
+7. Run an operator-owned restore procedure.
+8. Run parity checks.
+9. Run API preflight with the managed database runtime configuration.
+10. Generate the release manifest and API traffic plan.
+11. Move traffic manually only after the selected hosting-provider operator approves the plan.
 
 ## Boundary
-This phase creates a reviewable migration plan and schema inventory. Database provisioning, schema creation, data copy, parity automation, runtime adapter changes, traffic movement, and rollback automation remain deferred until the managed database provider and credential model are selected.
+This phase creates a reviewable migration plan and schema inventory. Database provisioning, schema application, data copy, parity automation, runtime adapter changes, traffic movement, and rollback automation remain deferred until the managed database provider and credential model are selected.
