@@ -87,8 +87,9 @@ Use this manifest before manual promotion:
 6. Confirm mobile distribution manifest or EAS dashboard matches the build references.
 7. Generate and review the API traffic plan.
 8. Confirm `/ready` is acceptable on the target API.
-9. Save the release manifest, managed database plan/schema/export/import/parity artifacts when applicable, and traffic plan artifacts with the release notes.
-10. Promote traffic manually through the selected hosting provider.
+9. When generating a managed database runtime cutover plan, prefer passing the downloaded release manifest JSON file path so local evidence validation can confirm target and image alignment.
+10. Save the release manifest, managed database plan/schema/export/import/parity artifacts when applicable, and traffic plan artifacts with the release notes.
+11. Promote traffic manually through the selected hosting provider.
 
 ## Rollback Use
 Use this manifest during rollback:

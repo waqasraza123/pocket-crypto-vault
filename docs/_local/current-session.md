@@ -7,20 +7,22 @@
 Commit and push current work, then implement the next production-grade step focused on code and detailed documentation without running full tests or builds.
 
 ## Last Completed Step
-Added Phase 40 local API preflight evidence validation for managed database runtime cutover planning.
+Added Phase 41 local release and traffic artifact evidence validation for managed database runtime cutover planning.
 
 ## Files Touched
 - `README.md`
+- `docs/deployment/api-traffic-plan.md`
 - `docs/deployment/api-managed-database-runtime-plan.md`
-- `docs/deployment/api-preflight.md`
-- `docs/plans/goal-vault-universal-react-native-phase-40.md`
+- `docs/deployment/release-manifest.md`
+- `docs/plans/goal-vault-universal-react-native-phase-41.md`
 - `docs/project-state.md`
 - `docs/_local/current-session.md`
 - `scripts/write-api-managed-database-runtime-plan.mjs`
 
 ## Durable Decisions Captured
-- Managed database runtime plans now inspect `API_DATABASE_RUNTIME_PREFLIGHT_REPORT` when it points to a local JSON file.
-- Cutover-mode runtime plans require local preflight evidence to show PostgreSQL driver, URL-configured, runtime-ready, driver adapter, factory wiring, and connection-check gates as accepted.
+- Managed database runtime plans now inspect local release manifest and API traffic plan JSON files when provided.
+- Cutover-mode runtime plans require local release evidence to match runtime target, candidate image, and rollback image when a release rollback image exists.
+- Cutover-mode runtime plans require local traffic evidence to match runtime target, promote action, candidate image, rollback image, release manifest reference, and preflight report reference.
 - Remote URL or workflow artifact references remain allowed but are recorded as not locally inspected and require operator review.
 - PostgreSQL runtime mode remains blocked until driver adapter, factory wiring, PostgreSQL preflight connection checks, credentials, parity acceptance, and rollback procedures are accepted.
 
@@ -33,6 +35,7 @@ Added Phase 40 local API preflight evidence validation for managed database runt
 - No PostgreSQL driver adapter, pool construction, migration execution, import execution, parity execution, or runtime factory wiring was added.
 - No PostgreSQL connection preflight was added or executed.
 - No local runtime plan artifact was generated.
+- No release manifest, traffic plan, or preflight artifacts were generated.
 - No provider-specific deployment integration was added.
 
 ## Verification Commands
@@ -40,4 +43,4 @@ Added Phase 40 local API preflight evidence validation for managed database runt
 - `git diff --check`
 
 ## Handoff Note
-Keep `API_PERSISTENCE_DRIVER=sqlite` for current releases. Future cutover-mode runtime plans should pass a local preflight JSON only after PostgreSQL capability gates are truly ready; otherwise the script will block the plan.
+Keep `API_PERSISTENCE_DRIVER=sqlite` for current releases. Future cutover-mode runtime plans should pass local release manifest, preflight, and traffic plan JSON files only after their target, image, and capability evidence truly align; otherwise the script will block the plan.

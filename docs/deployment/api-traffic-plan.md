@@ -129,9 +129,10 @@ Use the traffic plan after the supporting artifacts exist:
 11. Keep `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL runtime adapter exists and has passed preflight.
 12. Generate the release manifest.
 13. Generate the API traffic plan.
-14. Review the plan with the operator who owns the hosting provider.
-15. Move traffic manually in the selected hosting provider.
-16. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
+14. When generating a managed database runtime cutover plan, prefer passing the downloaded traffic plan JSON file path so local evidence validation can confirm target, action, image, release manifest, and preflight alignment.
+15. Review the plan with the operator who owns the hosting provider.
+16. Move traffic manually in the selected hosting provider.
+17. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
 
 ## Rollback Sequence
 Use the plan during rollback:

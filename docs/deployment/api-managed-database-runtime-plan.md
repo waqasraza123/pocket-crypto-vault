@@ -11,6 +11,8 @@ It is not a deployment workflow. It does not install a driver, connect to Postgr
   - rejects target references that look like connection strings or credentials
   - inspects `API_DATABASE_RUNTIME_PREFLIGHT_REPORT` when it points to a local JSON file
   - blocks cutover-mode plans when local API preflight evidence does not show PostgreSQL driver, factory, connection-check, URL-configured, and runtime-ready gates as accepted
+  - inspects `API_DATABASE_RUNTIME_RELEASE_MANIFEST` and `API_DATABASE_RUNTIME_TRAFFIC_PLAN` when they point to local JSON files
+  - blocks cutover-mode plans when local release or traffic evidence does not match the runtime target, candidate image, rollback image, release manifest reference, and preflight report reference
   - records acceptance gates for driver adapter, capability reporting, schema execution, import execution, parity, preflight, release manifest, traffic plan, and rollback snapshot evidence
   - writes a JSON runtime activation plan
   - emits the plan path for GitHub artifact upload
@@ -111,6 +113,23 @@ For `cutover` mode, the local preflight report must show:
 - `persistence.capabilities.postgresqlPreflightConnectionCheckReady: true`
 
 If the preflight reference is a remote URL or workflow artifact name, the script records that it was not locally inspected and leaves acceptance to operator review. References must still avoid secret names and credential material.
+
+When `API_DATABASE_RUNTIME_RELEASE_MANIFEST` is a local JSON file path, the runtime plan script verifies in `cutover` mode that:
+
+- the release manifest target matches `API_DATABASE_RUNTIME_TARGET`
+- the release manifest API image matches `API_DATABASE_RUNTIME_API_IMAGE`
+- the release manifest rollback API image matches `API_DATABASE_RUNTIME_ROLLBACK_API_IMAGE` when a rollback image is present in the release manifest
+
+When `API_DATABASE_RUNTIME_TRAFFIC_PLAN` is a local JSON file path, the runtime plan script verifies in `cutover` mode that:
+
+- the traffic plan target matches `API_DATABASE_RUNTIME_TARGET`
+- the traffic plan action is `promote`
+- the traffic plan candidate image matches `API_DATABASE_RUNTIME_API_IMAGE`
+- the traffic plan rollback image matches `API_DATABASE_RUNTIME_ROLLBACK_API_IMAGE`
+- the traffic plan release manifest reference matches `API_DATABASE_RUNTIME_RELEASE_MANIFEST`
+- the traffic plan preflight report reference matches `API_DATABASE_RUNTIME_PREFLIGHT_REPORT`
+
+Remote URL or workflow artifact names for release and traffic plans are recorded as not locally inspected and still require operator review.
 
 ## Promotion Sequence
 Use the runtime plan after the earlier managed-database artifacts:

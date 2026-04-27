@@ -40,6 +40,7 @@ The repository now has a real v1 foundation:
 - API persistence lifecycle shutdown boundary for server and one-shot job contexts
 - redacted API persistence capability reporting for PostgreSQL runtime activation gates
 - local API preflight evidence validation for managed database runtime cutover planning
+- local release and traffic artifact evidence validation for managed database runtime cutover planning
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
@@ -136,6 +137,7 @@ Still not implemented:
 - Phase 38: API persistence lifecycle shutdown boundary for server and one-shot job contexts
 - Phase 39: redacted API persistence capability reporting for PostgreSQL runtime activation gates
 - Phase 40: local API preflight evidence validation for managed database runtime cutover planning
+- Phase 41: local release and traffic artifact evidence validation for managed database runtime cutover planning
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -229,6 +231,7 @@ Still not implemented:
 - Phase 38 adds API persistence lifecycle shutdown wiring through the store factory, indexer context, Fastify close hook, process signal handlers, recurring sync timer cleanup, and one-shot job finally blocks.
 - Phase 39 adds redacted API persistence capability reporting through runtime env, `/ready`, API preflight, and managed database runtime planning so PostgreSQL activation blockers are explicit without exposing credentials.
 - Phase 40 adds local API preflight evidence validation to managed database runtime cutover planning so a local preflight JSON must show accepted PostgreSQL capability gates before a cutover plan is written.
+- Phase 41 adds local release manifest and API traffic plan evidence validation to managed database runtime cutover planning so local cutover plans must align target, action, candidate image, rollback image, release manifest, and preflight references.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -280,6 +283,7 @@ Still not implemented:
 - The Phase 38 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-38.md`.
 - The Phase 39 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-39.md`.
 - The Phase 40 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-40.md`.
+- The Phase 41 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-41.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.

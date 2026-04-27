@@ -137,6 +137,25 @@ const requireBoolean = (value, label) => {
   return value;
 };
 
+const referencesMatch = (left, right) => {
+  if (!left || !right) {
+    return false;
+  }
+
+  if (left === right) {
+    return true;
+  }
+
+  const leftPath = resolveLocalArtifactPath(left);
+  const rightPath = resolveLocalArtifactPath(right);
+
+  if (leftPath && rightPath && leftPath === rightPath) {
+    return true;
+  }
+
+  return path.basename(left) === path.basename(right);
+};
+
 const inspectApiPreflightReport = ({ reference, mode }) => {
   const result = readLocalJsonArtifact(reference, "API_DATABASE_RUNTIME_PREFLIGHT_REPORT");
 
@@ -228,6 +247,125 @@ const inspectApiPreflightReport = ({ reference, mode }) => {
   return evidence;
 };
 
+const inspectReleaseManifest = ({ reference, target, candidateApiImage, rollbackApiImage, mode }) => {
+  const result = readLocalJsonArtifact(reference, "API_DATABASE_RUNTIME_RELEASE_MANIFEST");
+
+  if (!result.inspected) {
+    return result;
+  }
+
+  const manifest = result.parsed;
+
+  if (manifest?.app !== "goal-vault" || manifest?.component !== "release") {
+    throw new Error("API_DATABASE_RUNTIME_RELEASE_MANIFEST must reference a Goal Vault release manifest.");
+  }
+
+  const evidence = {
+    inspected: true,
+    reference,
+    path: result.path,
+    target: manifest.target,
+    releaseLabel: manifest.releaseLabel,
+    apiUrl: manifest.apiUrl,
+    apiImage: manifest.apiImage,
+    rollbackApiImage: manifest.rollback?.previousApiImage ?? null,
+  };
+
+  if (mode === "cutover") {
+    const failures = [];
+
+    if (evidence.target !== target) {
+      failures.push("release manifest target does not match runtime target");
+    }
+
+    if (evidence.apiImage !== candidateApiImage) {
+      failures.push("release manifest API image does not match runtime candidate image");
+    }
+
+    if (evidence.rollbackApiImage && evidence.rollbackApiImage !== rollbackApiImage) {
+      failures.push("release manifest rollback image does not match runtime rollback image");
+    }
+
+    if (failures.length > 0) {
+      throw new Error(`Cutover runtime plan requires matching release manifest evidence: ${failures.join("; ")}.`);
+    }
+  }
+
+  return evidence;
+};
+
+const inspectTrafficPlan = ({
+  reference,
+  target,
+  candidateApiImage,
+  rollbackApiImage,
+  releaseManifestReference,
+  preflightReportReference,
+  mode,
+}) => {
+  const result = readLocalJsonArtifact(reference, "API_DATABASE_RUNTIME_TRAFFIC_PLAN");
+
+  if (!result.inspected) {
+    return result;
+  }
+
+  const trafficPlan = result.parsed;
+
+  if (trafficPlan?.app !== "goal-vault" || trafficPlan?.component !== "api-traffic-plan") {
+    throw new Error("API_DATABASE_RUNTIME_TRAFFIC_PLAN must reference a Goal Vault API traffic plan.");
+  }
+
+  const evidence = {
+    inspected: true,
+    reference,
+    path: result.path,
+    target: trafficPlan.target,
+    action: trafficPlan.action,
+    planLabel: trafficPlan.planLabel,
+    candidateApiUrl: trafficPlan.urls?.candidateApiUrl ?? null,
+    rollbackApiUrl: trafficPlan.urls?.rollbackApiUrl ?? null,
+    candidateApiImage: trafficPlan.images?.apiImage ?? null,
+    rollbackApiImage: trafficPlan.images?.rollbackApiImage ?? null,
+    releaseManifest: trafficPlan.artifacts?.releaseManifest ?? null,
+    preflightReport: trafficPlan.artifacts?.preflightReport ?? null,
+    dataSnapshot: trafficPlan.artifacts?.dataSnapshot ?? null,
+  };
+
+  if (mode === "cutover") {
+    const failures = [];
+
+    if (evidence.target !== target) {
+      failures.push("traffic plan target does not match runtime target");
+    }
+
+    if (evidence.action !== "promote") {
+      failures.push("traffic plan action is not promote");
+    }
+
+    if (evidence.candidateApiImage !== candidateApiImage) {
+      failures.push("traffic plan candidate image does not match runtime candidate image");
+    }
+
+    if (evidence.rollbackApiImage !== rollbackApiImage) {
+      failures.push("traffic plan rollback image does not match runtime rollback image");
+    }
+
+    if (!referencesMatch(evidence.releaseManifest, releaseManifestReference)) {
+      failures.push("traffic plan release manifest reference does not match runtime release manifest");
+    }
+
+    if (!referencesMatch(evidence.preflightReport, preflightReportReference)) {
+      failures.push("traffic plan preflight report reference does not match runtime preflight report");
+    }
+
+    if (failures.length > 0) {
+      throw new Error(`Cutover runtime plan requires matching traffic plan evidence: ${failures.join("; ")}.`);
+    }
+  }
+
+  return evidence;
+};
+
 const requireImage = (name) => {
   const value = requireText(name);
 
@@ -303,6 +441,26 @@ const preflightEvidence = inspectApiPreflightReport({
   reference: preflightReport,
   mode,
 });
+const releaseManifest = requireArtifactReference("API_DATABASE_RUNTIME_RELEASE_MANIFEST");
+const trafficPlan = requireArtifactReference("API_DATABASE_RUNTIME_TRAFFIC_PLAN");
+const candidateApiImage = requireImage("API_DATABASE_RUNTIME_API_IMAGE");
+const rollbackApiImage = requireImage("API_DATABASE_RUNTIME_ROLLBACK_API_IMAGE");
+const releaseManifestEvidence = inspectReleaseManifest({
+  reference: releaseManifest,
+  target,
+  candidateApiImage,
+  rollbackApiImage,
+  mode,
+});
+const trafficPlanEvidence = inspectTrafficPlan({
+  reference: trafficPlan,
+  target,
+  candidateApiImage,
+  rollbackApiImage,
+  releaseManifestReference: releaseManifest,
+  preflightReportReference: preflightReport,
+  mode,
+});
 
 const plan = {
   app: "goal-vault",
@@ -328,14 +486,14 @@ const plan = {
     importPlan: requireArtifactReference("API_DATABASE_RUNTIME_IMPORT_PLAN"),
     parityPlan: requireArtifactReference("API_DATABASE_RUNTIME_PARITY_PLAN"),
     preflightReport,
-    releaseManifest: requireArtifactReference("API_DATABASE_RUNTIME_RELEASE_MANIFEST"),
-    trafficPlan: requireArtifactReference("API_DATABASE_RUNTIME_TRAFFIC_PLAN"),
+    releaseManifest,
+    trafficPlan,
     sourceSnapshot: requireArtifactReference("API_DATABASE_RUNTIME_SOURCE_SNAPSHOT"),
     rollbackSnapshot: requireArtifactReference("API_DATABASE_RUNTIME_ROLLBACK_SNAPSHOT"),
   },
   images: {
-    candidateApiImage: requireImage("API_DATABASE_RUNTIME_API_IMAGE"),
-    rollbackApiImage: requireImage("API_DATABASE_RUNTIME_ROLLBACK_API_IMAGE"),
+    candidateApiImage,
+    rollbackApiImage,
   },
   controls: {
     changeWindow: optionalText("API_DATABASE_RUNTIME_CHANGE_WINDOW"),
@@ -345,6 +503,8 @@ const plan = {
   },
   evidence: {
     preflight: preflightEvidence,
+    releaseManifest: releaseManifestEvidence,
+    trafficPlan: trafficPlanEvidence,
   },
   requiredSecrets: [
     "API_DATABASE_URL",
