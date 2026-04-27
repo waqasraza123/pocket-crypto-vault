@@ -38,6 +38,7 @@ In SQLite mode:
 - API store construction flows through `createApiPersistenceStores`
 - API route and service modules consume `ApiIndexerStore` and `ApiAnalyticsStore` ports
 - API read paths await persistence port methods so future external database adapters can perform network I/O
+- API shutdown flows through the persistence factory close hook so store resources can be released centrally
 - an inactive PostgreSQL store core exists but is not constructed by the runtime factory
 - the inactive PostgreSQL store core accepts a transaction-aware query executor for future pooled runtime wiring
 - an inactive pooled PostgreSQL executor boundary defines future pool query, client checkout, transaction, release, and shutdown semantics
@@ -65,6 +66,7 @@ The factory returns:
 - indexer persistence for vaults, activity, and sync state
 - analytics persistence for product event batches
 - the selected persistence driver
+- a `close` lifecycle method for releasing store resources
 
 Route modules should consume stores from the API context instead of constructing persistence adapters directly. They should also import persisted record types from the persistence port module rather than from SQLite implementation files, and they should await persistence reads even when the current SQLite implementation resolves immediately. This keeps the future PostgreSQL adapter isolated to the persistence boundary.
 
@@ -73,6 +75,11 @@ Route modules should consume stores from the API context instead of constructing
 `apps/api/src/modules/persistence/postgresql-runtime.ts` provides the inactive pooled executor boundary. It depends on an injected pool-shaped object, delegates plain queries to the pool, checks out one client for `transaction`, commits on success, rolls back on operation or commit failure, releases the client in all transaction paths, and exposes `close` for future shutdown wiring.
 
 Future driver wiring should adapt the selected PostgreSQL package to the pool interface instead of importing driver-specific types into store modules. Store modules should continue to depend only on `PostgresqlQueryExecutor`.
+
+## Shutdown Lifecycle
+`createIndexerContext` exposes the persistence factory close hook through the API context. `buildApp` registers a Fastify `onClose` hook that calls `context.close()`, and the API entrypoint closes the app on `SIGINT` and `SIGTERM`. The recurring indexer sync timer is cleared through the same close path.
+
+Standalone jobs that create an indexer context must close it in a `finally` block. This is required before PostgreSQL runtime activation so both the long-running API process and one-shot operational scripts release future managed database pool resources consistently.
 
 ## Blocked PostgreSQL Mode
 PostgreSQL mode is reserved for the future runtime adapter:
@@ -108,7 +115,7 @@ The current provider-neutral path remains:
 7. Generate and execute parity checks through approved operational access.
 8. Add the provider-approved PostgreSQL driver adapter around the pooled executor boundary.
 9. Wire the PostgreSQL store core through `createApiPersistenceStores`.
-10. Add graceful shutdown for the PostgreSQL executor through the API lifecycle.
+10. Keep graceful shutdown wired through the API context and standalone jobs.
 11. Generate the managed database runtime activation plan.
 12. Switch `API_PERSISTENCE_DRIVER` to `postgresql` only after the adapter, rollback path, runtime activation plan, and preflight checks are accepted.
 

@@ -153,6 +153,9 @@ test("syncFactoryEventsForChain ingests legacy and V2 creation events without du
         } as never,
       },
       logger: null,
+      close: async () => {
+        await store.close();
+      },
     };
 
     await syncFactoryEventsForChain(context, 84532);

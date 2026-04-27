@@ -6,8 +6,12 @@ const main = async () => {
   const env = readApiRuntimeEnv();
   const context = await createIndexerContext(env);
 
-  await syncVaultEventsForChain(context, 84532);
-  await syncVaultEventsForChain(context, 8453);
+  try {
+    await syncVaultEventsForChain(context, 84532);
+    await syncVaultEventsForChain(context, 8453);
+  } finally {
+    await context.close();
+  }
 };
 
 void main();

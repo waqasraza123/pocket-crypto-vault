@@ -163,4 +163,13 @@ export class AnalyticsStore {
     this.database = database;
     return database;
   }
+
+  async close() {
+    if (!this.database) {
+      return;
+    }
+
+    this.database.close();
+    this.database = null;
+  }
 }

@@ -6,8 +6,12 @@ const main = async () => {
   const env = readApiRuntimeEnv();
   const context = await createIndexerContext(env);
 
-  await syncFactoryEventsForChain(context, 84532);
-  await syncFactoryEventsForChain(context, 8453);
+  try {
+    await syncFactoryEventsForChain(context, 84532);
+    await syncFactoryEventsForChain(context, 8453);
+  } finally {
+    await context.close();
+  }
 };
 
 void main();

@@ -15,6 +15,7 @@ const start = async () => {
 
   const context = await createIndexerContext(env);
   const app = buildApp({ context, env });
+  let syncTimer: NodeJS.Timeout | null = null;
   const runSync = async () => {
     try {
       logObservabilitySignal(app.log, {
@@ -34,6 +35,32 @@ const start = async () => {
       app.log.error(error, "Goal Vault indexer sync failed.");
     }
   };
+  const closeApp = async (signal: NodeJS.Signals) => {
+    try {
+      app.log.info({ signal }, "Goal Vault API shutting down.");
+      await app.close();
+      process.exit(0);
+    } catch (error) {
+      app.log.error(error, "Goal Vault API shutdown failed.");
+      process.exit(1);
+    }
+  };
+
+  app.addHook("onClose", async () => {
+    if (!syncTimer) {
+      return;
+    }
+
+    clearInterval(syncTimer);
+    syncTimer = null;
+  });
+
+  process.once("SIGINT", () => {
+    void closeApp("SIGINT");
+  });
+  process.once("SIGTERM", () => {
+    void closeApp("SIGTERM");
+  });
 
   app.log.info(
     {
@@ -58,7 +85,7 @@ const start = async () => {
 
   if (env.indexerEnabled && env.syncIntervalMs > 0) {
     void runSync();
-    setInterval(() => {
+    syncTimer = setInterval(() => {
       void runSync();
     }, env.syncIntervalMs).unref();
   } else if (!env.indexerEnabled) {

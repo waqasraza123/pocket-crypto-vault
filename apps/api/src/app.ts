@@ -17,6 +17,9 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
 
   context.logger = app.log;
   app.decorate("goalVaultContext", context);
+  app.addHook("onClose", async () => {
+    await context.close();
+  });
 
   app.get("/", async () => ({
     service: "goal-vault-api",

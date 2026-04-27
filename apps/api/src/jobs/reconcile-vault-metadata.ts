@@ -6,7 +6,11 @@ const main = async () => {
   const env = readApiRuntimeEnv();
   const context = await createIndexerContext(env);
 
-  await reconcileVaultMetadata(context);
+  try {
+    await reconcileVaultMetadata(context);
+  } finally {
+    await context.close();
+  }
 };
 
 void main();

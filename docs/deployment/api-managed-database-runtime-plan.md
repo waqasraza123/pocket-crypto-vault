@@ -84,6 +84,7 @@ Before PostgreSQL runtime activation, operators must confirm:
 - PostgreSQL driver adapter compatibility with the pooled executor boundary is reviewed.
 - PostgreSQL connection pooling and shutdown behavior are reviewed.
 - PostgreSQL transaction execution uses one checked-out client per transaction and releases it after commit or rollback.
+- API server shutdown and standalone indexer jobs close persistence resources through the shared context lifecycle.
 - Managed database schema execution is complete.
 - Managed database import execution is complete.
 - Parity review accepts row counts, latest sync state, metadata samples, and analytics bounds.
@@ -102,7 +103,7 @@ Use the runtime plan after the earlier managed-database artifacts:
 5. Generate the managed database import plan.
 6. Generate the managed database parity plan.
 7. Add the PostgreSQL driver adapter around the pooled executor boundary.
-8. Wire PostgreSQL stores through the persistence factory and API lifecycle.
+8. Wire PostgreSQL stores through the persistence factory and shared context lifecycle.
 9. Run API preflight with PostgreSQL runtime readiness checks.
 10. Generate the release manifest and API traffic plan.
 11. Generate the managed database runtime plan.

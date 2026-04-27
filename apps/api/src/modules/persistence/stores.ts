@@ -7,6 +7,7 @@ export interface ApiPersistenceStores {
   driver: ApiRuntimeEnv["persistence"]["driver"];
   indexerStore: ApiIndexerStore;
   analyticsStore: ApiAnalyticsStore;
+  close(): Promise<void>;
 }
 
 export const createApiPersistenceStores = async (env: ApiRuntimeEnv): Promise<ApiPersistenceStores> => {
@@ -16,10 +17,14 @@ export const createApiPersistenceStores = async (env: ApiRuntimeEnv): Promise<Ap
 
   const indexerStore = new IndexerStore(env.persistence.sqliteDataDir);
   await indexerStore.initialize();
+  const analyticsStore = new AnalyticsStore(env.persistence.sqliteDataDir);
 
   return {
     driver: env.persistence.driver,
     indexerStore,
-    analyticsStore: new AnalyticsStore(env.persistence.sqliteDataDir),
+    analyticsStore,
+    close: async () => {
+      await Promise.all([indexerStore.close(), analyticsStore.close()]);
+    },
   };
 };

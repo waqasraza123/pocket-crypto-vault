@@ -564,6 +564,15 @@ export class IndexerStore implements ApiIndexerStore {
       .run(record as unknown as Record<string, string | number | null>);
   }
 
+  async close() {
+    if (!this.database) {
+      return;
+    }
+
+    this.database.close();
+    this.database = null;
+  }
+
   private getDatabase() {
     if (!this.database) {
       throw new Error("IndexerStore must be initialized before use.");

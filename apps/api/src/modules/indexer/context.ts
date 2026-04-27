@@ -12,6 +12,7 @@ export interface IndexerContext {
   analyticsStore: ApiAnalyticsStore;
   clients: Partial<Record<8453 | 84532, ReturnType<typeof createPublicClient> | null>>;
   logger: FastifyBaseLogger | null;
+  close(): Promise<void>;
 }
 
 export const createIndexerContext = async (env: ApiRuntimeEnv): Promise<IndexerContext> => {
@@ -39,5 +40,6 @@ export const createIndexerContext = async (env: ApiRuntimeEnv): Promise<IndexerC
     analyticsStore: stores.analyticsStore,
     clients,
     logger: null,
+    close: stores.close,
   };
 };

@@ -178,6 +178,9 @@ test("verifyVaultMetadataWriteRequest validates the signed owner and materialize
         } as never,
       },
       logger: null,
+      close: async () => {
+        await store.close();
+      },
     };
 
     const result = await verifyVaultMetadataWriteRequest({
