@@ -1,6 +1,8 @@
 import type {
   GuardianApprovalState,
+  SupportRequestListFilters,
   SupportRequestRecord,
+  SupportRequestStatus,
   SupportedChainId,
   VaultAccentTheme,
   VaultMetadataStatus,
@@ -101,4 +103,7 @@ export interface ApiAnalyticsStore {
 
 export interface ApiSupportStore {
   create(record: SupportRequestRecord): Promise<void>;
+  list(filters: SupportRequestListFilters): Promise<SupportRequestRecord[]>;
+  get(id: string): Promise<SupportRequestRecord | null>;
+  updateStatus(id: string, status: SupportRequestStatus): Promise<SupportRequestRecord | null>;
 }

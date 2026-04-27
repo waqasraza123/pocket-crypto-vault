@@ -75,6 +75,9 @@ test("internal indexer routes require the configured token", async () => {
       analyticsStore: new AnalyticsStore(dataDir),
       supportStore: {
         create: async () => {},
+        list: async () => [],
+        get: async () => null,
+        updateStatus: async () => null,
       },
       clients: {},
       logger: null,
@@ -134,6 +137,9 @@ test("vault metadata route rejects invalid and unsigned requests", async () => {
       analyticsStore: new AnalyticsStore(dataDir),
       supportStore: {
         create: async () => {},
+        list: async () => [],
+        get: async () => null,
+        updateStatus: async () => null,
       },
       clients: {
         84532: {} as never,

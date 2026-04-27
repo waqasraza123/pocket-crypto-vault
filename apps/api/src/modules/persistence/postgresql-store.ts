@@ -1,6 +1,8 @@
 import type {
   GuardianApprovalState,
+  SupportRequestListFilters,
   SupportRequestRecord,
+  SupportRequestStatus,
   SupportedChainId,
   VaultAccentTheme,
   VaultMetadataStatus,
@@ -94,6 +96,26 @@ interface SyncStateRow {
   latest_chain_block: number | string | null;
   last_synced_at: string | null;
   error_message: string | null;
+}
+
+interface SupportRequestRow {
+  id: string;
+  status: string;
+  category: string;
+  priority: string;
+  subject: string;
+  message: string;
+  reporter_wallet: string | null;
+  contact_email: string | null;
+  route: string | null;
+  environment: string;
+  deployment_target: string;
+  chain_id: number | null;
+  wallet_status: string | null;
+  vault_address: string | null;
+  user_agent: string | null;
+  requester_ip_hash: string | null;
+  created_at: string;
 }
 
 const identifierPattern = /^[a-z_][a-z0-9_]*$/;
@@ -196,6 +218,28 @@ const mapSyncStateRow = (row: SyncStateRow): PersistedSyncStateRecord => ({
   errorMessage: row.error_message,
 });
 
+const mapSupportRequestRow = (row: SupportRequestRow): SupportRequestRecord => ({
+  id: row.id,
+  status: row.status as SupportRequestRecord["status"],
+  category: row.category as SupportRequestRecord["category"],
+  priority: row.priority as SupportRequestRecord["priority"],
+  subject: row.subject,
+  message: row.message,
+  reporterWallet: (row.reporter_wallet as Address | null) ?? null,
+  contactEmail: row.contact_email,
+  context: {
+    route: row.route,
+    environment: row.environment as SupportRequestRecord["context"]["environment"],
+    deploymentTarget: row.deployment_target as SupportRequestRecord["context"]["deploymentTarget"],
+    chainId: row.chain_id as SupportRequestRecord["context"]["chainId"],
+    walletStatus: row.wallet_status as SupportRequestRecord["context"]["walletStatus"],
+    vaultAddress: (row.vault_address as Address | null) ?? null,
+  },
+  createdAt: row.created_at,
+  userAgent: row.user_agent,
+  requesterIpHash: row.requester_ip_hash,
+});
+
 const vaultColumns = [
   "key",
   "chain_id",
@@ -254,6 +298,26 @@ const syncStateColumns = [
   "latest_chain_block",
   "last_synced_at",
   "error_message",
+] as const;
+
+const supportRequestColumns = [
+  "id",
+  "status",
+  "category",
+  "priority",
+  "subject",
+  "message",
+  "reporter_wallet",
+  "contact_email",
+  "route",
+  "environment",
+  "deployment_target",
+  "chain_id",
+  "wallet_status",
+  "vault_address",
+  "user_agent",
+  "requester_ip_hash",
+  "created_at",
 ] as const;
 
 const buildPlaceholders = (start: number, count: number) =>
@@ -545,28 +609,8 @@ export class PostgresqlSupportStore implements ApiSupportStore {
   }
 
   async create(record: SupportRequestRecord) {
-    const columnNames = [
-      "id",
-      "status",
-      "category",
-      "priority",
-      "subject",
-      "message",
-      "reporter_wallet",
-      "contact_email",
-      "route",
-      "environment",
-      "deployment_target",
-      "chain_id",
-      "wallet_status",
-      "vault_address",
-      "user_agent",
-      "requester_ip_hash",
-      "created_at",
-    ] as const;
-
     await this.queryExecutor.query(
-      `INSERT INTO ${this.supportRequestsTable} (${columnNames.join(", ")}) VALUES (${buildPlaceholders(1, columnNames.length)})`,
+      `INSERT INTO ${this.supportRequestsTable} (${supportRequestColumns.join(", ")}) VALUES (${buildPlaceholders(1, supportRequestColumns.length)})`,
       [
         record.id,
         record.status,
@@ -587,5 +631,59 @@ export class PostgresqlSupportStore implements ApiSupportStore {
         record.createdAt,
       ],
     );
+  }
+
+  async list(filters: SupportRequestListFilters) {
+    const where: string[] = [];
+    const values: Array<string | number> = [];
+
+    if (filters.status) {
+      values.push(filters.status);
+      where.push(`status = $${values.length}`);
+    }
+
+    if (filters.category) {
+      values.push(filters.category);
+      where.push(`category = $${values.length}`);
+    }
+
+    if (filters.priority) {
+      values.push(filters.priority);
+      where.push(`priority = $${values.length}`);
+    }
+
+    values.push(filters.limit);
+
+    const result = await this.queryExecutor.query<SupportRequestRow>(
+      `SELECT ${supportRequestColumns.join(", ")}
+       FROM ${this.supportRequestsTable}
+       ${where.length > 0 ? `WHERE ${where.join(" AND ")}` : ""}
+       ORDER BY created_at DESC, id DESC
+       LIMIT $${values.length}`,
+      values,
+    );
+
+    return result.rows.map(mapSupportRequestRow);
+  }
+
+  async get(id: string) {
+    const result = await this.queryExecutor.query<SupportRequestRow>(
+      `SELECT ${supportRequestColumns.join(", ")} FROM ${this.supportRequestsTable} WHERE id = $1 LIMIT 1`,
+      [id],
+    );
+
+    return result.rows[0] ? mapSupportRequestRow(result.rows[0]) : null;
+  }
+
+  async updateStatus(id: string, status: SupportRequestStatus) {
+    const result = await this.queryExecutor.query<SupportRequestRow>(
+      `UPDATE ${this.supportRequestsTable}
+       SET status = $1
+       WHERE id = $2
+       RETURNING ${supportRequestColumns.join(", ")}`,
+      [status, id],
+    );
+
+    return result.rows[0] ? mapSupportRequestRow(result.rows[0]) : null;
   }
 }

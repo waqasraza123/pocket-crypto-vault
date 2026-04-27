@@ -150,6 +150,9 @@ test("syncFactoryEventsForChain ingests legacy and V2 creation events without du
       analyticsStore: new AnalyticsStore(dataDir),
       supportStore: {
         create: async () => {},
+        list: async () => [],
+        get: async () => null,
+        updateStatus: async () => null,
       },
       clients: {
         84532: {

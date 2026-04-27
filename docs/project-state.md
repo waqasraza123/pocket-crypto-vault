@@ -44,6 +44,7 @@ The repository now has a real v1 foundation:
 - PostgreSQL API runtime adapter, store factory wiring, and redacted preflight connection/schema checks behind the existing persistence ports
 - provider-neutral limited beta readiness artifact tying together release, preflight, traffic, persistence, rollback, support, and audience-limit evidence
 - beta support intake across the app and API with durable SQLite/PostgreSQL persistence for structured real-user issue reports
+- operator-only beta support triage API for listing, reading, and updating support request status through internal access
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
@@ -144,6 +145,7 @@ Still not implemented:
 - Phase 42: PostgreSQL API runtime adapter, persistence factory wiring, and redacted preflight connection/schema checks
 - Phase 43: limited beta readiness artifact for real-audience operational approval
 - Phase 44: beta support intake surface with durable API persistence and managed database artifact coverage
+- Phase 45: internal beta support triage API for operator review and status updates
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -243,6 +245,7 @@ Still not implemented:
 - Phase 43 adds a provider-neutral beta readiness plan workflow that validates release, API preflight, traffic, database runtime, snapshot, support, incident owner, participant-limit, and per-vault USDC-limit evidence before real users are invited.
 - Phase 44 adds a `/support` app route and `POST /support/requests` API route so beta users can submit structured issue reports with wallet/runtime context. Support records are operational private data and must stay out of committed artifacts.
 - PostgreSQL API runtime mode now requires `support_requests` alongside `vaults`, `vault_events`, `sync_states`, and `analytics_events`.
+- Phase 45 adds internal support triage routes behind `API_INTERNAL_TOKEN` so operators can list support requests, inspect one request, and move it between `open`, `triage`, and `closed` without direct database access.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -299,6 +302,7 @@ Still not implemented:
 - The Phase 42 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-42.md`.
 - The Phase 43 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-43.md`.
 - The Phase 44 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-44.md`.
+- The Phase 45 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-45.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.

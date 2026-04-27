@@ -6,6 +6,10 @@ Goal Vault beta support intake gives real users a structured way to report produ
 
 - App route: `/support`
 - API route: `POST /support/requests`
+- Internal review routes:
+  - `GET /internal/support/requests`
+  - `GET /internal/support/requests/:id`
+  - `PATCH /internal/support/requests/:id`
 - Runtime toggle: `API_ENABLE_SUPPORT`
 - Default state: enabled
 - Storage:
@@ -58,6 +62,51 @@ The API writes:
 
 The API does not store raw requester IP addresses.
 
+## Internal Review
+
+Internal review routes require the same internal access model as indexer operations:
+
+- header: `x-goal-vault-internal-token`
+- value: `API_INTERNAL_TOKEN`
+- local development fallback: loopback requests are allowed when no internal token is configured
+
+List requests:
+
+```http
+GET /internal/support/requests?status=open&priority=urgent&limit=50
+```
+
+Optional filters:
+
+- `status`
+  - `open`
+  - `triage`
+  - `closed`
+- `category`
+- `priority`
+- `limit`
+  - 1 to 100
+  - defaults to 50
+
+Read one request:
+
+```http
+GET /internal/support/requests/{id}
+```
+
+Update triage status:
+
+```http
+PATCH /internal/support/requests/{id}
+Content-Type: application/json
+
+{
+  "status": "triage"
+}
+```
+
+The internal routes return full support request text and contact details. They should be used only through approved operator access.
+
 ## Secret Boundary
 
 Users and operators must not submit or store:
@@ -94,4 +143,4 @@ The managed database schema, export, import, parity, runtime preflight, and runt
 
 ## Boundary
 
-This feature does not send email, create tickets in a third-party system, page an incident tool, expose an admin dashboard, or provide public support-request reads. It creates a durable intake record that operators can inspect through approved database access during beta.
+This feature does not send email, create tickets in a third-party system, page an incident tool, expose an admin dashboard, or provide public support-request reads. It creates a durable intake record that operators can inspect through approved database or internal API access during beta.

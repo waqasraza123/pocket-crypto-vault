@@ -2,9 +2,72 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
-import type { SupportRequestRecord } from "@goal-vault/shared";
+import type { SupportRequestListFilters, SupportRequestRecord, SupportRequestStatus } from "@goal-vault/shared";
+import type { Address } from "viem";
 
 import type { ApiSupportStore } from "../persistence/ports";
+
+interface SupportRequestRow {
+  id: string;
+  status: string;
+  category: string;
+  priority: string;
+  subject: string;
+  message: string;
+  reporter_wallet: string | null;
+  contact_email: string | null;
+  route: string | null;
+  environment: string;
+  deployment_target: string;
+  chain_id: number | null;
+  wallet_status: string | null;
+  vault_address: string | null;
+  user_agent: string | null;
+  requester_ip_hash: string | null;
+  created_at: string;
+}
+
+const mapSupportRequestRow = (row: SupportRequestRow): SupportRequestRecord => ({
+  id: row.id,
+  status: row.status as SupportRequestRecord["status"],
+  category: row.category as SupportRequestRecord["category"],
+  priority: row.priority as SupportRequestRecord["priority"],
+  subject: row.subject,
+  message: row.message,
+  reporterWallet: (row.reporter_wallet as Address | null) ?? null,
+  contactEmail: row.contact_email,
+  context: {
+    route: row.route,
+    environment: row.environment as SupportRequestRecord["context"]["environment"],
+    deploymentTarget: row.deployment_target as SupportRequestRecord["context"]["deploymentTarget"],
+    chainId: row.chain_id as SupportRequestRecord["context"]["chainId"],
+    walletStatus: row.wallet_status as SupportRequestRecord["context"]["walletStatus"],
+    vaultAddress: (row.vault_address as Address | null) ?? null,
+  },
+  createdAt: row.created_at,
+  userAgent: row.user_agent,
+  requesterIpHash: row.requester_ip_hash,
+});
+
+const supportRequestColumns = [
+  "id",
+  "status",
+  "category",
+  "priority",
+  "subject",
+  "message",
+  "reporter_wallet",
+  "contact_email",
+  "route",
+  "environment",
+  "deployment_target",
+  "chain_id",
+  "wallet_status",
+  "vault_address",
+  "user_agent",
+  "requester_ip_hash",
+  "created_at",
+];
 
 export class SupportStore implements ApiSupportStore {
   private readonly dbPath: string;
@@ -75,6 +138,56 @@ export class SupportStore implements ApiSupportStore {
       requesterIpHash: record.requesterIpHash,
       createdAt: record.createdAt,
     });
+  }
+
+  async list(filters: SupportRequestListFilters) {
+    const database = await this.initialize();
+    const where: string[] = [];
+    const values: Array<string | number> = [];
+
+    if (filters.status) {
+      where.push("status = ?");
+      values.push(filters.status);
+    }
+
+    if (filters.category) {
+      where.push("category = ?");
+      values.push(filters.category);
+    }
+
+    if (filters.priority) {
+      where.push("priority = ?");
+      values.push(filters.priority);
+    }
+
+    values.push(filters.limit);
+
+    const rows = database
+      .prepare(
+        `SELECT ${supportRequestColumns.join(", ")}
+         FROM support_requests
+         ${where.length > 0 ? `WHERE ${where.join(" AND ")}` : ""}
+         ORDER BY created_at DESC, id DESC
+         LIMIT ?`,
+      )
+      .all(...values) as SupportRequestRow[];
+
+    return rows.map(mapSupportRequestRow);
+  }
+
+  async get(id: string) {
+    const database = await this.initialize();
+    const row = database
+      .prepare(`SELECT ${supportRequestColumns.join(", ")} FROM support_requests WHERE id = ?`)
+      .get(id) as SupportRequestRow | undefined;
+
+    return row ? mapSupportRequestRow(row) : null;
+  }
+
+  async updateStatus(id: string, status: SupportRequestStatus) {
+    const database = await this.initialize();
+    database.prepare("UPDATE support_requests SET status = ? WHERE id = ?").run(status, id);
+    return this.get(id);
   }
 
   async initialize() {

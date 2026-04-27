@@ -144,6 +144,9 @@ test("verifyVaultMetadataWriteRequest validates the signed owner and materialize
       analyticsStore: new AnalyticsStore(dataDir),
       supportStore: {
         create: async () => {},
+        list: async () => [],
+        get: async () => null,
+        updateStatus: async () => null,
       },
       clients: {
         84532: {

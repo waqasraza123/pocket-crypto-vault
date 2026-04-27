@@ -55,3 +55,24 @@ export interface SupportRequestResponse {
   receivedAt: string;
   message: string;
 }
+
+export interface SupportRequestListFilters {
+  status?: SupportRequestStatus;
+  category?: SupportRequestCategory;
+  priority?: SupportRequestPriority;
+  limit: number;
+}
+
+export interface SupportRequestListResponse {
+  items: SupportRequestRecord[];
+  filters: SupportRequestListFilters;
+  generatedAt: string;
+}
+
+export interface SupportRequestDetailResponse {
+  item: SupportRequestRecord;
+}
+
+export interface SupportRequestStatusUpdate {
+  status: SupportRequestStatus;
+}
