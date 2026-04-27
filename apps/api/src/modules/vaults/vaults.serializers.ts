@@ -4,7 +4,7 @@ import type { ApiVaultDetailItem, ApiVaultSummaryItem, VaultDetailResponse, Vaul
 import type { SyncFreshnessSnapshot, VaultSummary } from "@goal-vault/shared";
 
 import { serializeVaultActivityItem } from "../vault-events/vault-events.serializers";
-import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../indexer/indexer-store";
+import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 import { getAccentTone } from "../indexer/reconciliation.service";
 
 const getGoalName = (vault: PersistedVaultRecord) => vault.displayName ?? `Goal Vault ${vault.contractAddress.slice(2, 6).toUpperCase()}`;

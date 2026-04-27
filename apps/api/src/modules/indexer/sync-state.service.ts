@@ -2,7 +2,7 @@ import type { ChainSyncStatus, SyncFreshnessState, SupportedChainId } from "@goa
 import type { Address } from "viem";
 
 import type { IndexerContext } from "./context";
-import type { PersistedSyncStateRecord } from "./indexer-store";
+import type { PersistedSyncStateRecord } from "../persistence/ports";
 
 export const createFactorySyncStateKey = (chainId: SupportedChainId) => `factory:${chainId}`;
 

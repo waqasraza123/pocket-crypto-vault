@@ -3,7 +3,7 @@ import { parseEventLogs, type Address, type Log } from "viem";
 import type { GuardianApprovalState, SupportedChainId, UnlockRequestStatus } from "@goal-vault/shared";
 
 import { goalVaultAbi, goalVaultFactoryAbi } from "../../lib/contracts";
-import type { PersistedVaultEventRecord, PersistedVaultRecord } from "./indexer-store";
+import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 import { mergeVaultRecord } from "./reconciliation.service";
 
 const createEventId = (chainId: SupportedChainId, transactionHash: `0x${string}`, logIndex: number) =>

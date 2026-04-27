@@ -11,7 +11,7 @@ import type { Address } from "viem";
 
 import { logObservabilitySignal } from "../../lib/observability/logger";
 import type { IndexerContext } from "./context";
-import type { PersistedVaultRecord } from "./indexer-store";
+import type { PersistedVaultRecord } from "../persistence/ports";
 
 const accentTones = {
   sand: "#87684f",

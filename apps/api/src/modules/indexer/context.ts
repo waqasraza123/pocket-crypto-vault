@@ -3,14 +3,13 @@ import { createPublicClient, http } from "viem";
 import { base, baseSepolia } from "viem/chains";
 
 import type { ApiRuntimeEnv } from "../../env";
-import type { AnalyticsStore } from "../../lib/observability/analytics";
-import type { IndexerStore } from "./indexer-store";
+import type { ApiAnalyticsStore, ApiIndexerStore } from "../persistence/ports";
 import { createApiPersistenceStores } from "../persistence/stores";
 
 export interface IndexerContext {
   env: ApiRuntimeEnv;
-  store: IndexerStore;
-  analyticsStore: AnalyticsStore;
+  store: ApiIndexerStore;
+  analyticsStore: ApiAnalyticsStore;
   clients: Partial<Record<8453 | 84532, ReturnType<typeof createPublicClient> | null>>;
   logger: FastifyBaseLogger | null;
 }

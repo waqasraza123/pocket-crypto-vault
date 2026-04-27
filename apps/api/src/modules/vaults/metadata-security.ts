@@ -5,7 +5,7 @@ import { parseUnits, verifyMessage, type Address, type Log } from "viem";
 import { readGoalVaultSummaryForIndexer } from "../../lib/contracts";
 import type { IndexerContext } from "../indexer/context";
 import { getRuleStatePatchFromSummary, normalizeVaultCreatedLogs } from "../indexer/event-normalizer";
-import type { PersistedVaultRecord } from "../indexer/indexer-store";
+import type { PersistedVaultRecord } from "../persistence/ports";
 import { mergeVaultRecord } from "../indexer/reconciliation.service";
 
 const zeroAddress = "0x0000000000000000000000000000000000000000";

@@ -12,7 +12,7 @@ import {
   normalizeVaultUnlockLifecycleLogs,
   normalizeVaultWithdrawalLogs,
 } from "./event-normalizer";
-import type { PersistedVaultEventRecord } from "./indexer-store";
+import type { PersistedVaultEventRecord } from "../persistence/ports";
 import { mergeVaultRecord } from "./reconciliation.service";
 import { createVaultSyncStateKey, isLogAfterCursor } from "./sync-state.service";
 

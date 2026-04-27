@@ -3,7 +3,7 @@ import test from "node:test";
 
 import type { SyncFreshnessSnapshot } from "@goal-vault/shared";
 
-import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../indexer/indexer-store";
+import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 import { serializeVaultActivityItem } from "../vault-events/vault-events.serializers";
 import { serializeVaultSummary } from "./vaults.serializers";
 

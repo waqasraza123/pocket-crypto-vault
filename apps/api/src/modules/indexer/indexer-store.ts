@@ -13,72 +13,12 @@ import type {
 } from "@goal-vault/shared";
 import type { Address, Hash } from "viem";
 
-export interface PersistedVaultRecord {
-  key: string;
-  chainId: SupportedChainId;
-  contractAddress: Address;
-  ownerWallet: Address | null;
-  assetAddress: Address | null;
-  targetAmountAtomic: string | null;
-  ruleType: VaultRuleType;
-  unlockDate: string | null;
-  cooldownDurationSeconds: number | null;
-  guardianAddress: Address | null;
-  unlockRequestedAt: string | null;
-  unlockEligibleAt: string | null;
-  unlockRequestStatus: UnlockRequestStatus;
-  guardianApprovalState: GuardianApprovalState;
-  guardianDecisionAt: string | null;
-  createdAt: string | null;
-  createdTxHash: Hash | null;
-  displayName: string | null;
-  category: string | null;
-  note: string | null;
-  accentTheme: VaultAccentTheme | null;
-  metadataStatus: VaultMetadataStatus;
-  reconciliationStatus: VaultReconciliationStatus;
-  totalDepositedAtomic: string;
-  totalWithdrawnAtomic: string;
-  currentBalanceAtomic: string;
-  lastActivityAt: string | null;
-  lastIndexedAt: string | null;
-  onchainFound: boolean;
-}
-
-export interface PersistedVaultEventRecord {
-  id: string;
-  chainId: SupportedChainId;
-  txHash: Hash;
-  blockNumber: number;
-  logIndex: number;
-  vaultAddress: Address;
-  ownerAddress: Address | null;
-  actorAddress: Address | null;
-  eventType:
-    | "vault_created"
-    | "deposit_confirmed"
-    | "withdrawal_confirmed"
-    | "unlock_requested"
-    | "unlock_canceled"
-    | "guardian_approved"
-    | "guardian_rejected";
-  amountAtomic: string | null;
-  occurredAt: string;
-  indexedAt: string;
-}
-
-export interface PersistedSyncStateRecord {
-  key: string;
-  chainId: SupportedChainId;
-  streamType: "factory" | "vault";
-  scopeKey: string;
-  lifecycle: "idle" | "running" | "error";
-  latestIndexedBlock: number | null;
-  latestIndexedLogIndex: number | null;
-  latestChainBlock: number | null;
-  lastSyncedAt: string | null;
-  errorMessage: string | null;
-}
+import type {
+  ApiIndexerStore,
+  PersistedSyncStateRecord,
+  PersistedVaultEventRecord,
+  PersistedVaultRecord,
+} from "../persistence/ports";
 
 interface VaultRow {
   key: string;
@@ -200,7 +140,7 @@ const mapSyncStateRow = (row: SyncStateRow): PersistedSyncStateRecord => ({
   errorMessage: row.error_message,
 });
 
-export class IndexerStore {
+export class IndexerStore implements ApiIndexerStore {
   private readonly dbPath: string;
   private database: DatabaseSync | null = null;
 

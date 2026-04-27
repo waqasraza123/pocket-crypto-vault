@@ -3,7 +3,7 @@ import { formatUnits } from "viem";
 import type { ApiVaultActivityItem, ActivityFeedResponse, VaultActivityResponse } from "@goal-vault/api-client";
 import type { SyncFreshnessSnapshot, SupportedChainId } from "@goal-vault/shared";
 
-import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../indexer/indexer-store";
+import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 
 export const serializeVaultActivityItem = ({
   event,

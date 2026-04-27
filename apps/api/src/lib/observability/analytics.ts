@@ -53,7 +53,7 @@ export const analyticsBatchSchema = z.object({
   events: z.array(analyticsEventSchema).min(1).max(100),
 });
 
-type AnalyticsStoredEvent = z.infer<typeof analyticsEventSchema>;
+export type AnalyticsStoredEvent = z.infer<typeof analyticsEventSchema>;
 
 export class AnalyticsStore {
   private readonly dbPath: string;

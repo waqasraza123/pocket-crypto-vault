@@ -1,11 +1,12 @@
 import type { ApiRuntimeEnv } from "../../env";
 import { AnalyticsStore } from "../../lib/observability/analytics";
 import { IndexerStore } from "../indexer/indexer-store";
+import type { ApiAnalyticsStore, ApiIndexerStore } from "./ports";
 
 export interface ApiPersistenceStores {
   driver: ApiRuntimeEnv["persistence"]["driver"];
-  indexerStore: IndexerStore;
-  analyticsStore: AnalyticsStore;
+  indexerStore: ApiIndexerStore;
+  analyticsStore: ApiAnalyticsStore;
 }
 
 export const createApiPersistenceStores = async (env: ApiRuntimeEnv): Promise<ApiPersistenceStores> => {
