@@ -1,0 +1,146 @@
+name: API Managed Database Import Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      import_label:
+        description: Stable import plan label.
+        type: string
+        required: true
+      mode:
+        description: Import planning mode.
+        type: choice
+        required: true
+        default: initial-import
+        options:
+          - initial-import
+          - retry-import
+          - rollback-restore
+      target_reference:
+        description: Non-secret managed database target reference.
+        type: string
+        required: true
+      schema_name:
+        description: PostgreSQL schema name.
+        type: string
+        required: false
+        default: goal_vault_api
+      export_artifact:
+        description: Optional managed database export artifact name to download.
+        type: string
+        required: false
+      export_run_id:
+        description: Workflow run ID that produced export_artifact.
+        type: string
+        required: false
+      export_source:
+        description: Runner-local export bundle directory when no artifact is downloaded.
+        type: string
+        required: false
+      database_plan:
+        description: Managed database plan artifact name or URL.
+        type: string
+        required: false
+      schema_manifest:
+        description: Managed database schema manifest artifact name or URL.
+        type: string
+        required: false
+      parity_plan:
+        description: Managed database parity plan artifact name or URL.
+        type: string
+        required: false
+      change_window:
+        description: Approved operator change window.
+        type: string
+        required: false
+      observe_minutes:
+        description: Minimum post-import observation window.
+        type: string
+        required: false
+        default: "30"
+      operator:
+        description: Operator or team responsible for import execution.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: api-managed-database-import-plan-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  API_DATABASE_IMPORT_TARGET: ${{ inputs.target }}
+  API_DATABASE_IMPORT_LABEL: ${{ inputs.import_label }}
+  API_DATABASE_IMPORT_ENGINE: postgresql
+  API_DATABASE_IMPORT_MODE: ${{ inputs.mode }}
+  API_DATABASE_IMPORT_TARGET_REFERENCE: ${{ inputs.target_reference }}
+  API_DATABASE_IMPORT_SCHEMA_NAME: ${{ inputs.schema_name }}
+  API_DATABASE_IMPORT_EXPORT_SOURCE: ${{ inputs.export_artifact != '' && 'artifacts/source-export' || inputs.export_source }}
+  API_DATABASE_IMPORT_DATABASE_PLAN: ${{ inputs.database_plan }}
+  API_DATABASE_IMPORT_SCHEMA_MANIFEST: ${{ inputs.schema_manifest }}
+  API_DATABASE_IMPORT_PARITY_PLAN: ${{ inputs.parity_plan }}
+  API_DATABASE_IMPORT_CHANGE_WINDOW: ${{ inputs.change_window }}
+  API_DATABASE_IMPORT_OBSERVE_MINUTES: ${{ inputs.observe_minutes }}
+  API_DATABASE_IMPORT_OPERATOR: ${{ inputs.operator }}
+  API_DATABASE_IMPORT_NOTES: ${{ inputs.notes }}
+  API_DATABASE_IMPORT_DIR: artifacts/api-managed-database-import-plans
+
+jobs:
+  api-managed-database-import-plan:
+    name: Write ${{ inputs.target }} API managed database import plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate export source
+        if: ${{ inputs.export_artifact == '' && inputs.export_source == '' }}
+        run: |
+          echo "Provide export_artifact or export_source."
+          exit 1
+
+      - name: Validate export artifact run
+        if: ${{ inputs.export_artifact != '' && inputs.export_run_id == '' }}
+        run: |
+          echo "export_run_id is required when export_artifact is provided."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download managed database export artifact
+        if: ${{ inputs.export_artifact != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.export_artifact }}
+          run-id: ${{ inputs.export_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/source-export
+
+      - name: Write API managed database import plan
+        id: import_plan
+        run: node scripts/write-api-managed-database-import-plan.mjs
+
+      - name: Upload API managed database import plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: goal-vault-api-managed-database-import-plan-${{ inputs.target }}
+          path: |
+            ${{ steps.import_plan.outputs.plan_path }}
+            ${{ steps.import_plan.outputs.sql_path }}
+          if-no-files-found: error

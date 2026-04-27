@@ -23,6 +23,8 @@ It is not a deployment workflow. It does not deploy images, update DNS, change l
   - records the PostgreSQL schema artifact when API persistence is moving away from SQLite
 - `docs/deployment/api-managed-database-export.md`
   - records the SQLite snapshot to JSONL handoff bundle when API persistence is moving away from SQLite
+- `docs/deployment/api-managed-database-import-plan.md`
+  - records the PostgreSQL import SQL handoff when API persistence is moving away from SQLite
 - `docs/deployment/api-managed-database-parity.md`
   - records the parity checks that must pass before managed-database traffic movement
 
@@ -121,13 +123,14 @@ Use the traffic plan after the supporting artifacts exist:
 5. Generate the managed database plan when persistence is changing.
 6. Generate the managed database schema bundle when persistence is changing.
 7. Generate the managed database export bundle when persistence is changing.
-8. Import data through the selected provider or future migration tool when persistence is changing.
-9. Generate the managed database parity plan when persistence is changing.
-10. Generate the release manifest.
-11. Generate the API traffic plan.
-12. Review the plan with the operator who owns the hosting provider.
-13. Move traffic manually in the selected hosting provider.
-14. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
+8. Generate the managed database import plan when persistence is changing.
+9. Import data through the selected provider or future migration tool when persistence is changing.
+10. Generate the managed database parity plan when persistence is changing.
+11. Generate the release manifest.
+12. Generate the API traffic plan.
+13. Review the plan with the operator who owns the hosting provider.
+14. Move traffic manually in the selected hosting provider.
+15. Observe `/health`, `/ready`, indexer freshness, and product smoke checks for the planned observation window.
 
 ## Rollback Sequence
 Use the plan during rollback:

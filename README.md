@@ -1,6 +1,6 @@
 # Goal Vault
 
-![Status](https://img.shields.io/badge/status-phase%2028-b07d4f)
+![Status](https://img.shields.io/badge/status-phase%2029-b07d4f)
 ![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20Android%20%7C%20Web-456b66)
 ![Expo](https://img.shields.io/badge/expo-sdk%2055-111827?logo=expo&logoColor=white)
 ![React%20Native](https://img.shields.io/badge/react%20native-0.83.6-61dafb?logo=react&logoColor=111827)
@@ -34,6 +34,7 @@ This repository now contains a deployment-oriented universal Goal Vault v1:
 - provider-neutral managed database planning workflow for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle workflow for the current API persistence contract
 - provider-neutral managed database export workflow for SQLite snapshot to JSONL handoff
+- provider-neutral managed database import plan workflow for PostgreSQL import SQL handoff
 - provider-neutral managed database parity planning workflow for pre-traffic comparison review
 
 Still deferred:
@@ -148,6 +149,7 @@ Included:
 - managed database migration planning and schema inventory artifacts
 - managed database schema bundle artifacts for PostgreSQL review
 - managed database export bundles for future PostgreSQL import handoff
+- managed database import plan artifacts for psql execution review
 - managed database parity plan artifacts for restore and pre-traffic review
 - guarded mobile EAS build and submit workflow
 - release manifest generation before manual traffic movement
@@ -210,6 +212,8 @@ Root scripts:
   - writes a provider-neutral managed database migration plan and schema inventory
 - `pnpm api:database:export`
   - converts an API data snapshot into table-level JSONL files for future managed database import tooling
+- `pnpm api:database:import:plan`
+  - writes a provider-neutral PostgreSQL import SQL artifact and execution plan from a managed database export bundle
 - `pnpm api:database:parity`
   - writes a provider-neutral SQLite/PostgreSQL parity review plan
 - `pnpm api:database:schema`
@@ -304,6 +308,8 @@ Key documentation files:
   - PostgreSQL schema bundle runbook
 - `docs/deployment/api-managed-database-export.md`
   - SQLite snapshot to JSONL export runbook
+- `docs/deployment/api-managed-database-import-plan.md`
+  - managed database import plan and generated SQL runbook
 - `docs/deployment/api-traffic-plan.md`
   - API traffic planning, rollback, and disablement runbook
 - `docs/deployment/mobile-distribution.md`
@@ -334,6 +340,8 @@ Key documentation files:
   - Phase 27 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-28.md`
   - Phase 28 implementation note
+- `docs/plans/goal-vault-universal-react-native-phase-29.md`
+  - Phase 29 implementation note
 - `docs/plans/goal-vault-universal-react-native-phase-9.md`
   - Phase 9 implementation note
 - `docs/product/goal-vault/goal.md`
@@ -357,13 +365,14 @@ The next major implementation steps are:
 8. Generate a managed database plan before adding external PostgreSQL infrastructure.
 9. Generate a managed database schema bundle for review.
 10. Generate a managed database export bundle for provider-owned import.
-11. Generate a managed database parity plan before managed-database traffic movement.
-12. Generate a release manifest before manually moving traffic.
-13. Generate an API traffic plan before manually moving traffic.
-14. Decide whether hosting-provider backend promotion should be automated next.
+11. Generate a managed database import plan for provider-owned execution.
+12. Generate a managed database parity plan before managed-database traffic movement.
+13. Generate a release manifest before manually moving traffic.
+14. Generate an API traffic plan before manually moving traffic.
+15. Decide whether hosting-provider backend promotion should be automated next.
 
 ## Notes
 
-- This repository now has CI, release-candidate verification, guarded contract deployment, API image packaging, API runtime preflight, API traffic planning, managed database planning, managed database schema artifacts, managed database export artifacts, managed database parity planning, mobile EAS distribution automation, release manifests, and API data snapshot tooling, but backend traffic promotion remains manual.
+- This repository now has CI, release-candidate verification, guarded contract deployment, API image packaging, API runtime preflight, API traffic planning, managed database planning, managed database schema artifacts, managed database export artifacts, managed database import plan artifacts, managed database parity planning, mobile EAS distribution automation, release manifests, and API data snapshot tooling, but backend traffic promotion remains manual.
 - `.env.example` provides the expected variable names without secrets.
 - Use the launch checklist and env reference docs before staging or production deployment.

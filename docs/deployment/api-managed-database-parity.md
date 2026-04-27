@@ -20,6 +20,8 @@ It is not a live parity checker. It does not connect to SQLite, PostgreSQL, or a
   - exposes `pnpm api:database:parity`
 - `docs/deployment/api-managed-database-export.md`
   - creates the JSONL handoff bundle that operators import before running parity checks
+- `docs/deployment/api-managed-database-import-plan.md`
+  - creates the psql-compatible import SQL that operators review before provider-owned execution
 
 ## Required Inputs
 - `API_DATABASE_PARITY_TARGET`
@@ -82,11 +84,12 @@ PostgreSQL query pairs use `API_DATABASE_PARITY_SCHEMA_NAME`, which should match
 Before traffic movement:
 
 1. Source snapshot or export bundle, schema manifest, and schema SQL artifacts are reviewed.
-2. Table row counts match exactly unless an intentional reset is recorded.
-3. Sync state latest indexed blocks and log indexes do not regress.
-4. Private vault metadata is reviewed only through approved operational access.
-5. API preflight passes with the managed database runtime configuration.
-6. API traffic plan is accepted by the hosting-provider operator.
+2. Import plan SQL is reviewed and executed through approved operational access.
+3. Table row counts match exactly unless an intentional reset is recorded.
+4. Sync state latest indexed blocks and log indexes do not regress.
+5. Private vault metadata is reviewed only through approved operational access.
+6. API preflight passes with the managed database runtime configuration.
+7. API traffic plan is accepted by the hosting-provider operator.
 
 ## Rollback Triggers
 Rollback is required when:

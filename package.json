@@ -12,6 +12,7 @@
     "api:data:restore": "node scripts/restore-api-data-snapshot.mjs",
     "api:data:snapshot": "node scripts/create-api-data-snapshot.mjs",
     "api:database:export": "node scripts/write-api-managed-database-export.mjs",
+    "api:database:import:plan": "node scripts/write-api-managed-database-import-plan.mjs",
     "api:database:parity": "node scripts/write-api-managed-database-parity-plan.mjs",
     "api:database:plan": "node scripts/write-api-managed-database-plan.mjs",
     "api:database:schema": "node scripts/write-api-managed-database-schema.mjs",

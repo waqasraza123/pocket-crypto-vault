@@ -18,6 +18,8 @@ It does not connect to PostgreSQL, apply schema, import rows, run parity checks,
   - uploads the export bundle artifact
 - `package.json`
   - exposes `pnpm api:database:export`
+- `docs/deployment/api-managed-database-import-plan.md`
+  - turns reviewed export bundles into psql-compatible import SQL and an execution plan
 
 ## Required Inputs
 - `API_DATABASE_EXPORT_TARGET`
@@ -128,8 +130,9 @@ The normal sequence is:
 2. Generate or review the managed database plan.
 3. Generate or review the managed database schema bundle.
 4. Generate this export bundle from the reviewed snapshot.
-5. Import the JSONL files through provider-owned tooling.
-6. Generate or review the managed database parity plan.
+5. Generate or review the managed database import plan.
+6. Import the JSONL files through provider-owned tooling.
+7. Generate or review the managed database parity plan.
 
 After importing:
 

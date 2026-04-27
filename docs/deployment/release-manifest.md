@@ -24,6 +24,8 @@ It is not a deployment workflow. It does not move traffic, deploy the API image,
   - records the provider-neutral PostgreSQL schema artifact when persistence is changing
 - `docs/deployment/api-managed-database-export.md`
   - records the provider-neutral JSONL export bundle when persistence is changing
+- `docs/deployment/api-managed-database-import-plan.md`
+  - records the provider-neutral import SQL handoff when persistence is changing
 - `docs/deployment/api-managed-database-parity.md`
   - records the provider-neutral parity checks required before managed-database traffic movement
 
@@ -80,11 +82,11 @@ Use this manifest before manual promotion:
 1. Confirm contract deployment manifest matches the factory address.
 2. Confirm API image manifest matches the API image tag.
 3. Confirm API preflight report is passing for the target environment.
-4. Confirm managed database plan, schema bundle, export bundle, and parity plan are reviewed when persistence is changing.
+4. Confirm managed database plan, schema bundle, export bundle, import plan, and parity plan are reviewed when persistence is changing.
 5. Confirm mobile distribution manifest or EAS dashboard matches the build references.
 6. Generate and review the API traffic plan.
 7. Confirm `/ready` is acceptable on the target API.
-8. Save the release manifest, managed database plan/schema/export/parity artifacts when applicable, and traffic plan artifacts with the release notes.
+8. Save the release manifest, managed database plan/schema/export/import/parity artifacts when applicable, and traffic plan artifacts with the release notes.
 9. Promote traffic manually through the selected hosting provider.
 
 ## Rollback Use
