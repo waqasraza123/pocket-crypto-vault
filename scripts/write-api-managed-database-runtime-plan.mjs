@@ -204,6 +204,7 @@ const plan = {
   ],
   acceptanceGates: [
     "PostgreSQL driver package and lockfile changes are reviewed.",
+    "API preflight reports PostgreSQL runtime capability gates with secrets redacted.",
     "PostgreSQL connection pooling and shutdown behavior are reviewed.",
     "Managed database schema execution is completed through approved provider access.",
     "Managed database import execution is completed through approved provider access.",
@@ -216,10 +217,10 @@ const plan = {
   runtimeSteps: buildRuntimeSteps(mode, observeMinutes),
   rollbackSteps,
   blockedUntil: [
-    "A PostgreSQL driver dependency and connection pool are added to the API package.",
+    "A PostgreSQL driver adapter is added around the pooled executor boundary.",
     "`createApiPersistenceStores` wires PostgreSQL mode to the PostgreSQL store core.",
     "Runtime env validation is updated to allow PostgreSQL only when the connection layer is configured.",
-    "Preflight checks are updated to validate PostgreSQL runtime readiness without exposing `API_DATABASE_URL`.",
+    "Preflight capability checks report the PostgreSQL driver adapter, store factory wiring, and connection check as ready.",
     "Schema, import, parity, release manifest, and traffic plan artifacts are reviewed for this runtime label.",
   ],
   git: {

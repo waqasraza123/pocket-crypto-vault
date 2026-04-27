@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import type { ApiRuntimeEnv } from "./env";
+import { createApiPersistenceRuntimeCapabilities, type ApiRuntimeEnv } from "./env";
 import { buildApp } from "./app";
 import { AnalyticsStore } from "./lib/observability/analytics";
 import type { IndexerContext } from "./modules/indexer/context";
@@ -30,6 +30,7 @@ const createEnv = ({
     sqliteDataDir: dataDir,
     postgresUrlConfigured: false,
     schemaName: "goal_vault_api",
+    capabilities: createApiPersistenceRuntimeCapabilities(),
     runtimeReady: true,
     message: "SQLite persistence is active.",
   },

@@ -10,6 +10,7 @@ It does not start the server, connect to RPC providers, run database migrations,
   - reads API runtime configuration through `readApiRuntimeEnv`
   - validates target-chain RPC and factory configuration
   - validates persistence driver selection and blocks PostgreSQL runtime mode until the adapter exists
+  - reports redacted persistence runtime capabilities and PostgreSQL activation blockers
   - reports booleans for secrets instead of printing secret values
   - writes a JSON preflight report
   - exits nonzero when runtime validation fails
@@ -93,6 +94,18 @@ The preflight report records:
 - whether `API_DATABASE_URL` is configured
 - PostgreSQL schema name selected for future managed database runtime
 - whether the selected persistence runtime is ready
+- persistence runtime capabilities:
+  - SQLite runtime readiness
+  - asynchronous store port readiness
+  - PostgreSQL store core readiness
+  - PostgreSQL transaction boundary readiness
+  - PostgreSQL pooled executor boundary readiness
+  - lifecycle shutdown readiness
+  - PostgreSQL driver adapter readiness
+  - PostgreSQL store factory wiring readiness
+  - PostgreSQL preflight connection-check readiness
+  - PostgreSQL runtime readiness
+  - redacted blocker messages for incomplete PostgreSQL activation gates
 - sync interval, indexer mode, analytics mode, and log level
 - whether the internal token is configured
 - signed request maximum age
@@ -125,6 +138,7 @@ Common failures:
 - malformed numeric or boolean env values
 - `API_PERSISTENCE_DRIVER=postgresql` before the managed database runtime adapter exists
 - `API_DATABASE_URL` missing when `API_PERSISTENCE_DRIVER=postgresql`
+- PostgreSQL capability blockers showing the driver adapter, store factory wiring, or connection checks are not ready
 
 ## Boundary
 This preflight closes a promotion-readiness gap without selecting a hosting provider. Provider-specific deploy, traffic shifting, rollback automation, and managed database infrastructure remain deferred.

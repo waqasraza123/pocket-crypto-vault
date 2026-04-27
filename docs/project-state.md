@@ -38,6 +38,7 @@ The repository now has a real v1 foundation:
 - transaction-aware PostgreSQL query executor boundary for future driver wiring
 - driver-neutral pooled PostgreSQL executor boundary for future connection lifecycle wiring
 - API persistence lifecycle shutdown boundary for server and one-shot job contexts
+- redacted API persistence capability reporting for PostgreSQL runtime activation gates
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
@@ -132,6 +133,7 @@ Still not implemented:
 - Phase 36: transaction-aware PostgreSQL query executor boundary for future driver wiring
 - Phase 37: driver-neutral pooled PostgreSQL executor boundary for future connection lifecycle wiring
 - Phase 38: API persistence lifecycle shutdown boundary for server and one-shot job contexts
+- Phase 39: redacted API persistence capability reporting for PostgreSQL runtime activation gates
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -223,6 +225,7 @@ Still not implemented:
 - Phase 36 adds transaction-aware PostgreSQL query executor support to the inactive store core; future pooled runtime wiring must implement transactions with one checked-out client.
 - Phase 37 adds a driver-neutral pooled PostgreSQL executor boundary that delegates plain queries to a pool, runs transactions through one checked-out client, rolls back failures, releases clients, and exposes pool shutdown without enabling PostgreSQL runtime mode.
 - Phase 38 adds API persistence lifecycle shutdown wiring through the store factory, indexer context, Fastify close hook, process signal handlers, recurring sync timer cleanup, and one-shot job finally blocks.
+- Phase 39 adds redacted API persistence capability reporting through runtime env, `/ready`, API preflight, and managed database runtime planning so PostgreSQL activation blockers are explicit without exposing credentials.
 - Product docs live in `docs/product/goal-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -272,6 +275,7 @@ Still not implemented:
 - The Phase 36 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-36.md`.
 - The Phase 37 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-37.md`.
 - The Phase 38 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-38.md`.
+- The Phase 39 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-39.md`.
 - The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.

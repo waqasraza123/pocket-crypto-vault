@@ -9,7 +9,7 @@ It is not a deployment workflow. It does not install a driver, connect to Postgr
 - `scripts/write-api-managed-database-runtime-plan.mjs`
   - validates target, engine, mode, schema name, driver package label, managed database target reference, artifact references, image references, and observation window
   - rejects target references that look like connection strings or credentials
-  - records acceptance gates for driver, connection pool, schema execution, import execution, parity, preflight, release manifest, traffic plan, and rollback snapshot evidence
+  - records acceptance gates for driver adapter, capability reporting, schema execution, import execution, parity, preflight, release manifest, traffic plan, and rollback snapshot evidence
   - writes a JSON runtime activation plan
   - emits the plan path for GitHub artifact upload
 - `.github/workflows/api-managed-database-runtime-plan.yml`
@@ -81,6 +81,7 @@ The generated plan keeps public traffic on the known-good runtime and records ro
 Before PostgreSQL runtime activation, operators must confirm:
 
 - PostgreSQL driver package and lockfile changes are reviewed.
+- API preflight reports PostgreSQL runtime capability gates with secrets redacted.
 - PostgreSQL driver adapter compatibility with the pooled executor boundary is reviewed.
 - PostgreSQL connection pooling and shutdown behavior are reviewed.
 - PostgreSQL transaction execution uses one checked-out client per transaction and releases it after commit or rollback.
@@ -104,10 +105,11 @@ Use the runtime plan after the earlier managed-database artifacts:
 6. Generate the managed database parity plan.
 7. Add the PostgreSQL driver adapter around the pooled executor boundary.
 8. Wire PostgreSQL stores through the persistence factory and shared context lifecycle.
-9. Run API preflight with PostgreSQL runtime readiness checks.
-10. Generate the release manifest and API traffic plan.
-11. Generate the managed database runtime plan.
-12. Move traffic manually only after the selected hosting-provider operator approves the plan.
+9. Update runtime capability reporting so PostgreSQL driver adapter, store factory wiring, and connection checks are ready.
+10. Run API preflight with PostgreSQL runtime readiness checks.
+11. Generate the release manifest and API traffic plan.
+12. Generate the managed database runtime plan.
+13. Move traffic manually only after the selected hosting-provider operator approves the plan.
 
 ## Boundary
 This workflow creates a reviewable runtime activation artifact. PostgreSQL driver installation, driver adapter wiring, runtime factory wiring, schema execution, import execution, parity execution, API deployment, traffic movement, and rollback automation remain separate steps.

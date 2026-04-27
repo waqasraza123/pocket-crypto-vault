@@ -135,6 +135,22 @@ export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
             : "PostgreSQL persistence requires API_DATABASE_URL and the runtime adapter before use.",
     }),
     createCheck({
+      key: "persistence-capabilities",
+      label: "Persistence capabilities",
+      status:
+        env.persistence.driver === "sqlite"
+          ? env.persistence.capabilities.lifecycleShutdownReady
+            ? "ready"
+            : "blocked"
+          : env.persistence.capabilities.postgresqlRuntimeReady
+            ? "ready"
+            : "blocked",
+      message:
+        env.persistence.driver === "sqlite"
+          ? "SQLite runtime, async ports, store factory, and shutdown lifecycle are available."
+          : env.persistence.capabilities.blockedReasons.join(" "),
+    }),
+    createCheck({
       key: "internal-routes",
       label: "Internal route protection",
       status:
@@ -259,6 +275,22 @@ export const buildReleaseReadinessSummary = (env: ApiRuntimeEnv): ReleaseReadine
         env.persistence.driver === "sqlite"
           ? "SQLite persistence is active for this API release."
           : "PostgreSQL persistence is not release-ready until the runtime adapter is implemented.",
+    },
+    {
+      key: "persistence-capabilities",
+      label: "Persistence capabilities",
+      status:
+        env.persistence.driver === "sqlite"
+          ? env.persistence.capabilities.lifecycleShutdownReady
+            ? "ready"
+            : "blocked"
+          : env.persistence.capabilities.postgresqlRuntimeReady
+            ? "ready"
+            : "blocked",
+      message:
+        env.persistence.driver === "sqlite"
+          ? "Persistence ports, SQLite runtime, and lifecycle shutdown are ready."
+          : env.persistence.capabilities.blockedReasons.join(" "),
     },
     {
       key: `launch-chain-${expectedChain.chainId}`,

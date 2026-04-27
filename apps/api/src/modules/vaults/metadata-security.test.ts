@@ -8,7 +8,7 @@ import type { VaultMetadataWriteRequest } from "@goal-vault/shared";
 import * as metadataAuthModule from "@goal-vault/shared/src/validation/metadataAuth";
 import { privateKeyToAccount } from "viem/accounts";
 
-import type { ApiRuntimeEnv } from "../../env";
+import { createApiPersistenceRuntimeCapabilities, type ApiRuntimeEnv } from "../../env";
 import { goalVaultFactoryAbi } from "../../lib/contracts";
 import { AnalyticsStore } from "../../lib/observability/analytics";
 import type { IndexerContext } from "../indexer/context";
@@ -38,6 +38,7 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
     sqliteDataDir: dataDir,
     postgresUrlConfigured: false,
     schemaName: "goal_vault_api",
+    capabilities: createApiPersistenceRuntimeCapabilities(),
     runtimeReady: true,
     message: "SQLite persistence is active.",
   },

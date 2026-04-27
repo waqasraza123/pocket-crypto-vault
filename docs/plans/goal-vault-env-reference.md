@@ -85,6 +85,9 @@
   - reported only as configured or missing
 - `API_PERSISTENCE_SCHEMA_NAME`
   - reported as the selected schema name
+- Persistence capability gates
+  - reported in the preflight artifact without secrets
+  - includes SQLite runtime readiness, async persistence port readiness, PostgreSQL store core readiness, pooled executor readiness, lifecycle shutdown readiness, PostgreSQL driver adapter readiness, PostgreSQL factory wiring readiness, PostgreSQL preflight connection-check readiness, PostgreSQL runtime readiness, and redacted blocker messages
 - `API_INTERNAL_TOKEN`
   - reported only as configured or missing
 - `EXPO_PUBLIC_BASE_RPC_URL`
@@ -294,7 +297,7 @@
 - Keep `staging` and `production` values separate through GitHub Environments instead of branching inside workflow YAML.
 - The release-candidate workflow expects `EXPO_PUBLIC_API_TIMEOUT_MS` to resolve to a positive integer and defaults to `8000` when unset.
 - The API image workflow publishes to GHCR through `GITHUB_TOKEN` and does not require provider deployment credentials.
-- The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status. PostgreSQL persistence is intentionally blocked until the runtime adapter is implemented.
+- The API preflight workflow requires `API_INTERNAL_TOKEN` and target-chain RPC secrets but writes only redacted configured or missing status. PostgreSQL persistence is intentionally blocked until the runtime adapter is implemented, factory wiring is enabled, and PostgreSQL connection checks are accepted.
 - The API traffic plan workflow uses only non-secret operator inputs and does not require hosting-provider credentials.
 - The API managed database plan workflow uses only non-secret operator inputs and rejects target references that look like connection strings or credentials.
 - The API managed database export workflow reads a snapshot directory, verifies snapshot checksums, and writes JSONL files only; export bundles are sensitive and should not be committed.

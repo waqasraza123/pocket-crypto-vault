@@ -4,7 +4,7 @@ import path from "node:path";
 
 import type { SupportedChainId } from "@goal-vault/shared";
 
-import { readApiRuntimeEnv } from "../env";
+import { readApiRuntimeEnv, type ApiPersistenceRuntimeCapabilities } from "../env";
 
 type PreflightStatus = "valid" | "invalid";
 
@@ -35,6 +35,7 @@ interface RuntimePreflightReport {
     sqliteDataDir: string;
     postgresUrlConfigured: boolean;
     schemaName: string;
+    capabilities: ApiPersistenceRuntimeCapabilities;
     runtimeReady: boolean;
     message: string;
   };
@@ -135,6 +136,7 @@ const buildRuntimePreflightReport = (): RuntimePreflightReport => {
       sqliteDataDir: env.persistence.sqliteDataDir,
       postgresUrlConfigured: env.persistence.postgresUrlConfigured,
       schemaName: env.persistence.schemaName,
+      capabilities: env.persistence.capabilities,
       runtimeReady: env.persistence.runtimeReady,
       message: env.persistence.message,
     },
