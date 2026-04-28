@@ -27,6 +27,7 @@
     "beta:data:retention": "node scripts/write-beta-data-retention-plan.mjs",
     "beta:readiness": "node scripts/write-beta-readiness-plan.mjs",
     "beta:support:export": "node scripts/write-beta-support-export.mjs",
+    "production:activation:record": "node scripts/write-production-activation-record.mjs",
     "test": "turbo run test",
     "test:ts": "pnpm --filter @pocket-vault/api --filter @pocket-vault/mobile --filter @pocket-vault/api-client --filter @pocket-vault/contracts-sdk test",
     "test:contracts": "pnpm --filter @pocket-vault/contracts test",

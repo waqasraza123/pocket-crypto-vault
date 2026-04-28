@@ -1,0 +1,172 @@
+name: Production Activation Record
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Activation environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      activation_label:
+        description: Stable activation label.
+        type: string
+        required: true
+      activation_outcome:
+        description: Final activation outcome.
+        type: choice
+        required: true
+        default: accepted
+        options:
+          - accepted
+          - rolled-back
+          - disabled
+      persistence_driver:
+        description: Activated API persistence driver.
+        type: choice
+        required: true
+        default: postgresql
+        options:
+          - sqlite
+          - postgresql
+      release_manifest:
+        description: Release manifest artifact name, URL, or local path.
+        type: string
+        required: true
+      preflight_report:
+        description: API preflight report artifact name, URL, or local path.
+        type: string
+        required: true
+      database_runtime_plan:
+        description: Managed database runtime plan artifact name, URL, or local path. Required for PostgreSQL.
+        type: string
+        required: false
+      schema_execution:
+        description: Managed database schema execution result artifact name, URL, or local path. Required for PostgreSQL.
+        type: string
+        required: false
+      import_execution:
+        description: Managed database import execution result artifact name, URL, or local path. Required for PostgreSQL.
+        type: string
+        required: false
+      parity_execution:
+        description: Managed database parity execution result artifact name, URL, or local path. Required for PostgreSQL.
+        type: string
+        required: false
+      traffic_plan:
+        description: API traffic plan artifact name, URL, or local path.
+        type: string
+        required: true
+      traffic_execution:
+        description: Vercel API traffic execution result artifact name, URL, or local path.
+        type: string
+        required: true
+      smoke_result:
+        description: Protected production smoke result artifact name, URL, or local path.
+        type: string
+        required: true
+      beta_readiness:
+        description: Beta readiness plan artifact name, URL, or local path.
+        type: string
+        required: true
+      source_snapshot:
+        description: Source API data snapshot artifact name or approved storage reference.
+        type: string
+        required: true
+      rollback_snapshot:
+        description: Rollback API data snapshot artifact name or approved storage reference.
+        type: string
+        required: true
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for this activation.
+        type: string
+        required: true
+      change_window:
+        description: Approved activation change window.
+        type: string
+        required: false
+      observe_minutes:
+        description: Minimum activation observation window.
+        type: string
+        required: false
+        default: "60"
+      operator:
+        description: Operator or team responsible for activation acceptance.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_record:
+        description: Type record to write the activation record.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-activation-record-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  PRODUCTION_ACTIVATION_TARGET: ${{ inputs.target }}
+  PRODUCTION_ACTIVATION_LABEL: ${{ inputs.activation_label }}
+  PRODUCTION_ACTIVATION_OUTCOME: ${{ inputs.activation_outcome }}
+  PRODUCTION_ACTIVATION_PERSISTENCE_DRIVER: ${{ inputs.persistence_driver }}
+  PRODUCTION_ACTIVATION_RELEASE_MANIFEST: ${{ inputs.release_manifest }}
+  PRODUCTION_ACTIVATION_PREFLIGHT_REPORT: ${{ inputs.preflight_report }}
+  PRODUCTION_ACTIVATION_DATABASE_RUNTIME_PLAN: ${{ inputs.database_runtime_plan }}
+  PRODUCTION_ACTIVATION_SCHEMA_EXECUTION: ${{ inputs.schema_execution }}
+  PRODUCTION_ACTIVATION_IMPORT_EXECUTION: ${{ inputs.import_execution }}
+  PRODUCTION_ACTIVATION_PARITY_EXECUTION: ${{ inputs.parity_execution }}
+  PRODUCTION_ACTIVATION_TRAFFIC_PLAN: ${{ inputs.traffic_plan }}
+  PRODUCTION_ACTIVATION_TRAFFIC_EXECUTION: ${{ inputs.traffic_execution }}
+  PRODUCTION_ACTIVATION_SMOKE_RESULT: ${{ inputs.smoke_result }}
+  PRODUCTION_ACTIVATION_BETA_READINESS: ${{ inputs.beta_readiness }}
+  PRODUCTION_ACTIVATION_SOURCE_SNAPSHOT: ${{ inputs.source_snapshot }}
+  PRODUCTION_ACTIVATION_ROLLBACK_SNAPSHOT: ${{ inputs.rollback_snapshot }}
+  PRODUCTION_ACTIVATION_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  PRODUCTION_ACTIVATION_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  PRODUCTION_ACTIVATION_CHANGE_WINDOW: ${{ inputs.change_window }}
+  PRODUCTION_ACTIVATION_OBSERVE_MINUTES: ${{ inputs.observe_minutes }}
+  PRODUCTION_ACTIVATION_OPERATOR: ${{ inputs.operator }}
+  PRODUCTION_ACTIVATION_NOTES: ${{ inputs.notes }}
+  PRODUCTION_ACTIVATION_CONFIRM_RECORD: ${{ inputs.confirm_record }}
+  PRODUCTION_ACTIVATION_DIR: artifacts/production-activation
+
+jobs:
+  production-activation-record:
+    name: Write ${{ inputs.target }} production activation record
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_record != 'record' }}
+        run: |
+          echo "Production activation record requires confirm_record=record."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write production activation record
+        id: activation
+        run: node scripts/write-production-activation-record.mjs
+
+      - name: Upload production activation record
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-production-activation-${{ inputs.target }}
+          path: ${{ steps.activation.outputs.record_path }}
+          if-no-files-found: error

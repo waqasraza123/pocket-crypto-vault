@@ -25,7 +25,9 @@
 12. Generate the API traffic plan with `pnpm api:traffic:plan`.
 13. Move traffic only through the approved provider execution path.
 14. Run protected production smoke and store the artifact.
-15. Observe `/ready`, indexer freshness, support intake, and analytics for the approved window.
+15. Generate beta readiness if it has not already been generated against the final traffic and persistence evidence.
+16. Generate the production activation record with `pnpm production:activation:record`.
+17. Observe `/ready`, indexer freshness, support intake, and analytics for the approved window.
 
 ## Go Criteria
 - Preflight `status` is `valid`.
@@ -34,6 +36,7 @@
 - PostgreSQL schema check passes with no missing tables.
 - Parity is accepted.
 - Traffic plan records candidate and rollback URLs plus candidate and rollback images.
+- Production activation record is generated with `activationOutcome=accepted`.
 
 ## No-Go Criteria
 - Any production runtime uses SQLite.
@@ -41,4 +44,3 @@
 - `/ready` is unavailable or blocked.
 - Support or analytics persistence is not ready.
 - Rollback evidence is incomplete.
-

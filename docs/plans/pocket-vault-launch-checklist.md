@@ -45,6 +45,7 @@
 - Confirm at least one operator can move a support request from `open` to `triage` and `closed` through the internal API.
 - Confirm beta support exports can be generated from an API data snapshot when offline review is needed.
 - Confirm `/ready.productionActivation.safeForLimitedBetaTraffic=true` before inviting production beta users.
+- Generate the production activation record after traffic execution, protected smoke, beta readiness, and snapshot evidence are accepted.
 - Confirm rollback steps are reviewed with the operator before sending invitations.
 - Treat beta limits as operational guidance, not protocol-enforced limits.
 
@@ -155,6 +156,14 @@
 - Submit one support intake request and confirm internal triage visibility.
 - Record smoke wallet, vault, create transaction, deposit transaction, rule path, unlock or guardian transaction when applicable, withdraw transaction when eligible, support request, dashboard, detail, activity, indexer, metadata, and support verification evidence in the smoke artifact.
 - Confirm metadata reconciliation notices remain calm and honest if syncing lags.
+
+## Production Activation Record
+- Run the `Production Activation Record` workflow after API traffic execution and protected smoke pass.
+- Provide release manifest, API preflight, managed database runtime plan, schema execution, import execution, parity execution, traffic plan, traffic execution, smoke result, beta readiness, source snapshot, rollback snapshot, support reference, and incident owner.
+- Use `activation_outcome=accepted` only when the activation remains live and accepted.
+- Use `activation_outcome=rolled-back` or `disabled` when the cutover ended in recovery mode.
+- Confirm the artifact says `noDeploymentPerformed: true`, `noDatabaseMutated: true`, and `noTrafficMoved: true`.
+- Store the activation record with release evidence before expanding beta invitations.
 
 ## Post-Deploy Checks
 - Confirm `/ready` stays usable after deployment.

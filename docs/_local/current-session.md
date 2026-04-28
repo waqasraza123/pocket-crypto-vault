@@ -4,35 +4,38 @@
 2026-04-28
 
 ## Current Objective
-Implement the next production-readiness step with code and detailed docs only: guarded Vercel public API disablement.
+Implement the next production-readiness step with code and detailed docs only: production activation record.
 
 ## Completed
 - Confirmed there was no uncommitted current work before starting.
-- Extended Vercel API traffic command plans so `disable` requires `VERCEL_API_DISABLE_STRATEGY=remove-alias`.
-- Added executable disable command generation using `vercel alias rm <api-domain> --yes`.
-- Extended guarded Vercel traffic execution to support reviewed disable command plans.
-- Added disablement-specific post-execution checks that require public `/health` and `/ready` to stop being healthy.
-- Added workflow inputs for disable strategy and alias domain.
-- Updated deployment, launch checklist, release workflow, phase, and project-state docs.
+- Added `scripts/write-production-activation-record.mjs` for non-mutating post-cutover acceptance records.
+- Added the guarded `Production Activation Record` GitHub Actions workflow.
+- Added `pnpm production:activation:record`.
+- Added a production activation runbook and Phase 52 implementation note.
+- Updated README, env reference, CI/release workflow docs, launch checklist, limited beta checklist, production cutover runbook, and project state docs.
 
 ## Important Boundaries
-- No tests, real builds, Vercel CLI execution, deployment, database operation, traffic movement, or chain action was run.
-- The command-plan artifact remains non-mutating with `noDeploymentPerformed: true` and `noTrafficMoved: true`.
-- Only the protected execution workflow with `confirm_execute=execute` can run the alias-removal command.
-- Secrets remain confined to protected runtime env and are not written to docs or artifacts.
+- No real tests, builds, deployments, database operations, traffic movement, chain actions, or user invitations were run.
+- The activation record is non-mutating and records `noDeploymentPerformed: true`, `noDatabaseMutated: true`, and `noTrafficMoved: true`.
+- PostgreSQL activation records require runtime, schema execution, import execution, and parity execution evidence.
+- Secrets remain confined to protected runtime env and are not written to docs or activation artifacts.
 
 ## Main Files/Folders Touched
-- `scripts/write-vercel-api-traffic-command.mjs`
-- `scripts/execute-vercel-api-traffic.mjs`
-- `.github/workflows/vercel-api-traffic-command.yml`
-- `.github/workflows/vercel-api-traffic-execute.yml`
-- `docs/deployment/vercel-api-traffic.md`
-- `docs/plans/pocket-vault-universal-react-native-phase-51.md`
+- `scripts/write-production-activation-record.mjs`
+- `.github/workflows/production-activation-record.yml`
+- `docs/deployment/production-activation-record.md`
+- `docs/plans/pocket-vault-universal-react-native-phase-52.md`
+- `docs/plans/pocket-vault-ci-release-workflows.md`
+- `docs/plans/pocket-vault-env-reference.md`
+- `docs/plans/pocket-vault-launch-checklist.md`
+- `docs/plans/pocket-vault-limited-beta-launch-checklist.md`
+- `docs/plans/pocket-vault-production-cutover-runbook.md`
 - `docs/project-state.md`
+- `README.md`
+- `package.json`
 
 ## Verification Commands
-- `node --check scripts/write-vercel-api-traffic-command.mjs`
-- `node --check scripts/execute-vercel-api-traffic.mjs`
+- `node --check scripts/write-production-activation-record.mjs`
 - `git diff --check`
 
 ## Verification Result
@@ -41,4 +44,4 @@ Implement the next production-readiness step with code and detailed docs only: g
 - Full tests and builds intentionally skipped per user request.
 
 ## Next Step
-Generate a reviewed provider-neutral disable traffic plan before using the Vercel alias-removal execution path in production.
+Run `Production Activation Record` after production traffic execution, protected smoke, beta readiness, and snapshot retention evidence are accepted.

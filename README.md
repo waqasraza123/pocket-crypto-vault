@@ -170,11 +170,14 @@ pnpm api:traffic:plan
 pnpm api:traffic:vercel
 pnpm smoke:production-v1
 pnpm beta:readiness
+pnpm production:activation:record
 ```
 
 `pnpm smoke:production-v1` checks public API health/readiness and records operator evidence. It does not send wallet transactions.
 
 `/ready.productionActivation.safeForLimitedBetaTraffic` should be `true` before inviting production beta users.
+
+`pnpm production:activation:record` records the final accepted, rolled-back, or disabled activation outcome after release, preflight, traffic execution, smoke, beta readiness, snapshot, support, and incident-owner evidence is assembled. It does not deploy, mutate a database, or move traffic.
 
 Runbooks:
 
@@ -182,6 +185,7 @@ Runbooks:
 - `docs/plans/pocket-vault-production-smoke-runbook.md`
 - `docs/plans/pocket-vault-limited-beta-launch-checklist.md`
 - `docs/plans/pocket-vault-rollback-runbook.md`
+- `docs/deployment/production-activation-record.md`
 
 ## Rollback
 

@@ -27,7 +27,7 @@ User-facing product state:
 Operator-facing product state:
 - The API exposes health and readiness surfaces, internal sync triggers, enriched vault/activity reads, analytics ingestion, support intake, and internal support triage.
 - Backend persistence runs through typed ports with SQLite as the local/default durable store and PostgreSQL runtime support available when schema, credentials, and preflight gates are accepted.
-- Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, and production smoke evidence.
+- Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, production smoke evidence, and post-cutover activation records.
 - Production activation readiness now has explicit runtime gates for PostgreSQL cutover, protected smoke evidence, rollback evidence, support, analytics, and limited beta scope in API preflight and `/ready`.
 - Contract security hardening now uses SafeERC20, reentrancy protection, explicit vault and factory validation, zero-recipient withdrawal rejection, malicious-token regression tests, and a repo-local contract security audit note.
 - Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover and traffic movement remain unexecuted/deferred.
@@ -84,6 +84,7 @@ The repository now has a real v1 foundation:
 - guarded PostgreSQL schema apply, JSONL import execution, and parity execution workflows behind protected credentials and explicit confirmations
 - guarded production v1 smoke workflow for public API health/readiness checks and operator-recorded create/deposit/withdraw/support evidence
 - guarded Vercel public API disablement execution through reviewed alias-removal command plans
+- guarded production activation record workflow for accepting, rolling back, or disabling a cutover after release, preflight, managed database, traffic, smoke, beta readiness, snapshot, support, and incident-owner evidence is assembled
 - production activation readiness gates that block ambiguous production SQLite mode, reject mixed SQLite/PostgreSQL runtime env, and require accepted smoke, rollback, and beta scope evidence before limited beta traffic
 - production activation, production cutover, production smoke, limited beta, and rollback runbooks under `docs/plans/`
 - root README with setup, scripts, architecture, and verification guidance
@@ -186,6 +187,8 @@ Still not implemented:
 - Phase 47: beta support export artifacts for offline operator review without live database access or support status mutation
 - Phase 48: beta data retention plan artifacts for real-audience private data handling before broader beta expansion
 - Phase 49: production v1 completion with CI blocker fixes, guarded PostgreSQL schema/import/parity execution, and guarded Vercel promote/rollback execution
+- Phase 51: guarded Vercel public API disablement execution through reviewed alias-removal command plans
+- Phase 52: production activation records for post-cutover acceptance, rollback, or disablement evidence
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -360,6 +363,7 @@ Still not implemented:
 - The Phase 47 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-47.md`.
 - The Phase 48 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-48.md`.
 - The Phase 51 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-51.md`.
+- The Phase 52 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-52.md`.
 - The CI and release workflow note lives at `docs/plans/pocket-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
@@ -375,6 +379,7 @@ Still not implemented:
 - The Vercel API traffic command runbook lives at `docs/deployment/vercel-api-traffic.md`.
 - The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.
 - The release manifest runbook lives at `docs/deployment/release-manifest.md`.
+- The production activation record runbook lives at `docs/deployment/production-activation-record.md`.
 - The API data snapshot runbook lives at `docs/deployment/api-data-snapshots.md`.
 - The beta readiness runbook lives at `docs/deployment/beta-readiness.md`.
 - The beta support intake runbook lives at `docs/deployment/beta-support-intake.md`.
@@ -382,7 +387,7 @@ Still not implemented:
 - The beta data retention runbook lives at `docs/deployment/beta-data-retention.md`.
 
 ## Deferred / Not Yet Implemented
-- Accepted managed database schema/import/parity execution, production PostgreSQL cutover, and rollback operation
+- Live production PostgreSQL cutover and rollback operation
 - Live provider-specific backend deployment and traffic movement
 
 ## Risks / Watchouts

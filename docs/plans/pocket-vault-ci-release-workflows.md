@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, and production activation record generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -91,6 +91,10 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - manual staging or production release manifest generation
   - records the exact API image, factory address, app/API URLs, mobile build references, and rollback pointers
   - uploads a release manifest artifact
+- `.github/workflows/production-activation-record.yml`
+  - manual staging or production activation record generation
+  - validates release, preflight, managed database, traffic execution, smoke, beta readiness, snapshot, support, and incident-owner references
+  - uploads an activation record artifact without deploying, mutating a database, or moving traffic
 
 ## Required GitHub Environments
 Create two GitHub Environments before relying on release-candidate runs:
@@ -280,6 +284,30 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `BETA_DATA_RETENTION_INCIDENT_RECORDS_DAYS`
 - `BETA_DATA_RETENTION_NOTES`
 - `BETA_DATA_RETENTION_DIR`
+- `PRODUCTION_ACTIVATION_TARGET`
+- `PRODUCTION_ACTIVATION_LABEL`
+- `PRODUCTION_ACTIVATION_OUTCOME`
+- `PRODUCTION_ACTIVATION_PERSISTENCE_DRIVER`
+- `PRODUCTION_ACTIVATION_RELEASE_MANIFEST`
+- `PRODUCTION_ACTIVATION_PREFLIGHT_REPORT`
+- `PRODUCTION_ACTIVATION_DATABASE_RUNTIME_PLAN`
+- `PRODUCTION_ACTIVATION_SCHEMA_EXECUTION`
+- `PRODUCTION_ACTIVATION_IMPORT_EXECUTION`
+- `PRODUCTION_ACTIVATION_PARITY_EXECUTION`
+- `PRODUCTION_ACTIVATION_TRAFFIC_PLAN`
+- `PRODUCTION_ACTIVATION_TRAFFIC_EXECUTION`
+- `PRODUCTION_ACTIVATION_SMOKE_RESULT`
+- `PRODUCTION_ACTIVATION_BETA_READINESS`
+- `PRODUCTION_ACTIVATION_SOURCE_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_ROLLBACK_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_SUPPORT_REFERENCE`
+- `PRODUCTION_ACTIVATION_INCIDENT_OWNER`
+- `PRODUCTION_ACTIVATION_CHANGE_WINDOW`
+- `PRODUCTION_ACTIVATION_OBSERVE_MINUTES`
+- `PRODUCTION_ACTIVATION_OPERATOR`
+- `PRODUCTION_ACTIVATION_NOTES`
+- `PRODUCTION_ACTIVATION_CONFIRM_RECORD`
+- `PRODUCTION_ACTIVATION_DIR`
 - `API_DATABASE_SCHEMA_TARGET`
 - `API_DATABASE_SCHEMA_LABEL`
 - `API_DATABASE_SCHEMA_ENGINE`
@@ -398,7 +426,7 @@ Use the manual Vercel API traffic command workflow after the provider-neutral AP
 3. Provide the reviewed API traffic plan reference.
 4. Provide the non-secret Vercel project reference, optional scope, production API domain, and deployment URLs required by the selected action.
 5. Download the command plan artifact and confirm it says `noDeploymentPerformed: true` and `noTrafficMoved: true`.
-6. Execute any generated `vercel promote` or `vercel rollback` command only from an approved operator environment.
+6. Execute any generated `vercel promote`, `vercel rollback`, or `vercel alias rm` command only from an approved operator environment.
 
 ## API Managed Database Plan Gate
 Use the manual API managed database plan workflow before external database work:
@@ -475,6 +503,15 @@ Use the manual release manifest workflow before traffic movement:
 4. Add rollback API image and previous factory address when relevant.
 5. Save the manifest artifact with release notes.
 
+## Production Activation Record Gate
+Use the manual production activation record workflow after traffic execution, protected smoke, and beta readiness evidence exist:
+
+1. Choose `staging` or `production`.
+2. Provide a stable activation label and final outcome.
+3. Provide release manifest, API preflight, managed database runtime, schema execution, import execution, parity execution, traffic plan, traffic execution, smoke, beta readiness, source snapshot, rollback snapshot, support reference, and incident owner.
+4. Set `confirm_record` to `record`.
+5. Download the activation record and store it with release evidence before expanding beta invitations.
+
 ## Operator Notes
 - Keep GitHub Environment values aligned with `docs/plans/pocket-vault-env-reference.md`.
 - Keep production approval on the GitHub Environment instead of adding custom approval logic to workflow YAML.
@@ -489,6 +526,7 @@ Use the manual release manifest workflow before traffic movement:
 - Use `docs/deployment/api-preflight.md` for API runtime env validation before backend deployment.
 - Use `docs/deployment/api-traffic-plan.md` for provider-neutral traffic movement, rollback, and disablement planning.
 - Use `docs/deployment/vercel-api-traffic.md` for Vercel-specific command planning after a provider-neutral traffic plan exists.
+- Use `docs/deployment/production-activation-record.md` for post-cutover acceptance, rollback, or disablement evidence.
 - Use `docs/deployment/beta-support-export.md` for offline support review from API data snapshots.
 - Use `docs/deployment/beta-data-retention.md` for retention-window planning before broader beta expansion.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.

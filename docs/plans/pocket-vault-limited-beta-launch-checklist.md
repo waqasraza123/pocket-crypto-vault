@@ -15,6 +15,7 @@
 - Analytics ready: analytics persistence is enabled or an approved alternate monitoring path is recorded.
 - Rollback ready: rollback URL, image, snapshot, and traffic reversal path are accepted.
 - Operator evidence captured: release manifest, preflight, runtime plan, traffic plan, smoke result, snapshots, and beta readiness artifacts are stored.
+- Activation recorded: post-cutover activation record is accepted or the recovery outcome is recorded.
 - Beta scope approved: participant limit, value limit, support owner, incident owner, observation window, pause criteria, and re-enable criteria are recorded.
 
 ## Required Commands
@@ -23,15 +24,17 @@
 - `pnpm api:database:runtime:plan`
 - `pnpm smoke:production-v1`
 - `pnpm beta:readiness`
+- `pnpm production:activation:record`
 
 ## Launch Procedure
 1. Confirm all go/no-go gates.
 2. Confirm `/ready.productionActivation.safeForLimitedBetaTraffic=true`.
 3. Move traffic through the approved traffic execution path.
-4. Invite only the approved initial beta cohort.
-5. Monitor for the approved observation window before expanding invites.
-6. Review support queue after each participant wave.
-7. Record launch outcome and incidents in release notes.
+4. Run the production activation record and store it with release evidence.
+5. Invite only the approved initial beta cohort.
+6. Monitor for the approved observation window before expanding invites.
+7. Review support queue after each participant wave.
+8. Record launch outcome and incidents in release notes.
 
 ## Monitoring Priorities
 - `/health` alive.
@@ -51,4 +54,3 @@
 - Support cannot triage urgent requests.
 - PostgreSQL errors affect indexed reads or support persistence.
 - Public API rollback path is unavailable.
-
