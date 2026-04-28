@@ -18,6 +18,7 @@
 - Activation recorded: post-cutover activation record is accepted or the recovery outcome is recorded.
 - Observation clean: stable production observation report is stored for the current invitation wave.
 - Invitation wave approved: beta invitation wave plan is stored and contains no participant PII.
+- Prior wave outcome accepted: previous wave outcome report is `continue` before any expansion.
 - Beta scope approved: participant limit, value limit, support owner, incident owner, observation window, pause criteria, and re-enable criteria are recorded.
 
 ## Required Commands
@@ -29,6 +30,7 @@
 - `pnpm production:activation:record`
 - `pnpm production:observation:report`
 - `pnpm beta:invitation:wave`
+- `pnpm beta:wave:outcome`
 
 ## Launch Procedure
 1. Confirm all go/no-go gates.
@@ -39,9 +41,10 @@
 6. Run a beta invitation wave plan for the initial cohort.
 7. Invite only the approved initial beta cohort from the private operational system.
 8. Monitor for the approved observation window before expanding invites.
-9. Run another observation report and invitation wave plan before each invitation expansion.
-10. Review support queue after each participant wave.
-11. Record launch outcome and incidents in release notes.
+9. Run a beta wave outcome report before deciding on expansion.
+10. Run another observation report and invitation wave plan before each invitation expansion.
+11. Review support queue after each participant wave.
+12. Record launch outcome and incidents in release notes.
 
 ## Monitoring Priorities
 - `/health` alive.

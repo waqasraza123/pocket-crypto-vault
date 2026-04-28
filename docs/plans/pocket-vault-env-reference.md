@@ -163,6 +163,39 @@
   - must be `plan`
 - `BETA_INVITATION_DIR`
 
+## Beta Wave Outcome Variables
+- `BETA_WAVE_OUTCOME_TARGET`
+  - `staging` or `production`
+- `BETA_WAVE_OUTCOME_LABEL`
+  - stable beta wave outcome label
+- `BETA_WAVE_OUTCOME_DECISION`
+  - `continue`, `pause`, `rollback`, or `disable`
+- `BETA_WAVE_OUTCOME_OBSERVATION_STATUS`
+  - `stable`, `degraded`, or `incident`
+- `BETA_WAVE_OUTCOME_INVITATION_WAVE_PLAN`
+  - beta invitation wave plan artifact name, URL, or local path
+- `BETA_WAVE_OUTCOME_OBSERVATION_REPORT`
+  - post-wave production observation artifact name, URL, or local path
+- `BETA_WAVE_OUTCOME_INVITED_COUNT`
+- `BETA_WAVE_OUTCOME_ACTIVATED_WALLET_COUNT`
+- `BETA_WAVE_OUTCOME_VAULT_CREATED_COUNT`
+- `BETA_WAVE_OUTCOME_DEPOSIT_COUNT`
+- `BETA_WAVE_OUTCOME_WITHDRAW_COUNT`
+- `BETA_WAVE_OUTCOME_SUPPORT_REQUEST_COUNT`
+- `BETA_WAVE_OUTCOME_FAILED_TRANSACTION_COUNT`
+- `BETA_WAVE_OUTCOME_INCIDENT_COUNT`
+- `BETA_WAVE_OUTCOME_PARTICIPANT_IDENTIFIERS_RECORDED`
+  - must be `false`
+- `BETA_WAVE_OUTCOME_SUPPORT_REFERENCE`
+- `BETA_WAVE_OUTCOME_INCIDENT_OWNER`
+- `BETA_WAVE_OUTCOME_INCIDENT_REFERENCE`
+  - required for rollback, disable, incident observation, or non-zero incidents
+- `BETA_WAVE_OUTCOME_OPERATOR`
+- `BETA_WAVE_OUTCOME_NOTES`
+- `BETA_WAVE_OUTCOME_CONFIRM_REPORT`
+  - must be `report`
+- `BETA_WAVE_OUTCOME_DIR`
+
 ## Production Activation Record Variables
 - `PRODUCTION_ACTIVATION_TARGET`
   - `staging` or `production`

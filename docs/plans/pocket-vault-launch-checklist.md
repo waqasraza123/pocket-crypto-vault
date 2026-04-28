@@ -48,6 +48,7 @@
 - Generate the production activation record after traffic execution, protected smoke, beta readiness, and snapshot evidence are accepted.
 - Generate a stable production observation report after activation and before expanding beta invitations.
 - Generate a beta invitation wave plan before each cohort invite and keep participant PII outside artifacts.
+- Generate a beta wave outcome report after each wave observation window before approving the next wave.
 - Confirm rollback steps are reviewed with the operator before sending invitations.
 - Treat beta limits as operational guidance, not protocol-enforced limits.
 
@@ -182,6 +183,15 @@
 - Confirm the artifact says `noInvitesSent: true`.
 - Confirm no participant names, emails, wallet addresses, social handles, invite links, or contact details are recorded.
 - Send invitations only from the approved private operational system after reviewing the wave plan.
+
+## Beta Wave Outcome
+- Run the `Beta Wave Outcome Report` workflow after each invitation wave observation window.
+- Provide the invitation wave plan, post-wave observation report, decision, aggregate invited count, activated wallet count, vault count, deposit count, withdraw count, support request count, failed transaction count, incident count, support reference, and incident owner.
+- Use `decision=continue` only when the post-wave observation is stable and incident count is zero.
+- Use `decision=pause`, `rollback`, or `disable` when support, transaction, readiness, incident, or error-budget signals require review or recovery.
+- Confirm `participant_identifiers_recorded=false`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, contact details, private support text, or participant-level transaction traces are recorded.
+- Approve the next invitation wave only after a `continue` outcome report.
 
 ## Post-Deploy Checks
 - Confirm `/ready` stays usable after deployment.

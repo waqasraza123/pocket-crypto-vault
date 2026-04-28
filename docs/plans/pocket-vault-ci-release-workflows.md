@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta invitation wave planning, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, production activation record generation, and production observation report generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta invitation wave planning, beta wave outcome reporting, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, production activation record generation, and production observation report generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -57,6 +57,10 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - manual staging or production beta invitation wave plan generation
   - validates beta readiness, stable production observation, participant counts, value guidance, support reference, incident owner, and invite owner
   - uploads a non-PII wave plan artifact without sending invitations
+- `.github/workflows/beta-wave-outcome-report.yml`
+  - manual staging or production beta wave outcome report generation
+  - validates invitation wave, post-wave observation, aggregate counts, support reference, incident owner, and continue/pause/rollback/disable decision rules
+  - uploads a non-PII outcome report artifact without sending invitations or executing recovery actions
 - `.github/workflows/beta-data-retention-plan.yml`
   - manual staging or production beta data retention plan generation
   - records retention windows, owners, data classes, deletion request flow, and legal-hold flow
@@ -290,6 +294,28 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `BETA_INVITATION_NOTES`
 - `BETA_INVITATION_CONFIRM_PLAN`
 - `BETA_INVITATION_DIR`
+- `BETA_WAVE_OUTCOME_TARGET`
+- `BETA_WAVE_OUTCOME_LABEL`
+- `BETA_WAVE_OUTCOME_DECISION`
+- `BETA_WAVE_OUTCOME_OBSERVATION_STATUS`
+- `BETA_WAVE_OUTCOME_INVITATION_WAVE_PLAN`
+- `BETA_WAVE_OUTCOME_OBSERVATION_REPORT`
+- `BETA_WAVE_OUTCOME_INVITED_COUNT`
+- `BETA_WAVE_OUTCOME_ACTIVATED_WALLET_COUNT`
+- `BETA_WAVE_OUTCOME_VAULT_CREATED_COUNT`
+- `BETA_WAVE_OUTCOME_DEPOSIT_COUNT`
+- `BETA_WAVE_OUTCOME_WITHDRAW_COUNT`
+- `BETA_WAVE_OUTCOME_SUPPORT_REQUEST_COUNT`
+- `BETA_WAVE_OUTCOME_FAILED_TRANSACTION_COUNT`
+- `BETA_WAVE_OUTCOME_INCIDENT_COUNT`
+- `BETA_WAVE_OUTCOME_PARTICIPANT_IDENTIFIERS_RECORDED`
+- `BETA_WAVE_OUTCOME_SUPPORT_REFERENCE`
+- `BETA_WAVE_OUTCOME_INCIDENT_OWNER`
+- `BETA_WAVE_OUTCOME_INCIDENT_REFERENCE`
+- `BETA_WAVE_OUTCOME_OPERATOR`
+- `BETA_WAVE_OUTCOME_NOTES`
+- `BETA_WAVE_OUTCOME_CONFIRM_REPORT`
+- `BETA_WAVE_OUTCOME_DIR`
 - `BETA_DATA_RETENTION_TARGET`
 - `BETA_DATA_RETENTION_LABEL`
 - `BETA_DATA_RETENTION_POLICY_OWNER`
@@ -456,6 +482,16 @@ Use the manual beta invitation wave workflow after beta readiness and a stable o
 5. Confirm the plan contains no participant names, emails, wallet addresses, social handles, invite links, or contact details.
 6. Send invitations only from the approved private operational system after reviewing the plan.
 
+## Beta Wave Outcome Gate
+Use the manual beta wave outcome workflow after a wave observation window:
+
+1. Choose `staging` or `production`.
+2. Provide the invitation wave plan, post-wave observation report, decision, aggregate invited, activation, vault, deposit, withdraw, support, failed transaction, and incident counts.
+3. Confirm `participant_identifiers_recorded=false`.
+4. Set `confirm_report` to `report`.
+5. Download the outcome report and confirm it contains aggregate counts only.
+6. Approve the next invitation wave only when the outcome decision is `continue`.
+
 ## Beta Data Retention Gate
 Use the manual beta data retention plan workflow before expanding beyond limited beta:
 
@@ -596,6 +632,7 @@ Use the manual production observation report workflow after an activation record
 - Use `docs/deployment/production-activation-record.md` for post-cutover acceptance, rollback, or disablement evidence.
 - Use `docs/deployment/production-observation-report.md` for post-activation observation windows before beta expansion.
 - Use `docs/deployment/beta-invitation-wave.md` for non-PII invitation wave approval before sending beta invites.
+- Use `docs/deployment/beta-wave-outcome.md` for aggregate invite-wave outcome decisions before the next wave.
 - Use `docs/deployment/beta-support-export.md` for offline support review from API data snapshots.
 - Use `docs/deployment/beta-data-retention.md` for retention-window planning before broader beta expansion.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.

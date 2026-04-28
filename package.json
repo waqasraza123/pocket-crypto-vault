@@ -26,6 +26,7 @@
     "api:traffic:vercel:execute": "node scripts/execute-vercel-api-traffic.mjs",
     "beta:data:retention": "node scripts/write-beta-data-retention-plan.mjs",
     "beta:invitation:wave": "node scripts/write-beta-invitation-wave-plan.mjs",
+    "beta:wave:outcome": "node scripts/write-beta-wave-outcome-report.mjs",
     "beta:readiness": "node scripts/write-beta-readiness-plan.mjs",
     "beta:support:export": "node scripts/write-beta-support-export.mjs",
     "production:activation:record": "node scripts/write-production-activation-record.mjs",
