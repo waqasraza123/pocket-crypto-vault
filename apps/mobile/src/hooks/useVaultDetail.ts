@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { VaultDetail, VaultDetailApiModel, VaultSummary } from "@goal-vault/shared";
+import type { VaultDetail, VaultDetailApiModel, VaultSummary } from "@pocket-vault/shared";
 
 import { fetchVaultDetail } from "../lib/api/vaults";
 import { readVaultDetailByAddress, type VaultQueryResult } from "../lib/contracts/queries";

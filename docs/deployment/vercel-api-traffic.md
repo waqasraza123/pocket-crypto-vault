@@ -1,4 +1,4 @@
-# Goal Vault Vercel API Traffic Command Plan
+# Pocket Vault Vercel API Traffic Command Plan
 
 ## Purpose
 The Vercel API traffic command plan turns a reviewed provider-neutral API traffic plan into a Vercel-specific operator handoff.
@@ -15,8 +15,18 @@ It does not run Vercel CLI, deploy a backend, promote a deployment, roll back pr
   - supports `promote`, `rollback`, and `disable`
   - binds to the matching GitHub Environment
   - uploads the Vercel command plan artifact
+- `scripts/execute-vercel-api-traffic.mjs`
+  - reads a reviewed Vercel command plan artifact
+  - runs the single planned `pnpm dlx vercel` promote or rollback command
+  - checks `/health` and `/ready` on the production API domain after execution
+  - writes a redacted traffic execution result artifact
+- `.github/workflows/vercel-api-traffic-execute.yml`
+  - approval-gated staging or production workflow
+  - requires `confirm_execute=execute`
+  - downloads the command plan artifact before moving traffic
 - `package.json`
   - exposes `pnpm api:traffic:vercel`
+  - exposes `pnpm api:traffic:vercel:execute`
 
 ## Inputs
 Required for every action:
@@ -47,7 +57,7 @@ Optional:
 - `VERCEL_API_TRAFFIC_DIR`
 
 ## Secret Boundary
-The workflow does not need secrets because it does not execute Vercel CLI.
+The command-plan workflow does not need secrets because it does not execute Vercel CLI.
 
 The generated artifact names the secrets required for later execution:
 
@@ -57,6 +67,8 @@ The generated artifact names the secrets required for later execution:
 
 Do not place secret values in workflow inputs, labels, project references, scope, notes, URLs, or committed docs.
 
+The execution workflow reads `VERCEL_TOKEN` only from the protected GitHub Environment. Execution artifacts record deployment URLs, health-check results, byte counts for command output, and git metadata, but never record token values.
+
 ## Local Usage
 Example promotion command plan:
 
@@ -64,17 +76,17 @@ Example promotion command plan:
 VERCEL_API_TRAFFIC_TARGET=staging \
 VERCEL_API_TRAFFIC_ACTION=promote \
 VERCEL_API_TRAFFIC_LABEL=v0.1.0-rc.1 \
-VERCEL_API_TRAFFIC_PLAN=./artifacts/goal-vault-api-traffic-staging-promote-v0.1.0-rc.1.json \
-VERCEL_API_PROJECT=goal-vault-api \
-VERCEL_API_CANDIDATE_DEPLOYMENT_URL=https://goal-vault-api-git-rc-example.vercel.app \
-VERCEL_API_ROLLBACK_DEPLOYMENT_URL=https://goal-vault-api-previous-example.vercel.app \
-VERCEL_API_PRODUCTION_DOMAIN=https://api.goal-vault.example.com \
+VERCEL_API_TRAFFIC_PLAN=./artifacts/pocket-vault-api-traffic-staging-promote-v0.1.0-rc.1.json \
+VERCEL_API_PROJECT=pocket-vault-api \
+VERCEL_API_CANDIDATE_DEPLOYMENT_URL=https://pocket-vault-api-git-rc-example.vercel.app \
+VERCEL_API_ROLLBACK_DEPLOYMENT_URL=https://pocket-vault-api-previous-example.vercel.app \
+VERCEL_API_PRODUCTION_DOMAIN=https://api.pocket-vault.example.com \
 pnpm api:traffic:vercel
 ```
 
 When `VERCEL_API_TRAFFIC_PLAN` is a local JSON file path, the script verifies:
 
-- app is `goal-vault`
+- app is `pocket-vault`
 - component is `api-traffic-plan`
 - target matches
 - action matches
@@ -85,7 +97,7 @@ When `VERCEL_API_TRAFFIC_PLAN` is a local JSON file path, the script verifies:
 
 When `VERCEL_API_TRAFFIC_PLAN` is a remote artifact reference, the script records that it was not inspected and requires operator comparison before execution.
 
-## GitHub Workflow Usage
+## GitHub Command Plan Usage
 Run the `Vercel API Traffic Command` workflow manually after the `API Traffic Plan` workflow.
 
 Use `traffic_plan` as either:
@@ -93,7 +105,21 @@ Use `traffic_plan` as either:
 - a downloaded runner-local JSON path when the artifact is already available inside the runner
 - an artifact name or HTTPS URL when local inspection is not possible
 
-The workflow only writes the command plan. It does not install Vercel CLI, call Vercel, read Vercel secrets, or change traffic.
+The command-plan workflow only writes the command plan. It does not install Vercel CLI, call Vercel, read Vercel secrets, or change traffic.
+
+## GitHub Execution Usage
+Run `Vercel API Traffic Execute` only after the command plan is reviewed.
+
+Required execution inputs:
+
+- `target`
+- `execution_label`
+- `command_plan_artifact`
+- `command_plan_run_id`
+- `production_domain`
+- `confirm_execute=execute`
+
+Execution supports `promote` and `rollback` command plans. `disable` remains manual-only because disablement depends on the selected routing and protection policy.
 
 ## Artifact Contents
 The command plan records:
@@ -127,7 +153,7 @@ Use this handoff after provider-neutral release artifacts exist:
 6. Generate the API traffic plan.
 7. Generate the Vercel API traffic command plan.
 8. Review the Vercel project, team scope, production domain, candidate deployment, rollback deployment, and required secret names.
-9. Execute the generated Vercel CLI command only from an approved operator environment.
+9. Execute the generated Vercel CLI command through `Vercel API Traffic Execute` or another approved operator environment.
 10. Observe `/health`, `/ready`, indexer freshness, support intake, and product smoke checks for the planned observation window.
 11. Record the final deployment and observation result with release notes.
 
@@ -137,7 +163,7 @@ Use this handoff during rollback:
 1. Generate or retrieve the rollback API traffic plan.
 2. Generate the Vercel rollback command plan.
 3. Confirm the previous known-good deployment reference and rollback data snapshot.
-4. Execute the generated rollback command only from an approved operator environment.
+4. Execute the generated rollback command through `Vercel API Traffic Execute` or another approved operator environment.
 5. Check `/health` and `/ready`.
 6. Restore API data only from the approved rollback snapshot and only while the affected API process is stopped.
 7. Record the incident reason, restored deployment, and follow-up owner.

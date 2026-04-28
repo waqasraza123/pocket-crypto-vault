@@ -38,6 +38,10 @@ on:
         description: Managed database runtime plan artifact name, URL, or local path. Required for PostgreSQL.
         type: string
         required: false
+      smoke_result:
+        description: Protected production smoke result artifact name, URL, or local path.
+        type: string
+        required: true
       source_snapshot:
         description: Source API data snapshot artifact name or approved storage reference.
         type: string
@@ -98,6 +102,7 @@ env:
   BETA_READINESS_PREFLIGHT_REPORT: ${{ inputs.preflight_report }}
   BETA_READINESS_TRAFFIC_PLAN: ${{ inputs.traffic_plan }}
   BETA_READINESS_DATABASE_RUNTIME_PLAN: ${{ inputs.database_runtime_plan }}
+  BETA_READINESS_SMOKE_RESULT: ${{ inputs.smoke_result }}
   BETA_READINESS_SOURCE_SNAPSHOT: ${{ inputs.source_snapshot }}
   BETA_READINESS_ROLLBACK_SNAPSHOT: ${{ inputs.rollback_snapshot }}
   BETA_READINESS_PARTICIPANT_LIMIT: ${{ inputs.participant_limit }}
@@ -127,6 +132,6 @@ jobs:
       - name: Upload beta readiness plan
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-beta-readiness-${{ inputs.target }}
+          name: pocket-vault-beta-readiness-${{ inputs.target }}
           path: ${{ steps.readiness.outputs.plan_path }}
           if-no-files-found: error

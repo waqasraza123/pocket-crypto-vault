@@ -7,8 +7,8 @@ const enMessages = {
   localeNativeLabel: "English",
   dateLocale: "en-US",
   navigation: {
-    desktopTagline: "Premium goal vaults on Base",
-    mobileTagline: "Protect one goal at a time",
+    desktopTagline: "Pocket-money vaults on Base",
+    mobileTagline: "Save for student emergencies",
     marketingLinks: {
       howItWorks: "How it works",
       security: "Security",
@@ -98,17 +98,17 @@ const enMessages = {
   },
   footer: {
     description:
-      "Goal Vault is a calm USDC savings product on Base for one goal at a time, with clear withdrawal rules and honest progress tracking.",
+      "Pocket Vault helps college and university students save pocket money in USDC on Base with clear withdrawal rules and honest progress tracking.",
   },
   landing: {
-    heroBadge: "Base-native protected saving",
-    heroTitle: "One vault. One goal. One clear rule.",
+    heroBadge: "Student pocket-money saving",
+    heroTitle: "Save pocket money in crypto.",
     heroSubtitle:
-      "Create a goal-focused vault in USDC, keep funding it over time, and only withdraw when the protection rule says you can.",
-    heroHighlights: ["Time lock, cooldown, or guardian", "USDC only on Base", "Chain truth for money movement"],
+      "Create a USDC vault for emergency money, books, rent gaps, repairs, or a trip home, then withdraw only when your rule allows it.",
+    heroHighlights: ["Built for 18+ students", "USDC only on Base", "Time lock, cooldown, or guardian"],
     heroPreviewLabel: "Sample protected vault",
-    heroPreviewGoal: "Emergency Reserve",
-    heroPreviewDescription: "A calm reserve for six months of living costs, protected until late summer.",
+    heroPreviewGoal: "Campus Emergency Fund",
+    heroPreviewDescription: "Pocket money set aside for a broken laptop, rent gap, medical cost, or trip home.",
     heroPreviewFooter: "Withdrawals stay locked until the selected protection rule is satisfied.",
     heroPreviewRuleLabel: "Current protection",
     heroPreviewRuleValue: "Time lock until August 30, 2026",
@@ -123,14 +123,14 @@ const enMessages = {
     heroPreviewActivityLabel: "Example activity",
     heroPreviewActivityCreated: "Vault created and indexed cleanly",
     heroPreviewActivityFunded: "Latest USDC deposit confirmed and reflected in progress",
-    storyEyebrow: "Why Goal Vault",
-    storyTitle: "Saving feels different when the money already has a job.",
+    storyEyebrow: "Why Pocket Vault",
+    storyTitle: "Student savings feel different when the money already has a job.",
     storyDescription:
-      "Goal Vault is for money you do not want to break casually: the emergency buffer, the tuition plan, the move, or the reserve that should stay intact until the moment is right.",
+      "Pocket Vault is for students who are new to crypto and want a simple way to keep small USDC savings protected for bad events, not for trading noise.",
     storyCards: [
       {
-        title: "Protect one promise at a time",
-        description: "Each vault is built around one goal so progress and discipline stay emotionally clear.",
+        title: "Protect one student need at a time",
+        description: "Each vault is built around one pocket-money goal so progress and discipline stay clear.",
       },
       {
         title: "Not a generic finance dashboard",
@@ -138,18 +138,18 @@ const enMessages = {
       },
       {
         title: "Base and USDC keep it narrow",
-        description: "One network and one asset make the product easier to understand, explain, and trust.",
+        description: "One network and one asset make the product easier for crypto beginners to understand.",
       },
     ],
     howItWorksEyebrow: "How it works",
     howItWorksTitle: "From intention to protected savings in four clear steps.",
     howItWorksDescription:
-      "The product flow stays tight: create the vault, choose the rule, fund it with USDC, then wait until the rule makes withdrawal eligible.",
-    howItWorksSupport: ["Create with intent", "Choose the protection", "Fund gradually", "Withdraw only when eligible"],
+      "The product flow stays tight: create a student savings vault, choose the rule, fund it with USDC, then wait until the rule makes withdrawal eligible.",
+    howItWorksSupport: ["Pick a student need", "Choose the protection", "Fund gradually", "Withdraw only when eligible"],
     howItWorksSteps: [
       {
-        title: "Create the vault",
-        description: "Start with one goal so the balance, target, and progress all point at the same outcome.",
+        title: "Create the pocket vault",
+        description: "Start with one student need so the balance, target, and progress all point at the same outcome.",
       },
       {
         title: "Choose the protection rule",
@@ -188,7 +188,7 @@ const enMessages = {
     securityEyebrow: "Trust model",
     securityTitle: "Designed to feel calm because the rules are clear.",
     securityDescription:
-      "Goal Vault keeps the promise narrow: Base, USDC, one goal at a time, and protection rules the user can understand instantly.",
+      "Pocket Vault keeps the promise narrow: Base, USDC, one goal at a time, and protection rules the user can understand instantly.",
     securitySummaryTitle: "What the product is optimizing for",
     securitySummaryDescription:
       "Clarity comes first. Onchain state controls balances and withdrawals, while backend indexing and metadata help the app stay readable and current.",
@@ -211,10 +211,10 @@ const enMessages = {
       },
     ],
     finalCtaEyebrow: "Start here",
-    finalCtaTitle: "Open the product and start the first vault that matters.",
+    finalCtaTitle: "Open the product and start your first student pocket vault.",
     finalCtaDescription:
-      "Create one protected goal, review the rule before you confirm, and move into the real app flow without leaving the same product surface.",
-    finalCtaHighlights: ["Create a vault now", "Return to My Vaults later", "Keep the rule visible from day one"],
+      "Create one protected student savings goal, review the rule before you confirm, and keep the rule visible from day one.",
+    finalCtaHighlights: ["Create a pocket vault now", "Return to My Vaults later", "Keep the rule visible from day one"],
     demoPathEyebrow: "Best first walkthrough",
     demoPathTitle: "Show the full product in four calm steps.",
     demoPathDescription:
@@ -231,7 +231,7 @@ const enMessages = {
       eyebrow: "How it works",
       title: "Create the vault, choose the rule, fund it slowly.",
       description:
-        "Goal Vault stays focused on the core loop: create one protected vault, fund it with USDC, and wait until the rule makes withdrawal eligible.",
+        "Pocket Vault stays focused on the core loop: create one protected vault, fund it with USDC, and wait until the rule makes withdrawal eligible.",
       highlights: ["One vault per goal", "USDC on Base", "Protection stays visible at every step"],
       insightPoints: [
         "Create once and keep the goal details clear",
@@ -255,13 +255,13 @@ const enMessages = {
     },
     myVaults: {
       eyebrow: "My Vaults",
-      title: "Protect the money meant for something real.",
+      title: "Protect student pocket money for real emergencies.",
       description: "A calm view of progress, rules, and upcoming withdrawal eligibility.",
       emptyEyebrow: "Your first vault starts here",
       emptyTitle: "No vaults yet",
-      emptyDescription: "Create your first protected vault now to start saving toward one goal with a real unlock date.",
+      emptyDescription: "Create your first pocket vault to save for an emergency, rent gap, books, repairs, or travel home.",
       emptyHighlights: [
-        "Choose one goal that matters",
+        "Choose one student need",
         "Protect it with a clear unlock date",
         "Fund it over time with USDC on Base",
       ],
@@ -277,7 +277,7 @@ const enMessages = {
       eyebrow: "Activity",
       title: "Every vault movement in one calm timeline.",
       description:
-        "Confirmed deposits and withdrawals appear here through the indexed Goal Vault history, with gentle syncing when recent activity is still catching up.",
+        "Confirmed deposits and withdrawals appear here through the indexed Pocket Vault history, with gentle syncing when recent activity is still catching up.",
       emptyEyebrow: "A clean timeline",
       emptyTitle: "No activity yet",
       emptyDescription: "Confirmed deposits, withdrawals, and new vault activity will appear here.",
@@ -296,7 +296,7 @@ const enMessages = {
     },
     support: {
       eyebrow: "Beta Support",
-      title: "Get help without leaving Goal Vault.",
+      title: "Get help without leaving Pocket Vault.",
       description:
         "Send a structured support request with the route, wallet state, and optional contact details so beta issues can be triaged quickly.",
       intakeTitle: "What needs attention?",
@@ -312,7 +312,7 @@ const enMessages = {
       contactHelper: "Optional. Use it only if you want a direct follow-up.",
       walletContextTitle: "Context attached",
       walletContextDescription:
-        "Goal Vault includes the current route, environment, wallet state, and connected wallet address when available.",
+        "Pocket Vault includes the current route, environment, wallet state, and connected wallet address when available.",
       contextLabels: {
         route: "Route",
         environment: "Environment",
@@ -362,15 +362,15 @@ const enMessages = {
     },
     createVault: {
       eyebrow: "Create Vault",
-      title: "Protect one goal with a simple time rule.",
-      description: "Create a vault on Base, save the goal details, and start funding it later in USDC.",
+      title: "Protect one student savings goal with a simple time rule.",
+      description: "Create a pocket vault on Base, save the goal details, and start funding it later in USDC.",
       stateBanner:
         "A vault is created onchain, deposits stay open later, and withdrawals only become eligible after the unlock date.",
       missingFactory:
-        "Goal VaultFactory is not configured for this network yet. Set the factory address before creating vaults.",
+        "The vault factory contract is not configured for this network yet. Set the factory address before creating vaults.",
       steps: ["Goal", "Rule", "Review"],
-      goalSectionTitle: "What are you saving for?",
-      goalSectionDescription: "Keep the goal specific enough that progress feels emotionally meaningful.",
+      goalSectionTitle: "What student need are you saving for?",
+      goalSectionDescription: "Keep the goal specific enough that you know why this pocket money should stay protected.",
       ruleSectionTitle: "Protect this goal",
       ruleSectionDescription: "This first rule keeps things simple: the vault stays locked until the selected date.",
       reviewSectionTitle: "Review the vault",
@@ -386,15 +386,15 @@ const enMessages = {
       timeLockDescription: "Deposits can happen later. Withdrawals only become eligible after the unlock date.",
       fields: {
         goalName: "Goal name",
-        goalNamePlaceholder: "Emergency Reserve",
-        goalNameHelper: "Examples: Emergency reserve, Umrah fund, Studio upgrade",
+        goalNamePlaceholder: "Campus Emergency Fund",
+        goalNameHelper: "Examples: laptop repair, rent gap, books, medical visit, trip home",
         targetAmount: "Target amount",
         targetAmountHelper: "Use whole or decimal USDC amounts.",
         category: "Category",
-        categoryPlaceholder: "Home, Family, Travel",
+        categoryPlaceholder: "Emergency, study, rent, travel",
         categoryHelper: "Optional. Keep it short and useful.",
         note: "Short note",
-        notePlaceholder: "Six months of living costs, protected until late summer.",
+        notePlaceholder: "Pocket money for an urgent student expense, protected until late summer.",
         noteHelper: "Optional context that keeps the goal vivid.",
         unlockDate: "Unlock date",
         unlockDatePlaceholder: "2026-08-30",
@@ -426,7 +426,7 @@ const enMessages = {
       error: {
         activeTitle: "Your vault is active onchain",
         failedTitle: "Vault creation needs attention",
-        activeDescription: "The vault was created, but Goal Vault still needs to finish the display setup.",
+        activeDescription: "The vault was created, but Pocket Vault still needs to finish the display setup.",
         failedDescription: "Review the state and try again when you are ready.",
       },
       runtime: {
@@ -458,20 +458,20 @@ const enMessages = {
   },
   feedback: {
     unsupportedNetworkTitle: "Switch to Base or Base Sepolia",
-    unsupportedNetworkDescription: "Goal Vault reads are only enabled on Base and Base Sepolia.",
+    unsupportedNetworkDescription: "Pocket Vault reads are only enabled on Base and Base Sepolia.",
     unsupportedNetworkDescriptionWithLabel:
-      "{label} is connected right now. Goal Vault reads are only enabled on Base and Base Sepolia.",
-    configurationTitle: "Goal Vault needs a valid configuration",
+      "{label} is connected right now. Pocket Vault reads are only enabled on Base and Base Sepolia.",
+    configurationTitle: "Pocket Vault needs a valid configuration",
     configurationDescription: "Some launch settings are still missing. Review the active Base configuration and try again.",
     transactionPendingTitle: "Transaction still confirming",
-    transactionPendingDescription: "Your wallet submitted the transaction. Goal Vault will keep checking chain confirmation.",
+    transactionPendingDescription: "Your wallet submitted the transaction. Pocket Vault will keep checking chain confirmation.",
     transactionRefreshingTitle: "Transaction confirmed and refreshing",
     transactionRefreshingDescription: "Your transaction has been confirmed and the app is refreshing vault details and activity.",
     syncingTitle: "Activity is updating",
     partialStateTitle: "Some vault details are still loading",
-    partialStateDescription: "Goal Vault is showing the available chain truth while the rest of the display data catches up.",
+    partialStateDescription: "Pocket Vault is showing the available chain truth while the rest of the display data catches up.",
     dataUnavailableTitle: "Details are temporarily unavailable",
-    dataUnavailableDescription: "Try again in a moment. Goal Vault will keep the current vault view honest while data recovers.",
+    dataUnavailableDescription: "Try again in a moment. Pocket Vault will keep the current vault view honest while data recovers.",
     metadataLiveTitle: "Your vault is live",
     metadataPendingDescription: "This vault is active onchain. Goal details are still syncing into the app.",
     metadataFailedDescription: "This vault is active onchain, but its display details still need to be saved from the create flow.",
@@ -496,7 +496,7 @@ const enMessages = {
     activityEmpty: "Confirmed deposits, withdrawals, and new vault activity will appear here.",
   },
   activityFeed: {
-    fallbackGoalName: "Goal Vault",
+    fallbackGoalName: "Pocket Vault",
     createdTitle: "Vault created",
     createdSubtitle: "{goal} is now live.",
   },
@@ -512,14 +512,14 @@ const enMessages = {
     confirmingTitle: "Your vault is being created",
     confirmingDescription: "The transaction is onchain now. This can take a short moment on Base.",
     confirmedTitle: "Vault confirmed onchain",
-    confirmedDescription: "The vault contract is active. Goal Vault is resolving its new address.",
+    confirmedDescription: "The vault contract is active. Pocket Vault is resolving its new address.",
     metadataSavingTitle: "Saving your vault details",
     metadataSavingDescription: "The onchain vault is live. Goal details are being linked for display next.",
     successTitle: "Vault created successfully",
     successDescription: "Your vault is now active and protected by its unlock date.",
     failedOnchainTitle: "Vault created, details still need repair",
     failedTitle: "Vault creation did not finish",
-    failedOnchainDescription: "The vault is live onchain, but Goal Vault still needs to finish the display setup.",
+    failedOnchainDescription: "The vault is live onchain, but Pocket Vault still needs to finish the display setup.",
     failedDescription: "You can review the state below and try again when you are ready.",
   },
   deposit: {
@@ -711,8 +711,8 @@ const arMessages: AppMessages = {
   localeNativeLabel: "العربية",
   dateLocale: "ar-SA",
   navigation: {
-    desktopTagline: "خزائن أهداف مميزة على Base",
-    mobileTagline: "احمِ هدفاً واحداً في كل مرة",
+    desktopTagline: "خزائن مصروف الطلاب على Base",
+    mobileTagline: "ادخر للطوارئ الدراسية",
     marketingLinks: {
       howItWorks: "كيف يعمل",
       security: "الأمان",
@@ -801,16 +801,16 @@ const arMessages: AppMessages = {
     },
   },
   footer: {
-    description: "Goal Vault منتج ادخار هادئ بعملة USDC على Base لهدف واحد في كل مرة، مع قواعد سحب واضحة وتتبع تقدّم صادق.",
+    description: "Pocket Vault يساعد طلاب الجامعات على ادخار مصروفهم بعملة USDC على Base مع قواعد سحب واضحة وتتبع تقدّم صادق.",
   },
   landing: {
-    heroBadge: "ادخار محمي أصيل على Base",
-    heroTitle: "خزنة واحدة. هدف واحد. قاعدة واضحة واحدة.",
-    heroSubtitle: "أنشئ خزنة لهدف محدد بعملة USDC، واصل تمويلها بهدوء، ولا تسحب إلا عندما تسمح قاعدة الحماية بذلك.",
-    heroHighlights: ["قفل زمني أو مهلة انتظار أو وصي", "USDC فقط على Base", "حقيقة المال تأتي من السلسلة"],
+    heroBadge: "ادخار مصروف الطلاب",
+    heroTitle: "ادخر مصروفك في الكريبتو.",
+    heroSubtitle: "أنشئ خزنة USDC للطوارئ أو الكتب أو فجوة الإيجار أو إصلاح الحاسوب أو رحلة العودة، ولا تسحب إلا عندما تسمح القاعدة.",
+    heroHighlights: ["لطلاب 18+ فقط", "USDC فقط على Base", "قفل زمني أو مهلة انتظار أو وصي"],
     heroPreviewLabel: "خزنة محمية نموذجية",
-    heroPreviewGoal: "صندوق الطوارئ",
-    heroPreviewDescription: "احتياطي هادئ لستة أشهر من تكاليف المعيشة، محمي حتى أواخر الصيف.",
+    heroPreviewGoal: "صندوق طوارئ الجامعة",
+    heroPreviewDescription: "مصروف محفوظ لكسر حاسوب أو فجوة إيجار أو تكلفة صحية أو رحلة عودة.",
     heroPreviewFooter: "يبقى السحب مقفلاً حتى تتحقق قاعدة الحماية المختارة بالكامل.",
     heroPreviewRuleLabel: "الحماية الحالية",
     heroPreviewRuleValue: "قفل زمني حتى 30 أغسطس 2026",
@@ -825,14 +825,14 @@ const arMessages: AppMessages = {
     heroPreviewActivityLabel: "نشاط توضيحي",
     heroPreviewActivityCreated: "تم إنشاء الخزنة وفهرستها بشكل نظيف",
     heroPreviewActivityFunded: "تم تأكيد آخر إيداع USDC وظهر في التقدم",
-    storyEyebrow: "لماذا Goal Vault",
-    storyTitle: "يختلف الادخار عندما يكون للمال مهمة واضحة من البداية.",
+    storyEyebrow: "لماذا Pocket Vault",
+    storyTitle: "يختلف ادخار الطلاب عندما يكون للمال مهمة واضحة.",
     storyDescription:
-      "Goal Vault مخصص للمال الذي لا تريد كسره بسهولة: احتياطي الطوارئ، خطة الدراسة، خطوة الانتقال، أو المبلغ الذي يجب أن يبقى سليماً حتى يحين وقته.",
+      "Pocket Vault مخصص للطلاب الجدد في الكريبتو الذين يريدون طريقة بسيطة لحماية مدخرات USDC الصغيرة للأحداث السيئة، لا لضجيج التداول.",
     storyCards: [
       {
-        title: "احمِ وعداً واحداً في كل مرة",
-        description: "كل خزنة تدور حول هدف واحد حتى يبقى التقدّم والانضباط واضحين ومفهومين.",
+        title: "احمِ حاجة دراسية واحدة في كل مرة",
+        description: "كل خزنة تدور حول هدف مصروف واحد حتى يبقى التقدّم والانضباط واضحين.",
       },
       {
         title: "ليس لوحة مالية عامة",
@@ -840,18 +840,18 @@ const arMessages: AppMessages = {
       },
       {
         title: "Base وUSDC يبقيان النطاق ضيقاً",
-        description: "شبكة واحدة وأصل واحد يجعلان التجربة أسهل في الفهم والشرح والثقة.",
+        description: "شبكة واحدة وأصل واحد يجعلان التجربة أسهل للمبتدئين في الكريبتو.",
       },
     ],
     howItWorksEyebrow: "كيف يعمل",
     howItWorksTitle: "من النية إلى ادخار محمي في أربع خطوات واضحة.",
     howItWorksDescription:
-      "تدفق المنتج يبقى مركزاً: أنشئ الخزنة، اختر قاعدة الحماية، موّلها بعملة USDC، ثم انتظر حتى تجعل القاعدة السحب مؤهلاً.",
-    howItWorksSupport: ["أنشئ بنية واضحة", "اختر الحماية", "موّل تدريجياً", "اسحب فقط عند الاستحقاق"],
+      "تدفق المنتج يبقى مركزاً: أنشئ خزنة ادخار للطلاب، اختر القاعدة، موّلها بعملة USDC، ثم انتظر حتى تجعل القاعدة السحب مؤهلاً.",
+    howItWorksSupport: ["اختر حاجة دراسية", "اختر الحماية", "موّل تدريجياً", "اسحب فقط عند الاستحقاق"],
     howItWorksSteps: [
       {
-        title: "أنشئ الخزنة",
-        description: "ابدأ بهدف واحد حتى تشير الرصيد والهدف والتقدّم كلها إلى النتيجة نفسها.",
+        title: "أنشئ خزنة المصروف",
+        description: "ابدأ بحاجة دراسية واحدة حتى يشير الرصيد والهدف والتقدّم إلى النتيجة نفسها.",
       },
       {
         title: "اختر قاعدة الحماية",
@@ -890,7 +890,7 @@ const arMessages: AppMessages = {
     securityEyebrow: "نموذج الثقة",
     securityTitle: "صُمم ليشعر بالهدوء لأن القواعد واضحة.",
     securityDescription:
-      "يحافظ Goal Vault على وعد ضيق: Base وUSDC وهدف واحد في كل مرة وقواعد حماية يفهمها المستخدم فوراً.",
+      "يحافظ Pocket Vault على وعد ضيق: Base وUSDC وهدف واحد في كل مرة وقواعد حماية يفهمها المستخدم فوراً.",
     securitySummaryTitle: "ما الذي يحاول المنتج تحسينه",
     securitySummaryDescription:
       "الوضوح أولاً. تتحكم الحالة على السلسلة في الأرصدة والسحوبات، بينما تساعد الفهرسة والبيانات الوصفية الخلفية الواجهة على أن تبقى مقروءة ومحدثة.",
@@ -913,10 +913,10 @@ const arMessages: AppMessages = {
       },
     ],
     finalCtaEyebrow: "ابدأ من هنا",
-    finalCtaTitle: "افتح المنتج وابدأ أول خزنة لها معنى فعلاً.",
+    finalCtaTitle: "افتح المنتج وابدأ أول خزنة مصروف للطالب.",
     finalCtaDescription:
-      "أنشئ هدفاً محمياً واحداً، وراجع القاعدة قبل التأكيد، وادخل إلى التدفق الحقيقي من السطح نفسه.",
-    finalCtaHighlights: ["أنشئ خزنة الآن", "ارجع إلى خزائني لاحقاً", "أبقِ القاعدة مرئية من اليوم الأول"],
+      "أنشئ هدف ادخار طلابي محمياً، وراجع القاعدة قبل التأكيد، وأبقِ القاعدة مرئية من اليوم الأول.",
+    finalCtaHighlights: ["أنشئ خزنة مصروف الآن", "ارجع إلى خزائني لاحقاً", "أبقِ القاعدة مرئية من اليوم الأول"],
     demoPathEyebrow: "أفضل مسار أولي",
     demoPathTitle: "اعرض المنتج كاملاً في أربع خطوات هادئة.",
     demoPathDescription: "افتح التطبيق وأنشئ خزنة واحدة وموّلها بعملة USDC ثم عُد إلى صفحة التفاصيل وخط النشاط.",
@@ -932,7 +932,7 @@ const arMessages: AppMessages = {
       eyebrow: "كيف يعمل",
       title: "أنشئ الخزنة، اختر القاعدة، وموّلها بهدوء.",
       description:
-        "يبقى Goal Vault مركزاً على الحلقة الأساسية: أنشئ خزنة محمية واحدة، موّلها بعملة USDC، وانتظر حتى تجعل القاعدة السحب مؤهلاً.",
+        "يبقى Pocket Vault مركزاً على الحلقة الأساسية: أنشئ خزنة محمية واحدة، موّلها بعملة USDC، وانتظر حتى تجعل القاعدة السحب مؤهلاً.",
       highlights: ["خزنة واحدة لكل هدف", "USDC على Base", "الحماية تبقى مرئية في كل خطوة"],
       insightPoints: [
         "أنشئ الخزنة مرة واحدة وأبقِ تفاصيل الهدف واضحة",
@@ -956,13 +956,13 @@ const arMessages: AppMessages = {
     },
     myVaults: {
       eyebrow: "خزائني",
-      title: "احمِ المال المخصص لشيء حقيقي.",
+      title: "احمِ مصروف الطالب للطوارئ الحقيقية.",
       description: "عرض هادئ للتقدّم والقواعد ومواعيد أهلية السحب القادمة.",
       emptyEyebrow: "خزنتك الأولى تبدأ هنا",
       emptyTitle: "لا توجد خزائن بعد",
-      emptyDescription: "أنشئ أول خزنة محمية الآن لتبدأ الادخار نحو هدف واحد بتاريخ فتح حقيقي.",
+      emptyDescription: "أنشئ أول خزنة مصروف للطوارئ أو الإيجار أو الكتب أو الإصلاحات أو رحلة العودة.",
       emptyHighlights: [
-        "اختر هدفاً واحداً مهماً",
+        "اختر حاجة دراسية واحدة",
         "احمه بتاريخ فتح واضح",
         "موّله تدريجياً بعملة USDC على Base",
       ],
@@ -977,7 +977,7 @@ const arMessages: AppMessages = {
     activity: {
       eyebrow: "النشاط",
       title: "كل حركة للخزنة في خط زمني هادئ واحد.",
-      description: "تظهر هنا الإيداعات والسحوبات المؤكدة من سجل Goal Vault المفهرس، مع مزامنة هادئة عندما تكون الحركة الأخيرة ما زالت تلحق بالواجهة.",
+      description: "تظهر هنا الإيداعات والسحوبات المؤكدة من سجل Pocket Vault المفهرس، مع مزامنة هادئة عندما تكون الحركة الأخيرة ما زالت تلحق بالواجهة.",
       emptyEyebrow: "خط زمني نظيف",
       emptyTitle: "لا يوجد نشاط بعد",
       emptyDescription: "ستظهر هنا الإيداعات والسحوبات المؤكدة ونشاط الخزنة الجديد.",
@@ -996,7 +996,7 @@ const arMessages: AppMessages = {
     },
     support: {
       eyebrow: "دعم النسخة التجريبية",
-      title: "احصل على المساعدة من داخل Goal Vault.",
+      title: "احصل على المساعدة من داخل Pocket Vault.",
       description:
         "أرسل طلب دعم منظماً مع المسار وحالة المحفظة وبيانات تواصل اختيارية حتى يمكن فرز مشاكل النسخة التجريبية بسرعة.",
       intakeTitle: "ما الذي يحتاج إلى مراجعة؟",
@@ -1012,7 +1012,7 @@ const arMessages: AppMessages = {
       contactHelper: "اختياري. استخدمه فقط إذا أردت متابعة مباشرة.",
       walletContextTitle: "السياق المرفق",
       walletContextDescription:
-        "يرفق Goal Vault المسار الحالي والبيئة وحالة المحفظة وعنوان المحفظة المتصلة عند توفرها.",
+        "يرفق Pocket Vault المسار الحالي والبيئة وحالة المحفظة وعنوان المحفظة المتصلة عند توفرها.",
       contextLabels: {
         route: "المسار",
         environment: "البيئة",
@@ -1061,13 +1061,13 @@ const arMessages: AppMessages = {
     },
     createVault: {
       eyebrow: "إنشاء خزنة",
-      title: "احمِ هدفاً واحداً بقاعدة زمنية بسيطة.",
-      description: "أنشئ خزنة على Base واحفظ تفاصيل الهدف وابدأ تمويلها لاحقاً بعملة USDC.",
+      title: "احمِ هدف ادخار طلابي واحد بقاعدة زمنية بسيطة.",
+      description: "أنشئ خزنة مصروف على Base واحفظ تفاصيل الهدف وابدأ تمويلها لاحقاً بعملة USDC.",
       stateBanner: "يتم إنشاء الخزنة على السلسلة، وتبقى الإيداعات متاحة لاحقاً، ولا يصبح السحب ممكناً إلا بعد تاريخ الفتح.",
-      missingFactory: "لم يتم إعداد Goal VaultFactory لهذه الشبكة بعد. أضف عنوان المصنع قبل إنشاء الخزائن.",
+      missingFactory: "لم يتم إعداد عقد المصنع لهذه الشبكة بعد. أضف عنوان المصنع قبل إنشاء الخزائن.",
       steps: ["الهدف", "القاعدة", "المراجعة"],
-      goalSectionTitle: "ما الذي تدخر له؟",
-      goalSectionDescription: "اجعل الهدف محدداً بما يكفي ليبقى التقدّم ذا معنى عاطفي.",
+      goalSectionTitle: "ما الحاجة الدراسية التي تدخر لها؟",
+      goalSectionDescription: "اجعل الهدف محدداً بما يكفي لتعرف لماذا يجب أن يبقى هذا المصروف محمياً.",
       ruleSectionTitle: "احمِ هذا الهدف",
       ruleSectionDescription: "هذه القاعدة الأولى بسيطة: تبقى الخزنة مقفلة حتى التاريخ الذي تختاره.",
       reviewSectionTitle: "راجع الخزنة",
@@ -1083,15 +1083,15 @@ const arMessages: AppMessages = {
       timeLockDescription: "يمكن الإيداع لاحقاً. ولا يصبح السحب ممكناً إلا بعد تاريخ الفتح.",
       fields: {
         goalName: "اسم الهدف",
-        goalNamePlaceholder: "صندوق الطوارئ",
-        goalNameHelper: "أمثلة: صندوق الطوارئ، صندوق العمرة، تطوير الاستوديو",
+        goalNamePlaceholder: "صندوق طوارئ الجامعة",
+        goalNameHelper: "أمثلة: إصلاح الحاسوب، فجوة الإيجار، الكتب، زيارة طبية، رحلة العودة",
         targetAmount: "المبلغ المستهدف",
         targetAmountHelper: "استخدم مبالغ USDC الصحيحة أو العشرية.",
         category: "الفئة",
-        categoryPlaceholder: "المنزل، العائلة، السفر",
+        categoryPlaceholder: "طوارئ، دراسة، إيجار، سفر",
         categoryHelper: "اختياري. اجعله قصيراً ومفيداً.",
         note: "ملاحظة قصيرة",
-        notePlaceholder: "ستة أشهر من تكاليف المعيشة محمية حتى نهاية الصيف.",
+        notePlaceholder: "مصروف محفوظ لحاجة طلابية عاجلة حتى نهاية الصيف.",
         noteHelper: "اختياري. أضف سياقاً يبقي الهدف حياً في ذهنك.",
         unlockDate: "تاريخ الفتح",
         unlockDatePlaceholder: "2026-08-30",
@@ -1123,7 +1123,7 @@ const arMessages: AppMessages = {
       error: {
         activeTitle: "خزنتك نشطة على السلسلة",
         failedTitle: "إنشاء الخزنة يحتاج إلى مراجعة",
-        activeDescription: "تم إنشاء الخزنة، لكن Goal Vault ما زال بحاجة إلى إكمال إعداد العرض.",
+        activeDescription: "تم إنشاء الخزنة، لكن Pocket Vault ما زال بحاجة إلى إكمال إعداد العرض.",
         failedDescription: "راجع الحالة ثم أعد المحاولة عندما تكون جاهزاً.",
       },
       runtime: {
@@ -1154,19 +1154,19 @@ const arMessages: AppMessages = {
   },
   feedback: {
     unsupportedNetworkTitle: "بدّل إلى Base أو Base Sepolia",
-    unsupportedNetworkDescription: "قراءات Goal Vault مفعلة فقط على Base وBase Sepolia.",
-    unsupportedNetworkDescriptionWithLabel: "الشبكة المتصلة الآن هي {label}. قراءات Goal Vault مفعلة فقط على Base وBase Sepolia.",
-    configurationTitle: "Goal Vault يحتاج إلى إعداد صالح",
+    unsupportedNetworkDescription: "قراءات Pocket Vault مفعلة فقط على Base وBase Sepolia.",
+    unsupportedNetworkDescriptionWithLabel: "الشبكة المتصلة الآن هي {label}. قراءات Pocket Vault مفعلة فقط على Base وBase Sepolia.",
+    configurationTitle: "Pocket Vault يحتاج إلى إعداد صالح",
     configurationDescription: "ما زالت بعض إعدادات الإطلاق ناقصة. راجع إعدادات Base النشطة ثم حاول مرة أخرى.",
     transactionPendingTitle: "المعاملة ما زالت قيد التأكيد",
-    transactionPendingDescription: "أرسلت المحفظة المعاملة. سيواصل Goal Vault التحقق من تأكيدها على السلسلة.",
+    transactionPendingDescription: "أرسلت المحفظة المعاملة. سيواصل Pocket Vault التحقق من تأكيدها على السلسلة.",
     transactionRefreshingTitle: "تم تأكيد المعاملة ويجري التحديث",
     transactionRefreshingDescription: "تم تأكيد معاملتك ويجري الآن تحديث تفاصيل الخزنة والنشاط داخل التطبيق.",
     syncingTitle: "يجري تحديث النشاط",
     partialStateTitle: "بعض تفاصيل الخزنة ما زالت قيد التحميل",
-    partialStateDescription: "يعرض Goal Vault حقيقة السلسلة المتاحة الآن بينما تلحق بقية بيانات العرض بها.",
+    partialStateDescription: "يعرض Pocket Vault حقيقة السلسلة المتاحة الآن بينما تلحق بقية بيانات العرض بها.",
     dataUnavailableTitle: "التفاصيل غير متاحة مؤقتاً",
-    dataUnavailableDescription: "حاول مرة أخرى بعد قليل. سيبقي Goal Vault عرض الخزنة الحالي صادقاً حتى تتعافى البيانات.",
+    dataUnavailableDescription: "حاول مرة أخرى بعد قليل. سيبقي Pocket Vault عرض الخزنة الحالي صادقاً حتى تتعافى البيانات.",
     metadataLiveTitle: "خزنتك حية الآن",
     metadataPendingDescription: "هذه الخزنة نشطة على السلسلة. ما زالت تفاصيل الهدف تتم مزامنتها داخل التطبيق.",
     metadataFailedDescription: "هذه الخزنة نشطة على السلسلة، لكن تفاصيل العرض ما زالت بحاجة إلى الحفظ من تدفق الإنشاء.",
@@ -1191,7 +1191,7 @@ const arMessages: AppMessages = {
     activityEmpty: "ستظهر هنا الإيداعات والسحوبات المؤكدة ونشاط الخزنة الجديد.",
   },
   activityFeed: {
-    fallbackGoalName: "Goal Vault",
+    fallbackGoalName: "Pocket Vault",
     createdTitle: "تم إنشاء الخزنة",
     createdSubtitle: "أصبحت {goal} نشطة الآن.",
   },
@@ -1207,14 +1207,14 @@ const arMessages: AppMessages = {
     confirmingTitle: "خزنتك قيد الإنشاء",
     confirmingDescription: "المعاملة أصبحت على السلسلة الآن. قد يستغرق ذلك لحظات على Base.",
     confirmedTitle: "تم تأكيد الخزنة على السلسلة",
-    confirmedDescription: "عقد الخزنة أصبح نشطاً. يقوم Goal Vault الآن بحل عنوانه الجديد.",
+    confirmedDescription: "عقد الخزنة أصبح نشطاً. يقوم Pocket Vault الآن بحل عنوانه الجديد.",
     metadataSavingTitle: "جارٍ حفظ تفاصيل الخزنة",
     metadataSavingDescription: "الخزنة أصبحت حية على السلسلة. يتم الآن ربط تفاصيل الهدف لأغراض العرض.",
     successTitle: "تم إنشاء الخزنة بنجاح",
     successDescription: "أصبحت خزنتك نشطة ومحمية بتاريخ الفتح.",
     failedOnchainTitle: "تم إنشاء الخزنة لكن التفاصيل تحتاج إصلاحاً",
     failedTitle: "لم يكتمل إنشاء الخزنة",
-    failedOnchainDescription: "الخزنة حية على السلسلة، لكن Goal Vault ما زال بحاجة إلى إكمال إعداد العرض.",
+    failedOnchainDescription: "الخزنة حية على السلسلة، لكن Pocket Vault ما زال بحاجة إلى إكمال إعداد العرض.",
     failedDescription: "يمكنك مراجعة الحالة أدناه ثم إعادة المحاولة عندما تكون جاهزاً.",
   },
   deposit: {

@@ -1,7 +1,7 @@
 import type { GoalVaultContractSummary } from "../types/contract-types";
 import type { VaultMetadataFallback } from "../types/vault-types";
 import { formatTokenAmountNumber } from "./token-mappers";
-import type { VaultAddress, VaultDetail, VaultRuleSummary, WithdrawEligibility, VaultSummary } from "@goal-vault/shared";
+import type { VaultAddress, VaultDetail, VaultRuleSummary, WithdrawEligibility, VaultSummary } from "@pocket-vault/shared";
 
 const usdcDecimals = 6;
 
@@ -99,7 +99,7 @@ export const mapVaultSummary = ({
     chainId,
     assetAddress: summary.asset,
     ownerAddress: summary.owner,
-    goalName: metadataFallback?.goalName || "Goal Vault",
+    goalName: metadataFallback?.goalName || "Pocket Vault",
     category: metadataFallback?.category,
     note: metadataFallback?.note,
     targetAmount,

@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import { erc20Abi } from "../abi";
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 export interface ApproveErc20WriteRequest {
   chainId: SupportedChainId;

@@ -10,7 +10,7 @@ import type {
   VaultReconciliationStatus,
   VaultRuleType,
   UnlockRequestStatus,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 import type { Address, Hash } from "viem";
 
 import type {

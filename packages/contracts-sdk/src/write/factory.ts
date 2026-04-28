@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import { goalVaultFactoryAbi } from "../abi";
-import type { SupportedChainId, VaultRuleType } from "@goal-vault/shared";
+import type { SupportedChainId, VaultRuleType } from "@pocket-vault/shared";
 
 export interface CreateVaultWriteRequest {
   chainId: SupportedChainId;

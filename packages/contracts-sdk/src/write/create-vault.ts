@@ -3,7 +3,7 @@ import { buildCreateVaultWriteRequest } from "./factory";
 import { getGoalVaultFactoryAddress } from "../addresses";
 import type { Address } from "viem";
 
-import type { SupportedChainId, VaultRuleType } from "@goal-vault/shared";
+import type { SupportedChainId, VaultRuleType } from "@pocket-vault/shared";
 
 export interface CreateVaultContractWriteInput {
   chainId: SupportedChainId;
@@ -40,7 +40,7 @@ export const prepareCreateVaultWriteRequest = ({
     return {
       status: "unavailable",
       request: null,
-      message: "Goal Vault is not configured for this network yet.",
+      message: "Pocket Vault is not configured for this network yet.",
     };
   }
 

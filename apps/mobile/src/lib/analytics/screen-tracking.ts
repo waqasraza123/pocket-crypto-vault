@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import type { AnalyticsContext, AnalyticsEventName, AnalyticsEventPayload } from "@goal-vault/shared";
+import type { AnalyticsContext, AnalyticsEventName, AnalyticsEventPayload } from "@pocket-vault/shared";
 
 import { useAnalytics } from "../../hooks/useAnalytics";
 

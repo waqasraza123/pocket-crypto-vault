@@ -1,4 +1,4 @@
-import type { SyncFreshnessSnapshot, VaultDegradedState } from "@goal-vault/shared";
+import type { SyncFreshnessSnapshot, VaultDegradedState } from "@pocket-vault/shared";
 
 export const getVaultDegradedState = ({
   freshness,

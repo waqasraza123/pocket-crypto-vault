@@ -1,1 +1,1 @@
-export { readFactoryVaultAddresses, readGoalVaultSummary } from "@goal-vault/contracts-sdk";
+export { readFactoryVaultAddresses, readGoalVaultSummary } from "@pocket-vault/contracts-sdk";

@@ -22,6 +22,7 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
   dataDir,
   persistence: {
     driver: "sqlite",
+    postgresqlDriver: "pg",
     sqliteDataDir: dataDir,
     postgresUrlConfigured: false,
     schemaName: "goal_vault_api",
@@ -33,6 +34,9 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
   indexerEnabled: true,
   analyticsEnabled: false,
   supportEnabled: true,
+  rollbackEvidenceAccepted: false,
+  smokeEvidenceAccepted: false,
+  limitedBetaScopeApproved: false,
   internalToken: null,
   signedRequestMaxAgeSeconds: 900,
   logLevel: "info",
@@ -54,7 +58,7 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
 });
 
 test("syncFactoryEventsForChain ingests legacy and V2 creation events without duplicates", async () => {
-  const dataDir = await mkdtemp(path.join(tmpdir(), "goal-vault-api-factory-sync-"));
+  const dataDir = await mkdtemp(path.join(tmpdir(), "pocket-vault-api-factory-sync-"));
 
   try {
     const store = new IndexerStore(dataDir);

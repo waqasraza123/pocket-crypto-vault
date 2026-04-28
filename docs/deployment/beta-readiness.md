@@ -1,7 +1,7 @@
-# Goal Vault Beta Readiness
+# Pocket Vault Beta Readiness
 
 ## Purpose
-The beta readiness plan is the final provider-neutral review artifact before inviting real users to a limited Goal Vault beta.
+The beta readiness plan is the final provider-neutral review artifact before inviting real users to a limited Pocket Vault beta.
 
 It does not deploy infrastructure, mutate a database, move traffic, send invites, run chain transactions, or submit mobile builds. It validates that the release, API preflight, traffic plan, persistence cutover evidence, rollback references, support path, and audience limits are coherent before an operator starts a real-world beta.
 
@@ -10,6 +10,7 @@ It does not deploy infrastructure, mutate a database, move traffic, send invites
   - validates beta target and persistence driver
   - inspects local release, preflight, traffic, and managed database runtime JSON artifacts when paths are provided
   - requires PostgreSQL runtime evidence when `BETA_READINESS_PERSISTENCE_DRIVER=postgresql`
+  - requires protected smoke evidence and production activation gates for production beta readiness
   - records participant limits, per-vault USDC limit, support reference, incident owner, launch steps, and rollback steps
   - writes a JSON readiness plan
 - `.github/workflows/beta-readiness-plan.yml`
@@ -31,6 +32,7 @@ It does not deploy infrastructure, mutate a database, move traffic, send invites
 - `BETA_READINESS_TRAFFIC_PLAN`
 - `BETA_READINESS_DATABASE_RUNTIME_PLAN`
   - required when persistence driver is `postgresql`
+- `BETA_READINESS_SMOKE_RESULT`
 - `BETA_READINESS_SOURCE_SNAPSHOT`
 - `BETA_READINESS_ROLLBACK_SNAPSHOT`
 - `BETA_READINESS_PARTICIPANT_LIMIT`
@@ -51,8 +53,10 @@ When artifact references point to local JSON files, the script validates:
 
 - release manifest target, URLs, API image, and rollback image
 - API preflight target, valid status, persistence driver, runtime readiness, and PostgreSQL connection/schema status when selected
+- API preflight production activation status and `safeForLimitedBetaTraffic` for production
 - traffic plan target, promote action, candidate URL, rollback URL, image alignment, release manifest reference, and preflight reference
 - managed database runtime plan target, cutover mode, PostgreSQL persistence target, release reference, preflight reference, and traffic plan reference
+- protected smoke target, `/health`, `/ready`, wallet, vault, create, deposit, support, dashboard, detail, activity, indexer, and metadata evidence
 - `/support` references require local API preflight evidence with support intake enabled
 
 Remote URLs and artifact names remain valid references but are recorded as not locally inspected. Operators must review them before launch.

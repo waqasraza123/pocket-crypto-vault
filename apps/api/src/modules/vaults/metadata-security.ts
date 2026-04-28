@@ -1,5 +1,5 @@
-import type { VaultMetadataWriteRequest } from "@goal-vault/shared";
-import * as metadataAuthModule from "@goal-vault/shared/src/validation/metadataAuth";
+import type { VaultMetadataWriteRequest } from "@pocket-vault/shared";
+import * as metadataAuthModule from "@pocket-vault/shared/src/validation/metadataAuth";
 import { parseUnits, verifyMessage, type Address, type Log } from "viem";
 
 import { readGoalVaultSummaryForIndexer } from "../../lib/contracts";

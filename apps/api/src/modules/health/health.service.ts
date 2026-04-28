@@ -1,15 +1,20 @@
-import type { HealthStatus } from "@goal-vault/shared";
-import type { ServiceHealthResponse } from "@goal-vault/api-client";
+import type { HealthStatus } from "@pocket-vault/shared";
+import type { ServiceHealthResponse } from "@pocket-vault/api-client";
 
 import type { ApiRuntimeEnv } from "../../env";
 import type { IndexerContext } from "../indexer/context";
 import { getChainSyncStatuses } from "../indexer/sync-state.service";
-import { buildApiHealthSummary, buildReleaseReadinessSummary, buildStagingReadinessSummary } from "./readiness.service";
+import {
+  buildApiHealthSummary,
+  buildProductionActivationReadinessSummary,
+  buildReleaseReadinessSummary,
+  buildStagingReadinessSummary,
+} from "./readiness.service";
 
 export const getServiceHealthStatus = ({ env }: { env: ApiRuntimeEnv }): ServiceHealthResponse => ({
   ok: true,
   checkedAt: new Date().toISOString(),
-  service: "goal-vault-api",
+  service: "pocket-vault-api",
   environment: env.environment,
   deploymentTarget: env.deploymentTarget,
   indexerEnabled: env.indexerEnabled,
@@ -51,6 +56,7 @@ export const getReadinessStatus = async ({
     api,
     staging: buildStagingReadinessSummary(env),
     release: buildReleaseReadinessSummary(env),
+    productionActivation: buildProductionActivationReadinessSummary(env, chainSync),
     validationErrors: env.validationErrors,
   };
 };

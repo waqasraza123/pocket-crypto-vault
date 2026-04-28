@@ -1,6 +1,6 @@
-import type { AppEnvironment } from "@goal-vault/shared";
+import type { AppEnvironment } from "@pocket-vault/shared";
 
-export interface GoalVaultAppIdentity {
+export interface PocketVaultAppIdentity {
   name: string;
   shortName: string;
   slug: string;
@@ -10,35 +10,35 @@ export interface GoalVaultAppIdentity {
   webTitle: string;
 }
 
-const appIdentityByEnvironment: Record<AppEnvironment, GoalVaultAppIdentity> = {
+const appIdentityByEnvironment: Record<AppEnvironment, PocketVaultAppIdentity> = {
   development: {
-    name: "Goal Vault Dev",
-    shortName: "Goal Vault Dev",
-    slug: "goal-vault-dev",
-    scheme: "goal-vault-dev",
-    iosBundleIdentifier: "com.goalvault.app.dev",
-    androidPackage: "com.goalvault.app.dev",
-    webTitle: "Goal Vault Dev",
+    name: "Pocket Vault Dev",
+    shortName: "Pocket Vault Dev",
+    slug: "pocket-vault-dev",
+    scheme: "pocket-vault-dev",
+    iosBundleIdentifier: "com.pocketvault.app.dev",
+    androidPackage: "com.pocketvault.app.dev",
+    webTitle: "Pocket Vault Dev",
   },
   staging: {
-    name: "Goal Vault Staging",
-    shortName: "Goal Vault Staging",
-    slug: "goal-vault-staging",
-    scheme: "goal-vault-staging",
-    iosBundleIdentifier: "com.goalvault.app.staging",
-    androidPackage: "com.goalvault.app.staging",
-    webTitle: "Goal Vault Staging",
+    name: "Pocket Vault Staging",
+    shortName: "Pocket Vault Staging",
+    slug: "pocket-vault-staging",
+    scheme: "pocket-vault-staging",
+    iosBundleIdentifier: "com.pocketvault.app.staging",
+    androidPackage: "com.pocketvault.app.staging",
+    webTitle: "Pocket Vault Staging",
   },
   production: {
-    name: "Goal Vault",
-    shortName: "Goal Vault",
-    slug: "goal-vault",
-    scheme: "goal-vault",
-    iosBundleIdentifier: "com.goalvault.app",
-    androidPackage: "com.goalvault.app",
-    webTitle: "Goal Vault",
+    name: "Pocket Vault",
+    shortName: "Pocket Vault",
+    slug: "pocket-vault",
+    scheme: "pocket-vault",
+    iosBundleIdentifier: "com.pocketvault.app",
+    androidPackage: "com.pocketvault.app",
+    webTitle: "Pocket Vault",
   },
 };
 
-export const getGoalVaultAppIdentity = (environment: AppEnvironment): GoalVaultAppIdentity =>
+export const getPocketVaultAppIdentity = (environment: AppEnvironment): PocketVaultAppIdentity =>
   appIdentityByEnvironment[environment];

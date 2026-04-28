@@ -1,5 +1,5 @@
 {
-  "name": "@goal-vault/config",
+  "name": "@pocket-vault/config",
   "private": true,
   "version": "0.1.0",
   "main": "src/index.ts",
@@ -8,7 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@goal-vault/shared": "workspace:*",
+    "@pocket-vault/shared": "workspace:*",
     "viem": "^2.38.5",
     "zod": "^4.1.12"
   }

@@ -1,5 +1,5 @@
 {
-  "name": "@goal-vault/api",
+  "name": "@pocket-vault/api",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -16,14 +16,16 @@
     "job:reconcile": "tsx src/jobs/reconcile-vault-metadata.ts"
   },
   "dependencies": {
-    "@goal-vault/api-client": "workspace:*",
-    "@goal-vault/config": "workspace:*",
-    "@goal-vault/contracts-sdk": "workspace:*",
-    "@goal-vault/shared": "workspace:*",
+    "@pocket-vault/api-client": "workspace:*",
+    "@pocket-vault/config": "workspace:*",
+    "@pocket-vault/contracts-sdk": "workspace:*",
+    "@pocket-vault/shared": "workspace:*",
+    "@neondatabase/serverless": "^1.1.0",
     "fastify": "^5.6.1",
     "pg": "^8.20.0",
     "tsx": "^4.20.6",
     "viem": "^2.38.5",
+    "ws": "^8.20.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {

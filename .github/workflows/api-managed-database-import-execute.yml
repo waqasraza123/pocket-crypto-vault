@@ -1,0 +1,124 @@
+name: API Managed Database Import Execute
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      execution_label:
+        description: Stable import execution label.
+        type: string
+        required: true
+      schema_name:
+        description: PostgreSQL schema name.
+        type: string
+        required: false
+        default: goal_vault_api
+      import_plan_artifact:
+        description: Managed database import plan artifact to download.
+        type: string
+        required: true
+      import_plan_run_id:
+        description: Workflow run ID that produced import_plan_artifact.
+        type: string
+        required: true
+      export_artifact:
+        description: Managed database export artifact to download.
+        type: string
+        required: true
+      export_run_id:
+        description: Workflow run ID that produced export_artifact.
+        type: string
+        required: true
+      target_reference:
+        description: Non-secret managed database target reference.
+        type: string
+        required: false
+      confirm_execute:
+        description: Type import to mutate the target database.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: api-managed-database-import-execute-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  API_DATABASE_IMPORT_EXECUTION_TARGET: ${{ inputs.target }}
+  API_DATABASE_IMPORT_EXECUTION_LABEL: ${{ inputs.execution_label }}
+  API_DATABASE_IMPORT_SCHEMA_NAME: ${{ inputs.schema_name }}
+  API_DATABASE_IMPORT_TARGET_REFERENCE: ${{ inputs.target_reference }}
+  API_DATABASE_IMPORT_CONFIRM_EXECUTE: ${{ inputs.confirm_execute }}
+  API_DATABASE_URL: ${{ secrets.API_DATABASE_URL }}
+  API_DATABASE_IMPORT_EXECUTION_DIR: artifacts/import-execute
+
+jobs:
+  api-managed-database-import-execute:
+    name: Execute ${{ inputs.target }} API managed database import
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_execute != 'import' }}
+        run: |
+          echo "Import execution requires confirm_execute=import."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Download managed database import plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.import_plan_artifact }}
+          run-id: ${{ inputs.import_plan_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/import-plan
+
+      - name: Download managed database export artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.export_artifact }}
+          run-id: ${{ inputs.export_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/source-export
+
+      - name: Resolve import plan path
+        id: import-paths
+        shell: bash
+        run: |
+          import_plan="$(find artifacts/import-plan -name '*.json' -type f | head -n 1)"
+          if [ -z "$import_plan" ] || [ ! -f "$import_plan" ]; then
+            echo "Import plan JSON was not found."
+            exit 1
+          fi
+          echo "import_plan=$import_plan" >> "$GITHUB_OUTPUT"
+
+      - name: Execute API managed database import
+        id: import-execute
+        env:
+          API_DATABASE_IMPORT_PLAN: ${{ steps.import-paths.outputs.import_plan }}
+          API_DATABASE_IMPORT_EXPORT_SOURCE: artifacts/source-export
+        run: pnpm api:database:import:execute
+
+      - name: Upload import execution result
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-api-managed-database-import-execute-${{ inputs.target }}
+          path: ${{ steps.import-execute.outputs.result_path }}
+          if-no-files-found: error

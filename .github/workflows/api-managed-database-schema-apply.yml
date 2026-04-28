@@ -1,0 +1,122 @@
+name: API Managed Database Schema Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      execution_label:
+        description: Stable schema execution label.
+        type: string
+        required: true
+      schema_name:
+        description: PostgreSQL schema name.
+        type: string
+        required: false
+        default: goal_vault_api
+      schema_artifact:
+        description: Managed database schema artifact to download.
+        type: string
+        required: true
+      schema_run_id:
+        description: Workflow run ID that produced schema_artifact.
+        type: string
+        required: true
+      schema_sql:
+        description: Runner-local schema SQL path after artifact download.
+        type: string
+        required: false
+        default: artifacts/schema
+      schema_manifest:
+        description: Runner-local schema manifest path after artifact download.
+        type: string
+        required: false
+      target_reference:
+        description: Non-secret managed database target reference.
+        type: string
+        required: false
+      confirm_apply:
+        description: Type apply to mutate the target database.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: api-managed-database-schema-apply-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  API_DATABASE_SCHEMA_EXECUTION_TARGET: ${{ inputs.target }}
+  API_DATABASE_SCHEMA_EXECUTION_LABEL: ${{ inputs.execution_label }}
+  API_DATABASE_SCHEMA_NAME: ${{ inputs.schema_name }}
+  API_DATABASE_SCHEMA_TARGET_REFERENCE: ${{ inputs.target_reference }}
+  API_DATABASE_SCHEMA_CONFIRM_APPLY: ${{ inputs.confirm_apply }}
+  API_DATABASE_URL: ${{ secrets.API_DATABASE_URL }}
+  API_DATABASE_SCHEMA_EXECUTION_DIR: artifacts/schema-apply
+
+jobs:
+  api-managed-database-schema-apply:
+    name: Apply ${{ inputs.target }} API managed database schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_apply != 'apply' }}
+        run: |
+          echo "Schema execution requires confirm_apply=apply."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Download managed database schema artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.schema_artifact }}
+          run-id: ${{ inputs.schema_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/schema
+
+      - name: Resolve schema artifact paths
+        id: schema-paths
+        shell: bash
+        run: |
+          schema_sql="$(find artifacts/schema -name '*.sql' -type f | head -n 1)"
+          schema_manifest="${{ inputs.schema_manifest }}"
+          if [ -z "$schema_manifest" ]; then
+            schema_manifest="$(find artifacts/schema -name '*.json' -type f | head -n 1)"
+          fi
+          if [ -z "$schema_sql" ] || [ ! -f "$schema_sql" ]; then
+            echo "Schema SQL file was not found."
+            exit 1
+          fi
+          echo "schema_sql=$schema_sql" >> "$GITHUB_OUTPUT"
+          echo "schema_manifest=$schema_manifest" >> "$GITHUB_OUTPUT"
+
+      - name: Apply API managed database schema
+        id: schema-apply
+        env:
+          API_DATABASE_SCHEMA_SQL: ${{ steps.schema-paths.outputs.schema_sql }}
+          API_DATABASE_SCHEMA_MANIFEST: ${{ steps.schema-paths.outputs.schema_manifest }}
+        run: pnpm api:database:schema:apply
+
+      - name: Upload schema apply result
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-api-managed-database-schema-apply-${{ inputs.target }}
+          path: ${{ steps.schema-apply.outputs.result_path }}
+          if-no-files-found: error

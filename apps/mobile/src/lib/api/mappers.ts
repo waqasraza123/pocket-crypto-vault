@@ -5,7 +5,7 @@ import type {
   VaultActivityEvent,
   VaultActivityItem,
   VaultDetailApiModel,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import { formatUsdc } from "../format";
 import { getCurrentMessages, interpolate } from "../i18n";

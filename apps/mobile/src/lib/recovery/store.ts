@@ -1,9 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useSyncExternalStore } from "react";
 
-import type { TransactionRecoveryRecord } from "@goal-vault/shared";
+import type { TransactionRecoveryRecord } from "@pocket-vault/shared";
 
-const storageKey = "@goal-vault/transaction-recovery";
+const storageKey = "@pocket-vault/transaction-recovery";
 
 interface RecoveryStoreSnapshot {
   version: number;

@@ -23,7 +23,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
   });
 
   app.get("/", async () => ({
-    service: "goal-vault-api",
+    service: "pocket-vault-api",
     ok: true,
     checkedAt: new Date().toISOString(),
     environment: env.environment,
@@ -32,6 +32,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
     indexerEnabled: env.indexerEnabled,
     supportEnabled: env.supportEnabled,
     persistenceDriver: env.persistence.driver,
+    postgresqlDriver: env.persistence.postgresqlDriver,
     readyPath: "/ready",
     validationErrors: env.validationErrors,
   }));
@@ -40,7 +41,7 @@ export const buildApp = ({ context, env }: { context: IndexerContext; env: ApiRu
     app.log.error(error);
 
     return reply.status(500).send({
-      message: "Goal Vault API could not complete this request.",
+      message: "Pocket Vault API could not complete this request.",
     });
   });
 

@@ -139,7 +139,7 @@ jobs:
       - name: Upload API managed database import plan
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-managed-database-import-plan-${{ inputs.target }}
+          name: pocket-vault-api-managed-database-import-plan-${{ inputs.target }}
           path: |
             ${{ steps.import_plan.outputs.plan_path }}
             ${{ steps.import_plan.outputs.sql_path }}

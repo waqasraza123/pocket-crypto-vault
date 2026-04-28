@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Plan
+# Pocket Vault API Managed Database Plan
 
 ## Purpose
 The API managed database plan records how the current SQLite-backed API persistence layer should move toward an external managed PostgreSQL target.
@@ -137,7 +137,7 @@ Use the managed database plan before adding provider-specific database infrastru
 9. Import the JSONL export through an operator-owned procedure.
 10. Generate the managed database parity plan.
 11. Run parity checks through approved operational access.
-12. Run API preflight with the selected persistence driver and keep `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL adapter is implemented.
+12. Run API preflight with the selected persistence driver and keep `API_PERSISTENCE_DRIVER=sqlite` until PostgreSQL runtime preflight, parity, rollback, and activation evidence are accepted.
 13. Generate the release manifest and API traffic plan.
 14. Generate the managed database runtime activation plan before enabling PostgreSQL mode.
 15. Move traffic manually only after the selected hosting-provider operator approves the plan.

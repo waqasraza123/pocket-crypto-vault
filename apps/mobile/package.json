@@ -1,5 +1,5 @@
 {
-  "name": "@goal-vault/mobile",
+  "name": "@pocket-vault/mobile",
   "private": true,
   "version": "0.1.0",
   "main": "expo-router/entry",
@@ -13,11 +13,11 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
-    "@goal-vault/api-client": "workspace:*",
-    "@goal-vault/config": "workspace:*",
-    "@goal-vault/contracts": "workspace:*",
-    "@goal-vault/contracts-sdk": "workspace:*",
-    "@goal-vault/shared": "workspace:*",
+    "@pocket-vault/api-client": "workspace:*",
+    "@pocket-vault/config": "workspace:*",
+    "@pocket-vault/contracts": "workspace:*",
+    "@pocket-vault/contracts-sdk": "workspace:*",
+    "@pocket-vault/shared": "workspace:*",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.5.2",
     "@reown/appkit": "^1.8.19",

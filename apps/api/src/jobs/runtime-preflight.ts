@@ -2,9 +2,10 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 import { readApiRuntimeEnv, type ApiPersistenceRuntimeCapabilities } from "../env";
+import { buildProductionActivationReadinessSummary } from "../modules/health/readiness.service";
 import {
   checkPostgresqlConnection,
   checkPostgresqlSchema,
@@ -23,7 +24,7 @@ interface ChainPreflightReport {
 }
 
 interface RuntimePreflightReport {
-  app: "goal-vault";
+  app: "pocket-vault";
   component: "api";
   status: PreflightStatus;
   generatedAt: string;
@@ -37,6 +38,7 @@ interface RuntimePreflightReport {
   dataDirExists: boolean;
   persistence: {
     driver: "sqlite" | "postgresql";
+    postgresqlDriver: "pg" | "neon";
     sqliteDataDir: string;
     postgresUrlConfigured: boolean;
     schemaName: string;
@@ -51,11 +53,15 @@ interface RuntimePreflightReport {
   indexerEnabled: boolean;
   analyticsEnabled: boolean;
   supportEnabled: boolean;
+  rollbackEvidenceAccepted: boolean;
+  smokeEvidenceAccepted: boolean;
+  limitedBetaScopeApproved: boolean;
   internalTokenConfigured: boolean;
   signedRequestMaxAgeSeconds: number;
   logLevel: string;
   primaryChainId: SupportedChainId | null;
   chains: ChainPreflightReport[];
+  productionActivation: ReturnType<typeof buildProductionActivationReadinessSummary>;
   validationErrors: string[];
 }
 
@@ -84,7 +90,7 @@ const resolveOutputPath = () => {
     return path.join(resolveRepositoryRoot(process.cwd()), configuredOutputPath);
   }
 
-  return path.join(resolveRepositoryRoot(process.cwd()), "artifacts", "goal-vault-api-preflight.json");
+  return path.join(resolveRepositoryRoot(process.cwd()), "artifacts", "pocket-vault-api-preflight.json");
 };
 
 const resolvePrimaryChainId = (environment: string): SupportedChainId | null => {
@@ -108,7 +114,10 @@ const buildRuntimePreflightReport = async (): Promise<RuntimePreflightReport> =>
   let missingTables: string[] = [];
 
   if (env.persistence.driver === "postgresql" && env.persistence.postgresConnectionString) {
-    const queryExecutor = createPostgresqlQueryExecutor({ connectionString: env.persistence.postgresConnectionString });
+    const queryExecutor = createPostgresqlQueryExecutor({
+      connectionString: env.persistence.postgresConnectionString,
+      driver: env.persistence.postgresqlDriver,
+    });
 
     try {
       await checkPostgresqlConnection(queryExecutor);
@@ -152,9 +161,10 @@ const buildRuntimePreflightReport = async (): Promise<RuntimePreflightReport> =>
       factoryAddress: chain.factoryAddress,
       startBlock: chain.startBlock,
     }));
+  const productionActivation = buildProductionActivationReadinessSummary(env);
 
   return {
-    app: "goal-vault",
+    app: "pocket-vault",
     component: "api",
     status: validationErrors.length > 0 ? "invalid" : "valid",
     generatedAt: new Date().toISOString(),
@@ -168,6 +178,7 @@ const buildRuntimePreflightReport = async (): Promise<RuntimePreflightReport> =>
     dataDirExists: existsSync(env.dataDir),
     persistence: {
       driver: env.persistence.driver,
+      postgresqlDriver: env.persistence.postgresqlDriver,
       sqliteDataDir: env.persistence.sqliteDataDir,
       postgresUrlConfigured: env.persistence.postgresUrlConfigured,
       schemaName: env.persistence.schemaName,
@@ -182,11 +193,15 @@ const buildRuntimePreflightReport = async (): Promise<RuntimePreflightReport> =>
     indexerEnabled: env.indexerEnabled,
     analyticsEnabled: env.analyticsEnabled,
     supportEnabled: env.supportEnabled,
+    rollbackEvidenceAccepted: env.rollbackEvidenceAccepted,
+    smokeEvidenceAccepted: env.smokeEvidenceAccepted,
+    limitedBetaScopeApproved: env.limitedBetaScopeApproved,
     internalTokenConfigured: Boolean(env.internalToken),
     signedRequestMaxAgeSeconds: env.signedRequestMaxAgeSeconds,
     logLevel: env.logLevel,
     primaryChainId,
     chains,
+    productionActivation,
     validationErrors,
   };
 };

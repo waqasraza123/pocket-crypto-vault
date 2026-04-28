@@ -23,10 +23,10 @@ const isWalletRejectedError = (error: unknown) => {
 
 const getUnlockErrorMessage = (error: unknown) => {
   if (isWalletRejectedError(error)) {
-    return "The wallet request was canceled before Goal Vault could update this rule.";
+    return "The wallet request was canceled before Pocket Vault could update this rule.";
   }
 
-  return error instanceof Error ? error.message : "Goal Vault could not update this rule right now.";
+  return error instanceof Error ? error.message : "Pocket Vault could not update this rule right now.";
 };
 
 const isActionAllowed = ({
@@ -441,7 +441,7 @@ export const useVaultUnlockFlow = (vault: VaultDetail | null) => {
           : state.status === "awaiting_wallet_confirmation"
             ? "Confirm the wallet request to update this vault rule."
             : state.status === "confirming" || state.status === "submitting"
-              ? "Goal Vault is confirming the latest vault rule update."
+              ? "Pocket Vault is confirming the latest vault rule update."
               : null,
     txHash: state.txHash,
     isBusy:

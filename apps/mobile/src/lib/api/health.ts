@@ -1,5 +1,5 @@
-import { parseHealthPayload, parseHealthResponse } from "@goal-vault/api-client";
-import type { HealthStatus } from "@goal-vault/shared";
+import { parseHealthPayload, parseHealthResponse } from "@pocket-vault/api-client";
+import type { HealthStatus } from "@pocket-vault/shared";
 
 import { fetchBackendJson } from "./client";
 
@@ -10,7 +10,7 @@ export const fetchApiHealth = async (): Promise<{
 }> => {
   const response = await fetchBackendJson({
     path: "/ready",
-    fallbackMessage: "Goal Vault services are not available right now.",
+    fallbackMessage: "Pocket Vault services are not available right now.",
     parse: parseHealthPayload,
   });
 

@@ -1,5 +1,5 @@
-import type { SupportedChainId, VaultAddress, VaultCreatedResolution } from "@goal-vault/shared";
-import { parseVaultCreatedResolution, readFactoryVaultAddresses } from "@goal-vault/contracts-sdk";
+import type { SupportedChainId, VaultAddress, VaultCreatedResolution } from "@pocket-vault/shared";
+import { parseVaultCreatedResolution, readFactoryVaultAddresses } from "@pocket-vault/contracts-sdk";
 import type { Address, TransactionReceipt } from "viem";
 
 import { getReadClient } from "../blockchain/read-client";

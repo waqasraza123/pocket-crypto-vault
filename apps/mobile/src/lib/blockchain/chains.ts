@@ -4,8 +4,8 @@ import {
   supportedChains,
   supportedViemChainList,
   supportedViemChains,
-} from "@goal-vault/config";
-import type { SupportedChain, SupportedChainId } from "@goal-vault/shared";
+} from "@pocket-vault/config";
+import type { SupportedChain, SupportedChainId } from "@pocket-vault/shared";
 
 export const goalVaultSupportedChainIds = supportedChainIds;
 export const goalVaultSupportedChains = supportedChains;

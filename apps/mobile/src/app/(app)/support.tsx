@@ -9,7 +9,7 @@ import {
   supportRequestPriorities,
   type SupportRequestCategory,
   type SupportRequestPriority,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import { FeedbackStatusCard, StateBanner } from "../../components/feedback";
 import { ScreenHeader } from "../../components/layout";
@@ -155,7 +155,7 @@ export default function SupportScreen() {
         ) : null}
         {status === "error" && errorMessage ? <StateBanner icon="alert-circle-outline" label={errorMessage} tone="warning" /> : null}
         {containsSecretLikeContent ? (
-          <StateBanner icon="shield-alert-outline" label={messages.pages.support.secretWarning} tone="danger" />
+          <StateBanner icon="shield-alert-outline" label={messages.pages.support.secretWarning} tone="warning" />
         ) : null}
         <SurfaceCard tone="accent" style={{ padding: spacing[5] }}>
           <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>

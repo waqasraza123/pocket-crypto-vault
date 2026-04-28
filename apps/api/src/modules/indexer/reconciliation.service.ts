@@ -6,7 +6,7 @@ import type {
   VaultMetadataPayload,
   VaultMetadataStatus,
   VaultReconciliationStatus,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 import { logObservabilitySignal } from "../../lib/observability/logger";

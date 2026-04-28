@@ -151,6 +151,76 @@ const requireOptionalDatabaseRuntimeReference = (driver) => {
   return reference;
 };
 
+const inspectSmokeResult = ({ reference, target }) => {
+  const result = readLocalJsonArtifact(reference, "BETA_READINESS_SMOKE_RESULT");
+
+  if (!result.inspected) {
+    return result;
+  }
+
+  const smoke = result.parsed;
+
+  if (smoke?.app !== "pocket-vault" || smoke?.component !== "production-v1-smoke") {
+    throw new Error("BETA_READINESS_SMOKE_RESULT must reference a Pocket Vault production smoke result.");
+  }
+
+  const evidence = {
+    inspected: true,
+    reference,
+    path: result.path,
+    target: smoke.target,
+    label: smoke.label,
+    healthOk: smoke.checks?.health?.ok === true,
+    readyOk: smoke.checks?.ready?.ok === true,
+    walletAddress: smoke.evidence?.walletAddress ?? null,
+    vaultAddress: smoke.evidence?.vaultAddress ?? null,
+    createTxHash: smoke.evidence?.createTxHash ?? null,
+    depositTxHash: smoke.evidence?.depositTxHash ?? null,
+    rulePath: smoke.evidence?.rulePath ?? null,
+    unlockRequestTxHash: smoke.evidence?.unlockRequestTxHash ?? null,
+    guardianDecisionTxHash: smoke.evidence?.guardianDecisionTxHash ?? null,
+    withdrawTxHash: smoke.evidence?.withdrawTxHash ?? null,
+    supportRequestId: smoke.evidence?.supportRequestId ?? null,
+    dashboardVerified: smoke.evidence?.dashboardVerified === true,
+    detailVerified: smoke.evidence?.detailVerified === true,
+    activityVerified: smoke.evidence?.activityVerified === true,
+    indexerVerified: smoke.evidence?.indexerVerified === true,
+    metadataReconciliationVerified: smoke.evidence?.metadataReconciliationVerified === true,
+    supportVerified: smoke.evidence?.supportVerified === true,
+  };
+  const failures = [];
+
+  if (evidence.target !== target) {
+    failures.push("smoke result target does not match beta readiness target");
+  }
+
+  if (!evidence.healthOk || !evidence.readyOk) {
+    failures.push("smoke result did not pass /health and /ready");
+  }
+
+  if (!evidence.walletAddress || !evidence.vaultAddress || !evidence.createTxHash || !evidence.depositTxHash) {
+    failures.push("smoke result must include wallet, vault, create, and deposit evidence");
+  }
+
+  if (!evidence.supportRequestId || !evidence.supportVerified) {
+    failures.push("smoke result must include support intake evidence");
+  }
+
+  if (!evidence.dashboardVerified || !evidence.detailVerified || !evidence.activityVerified) {
+    failures.push("smoke result must include dashboard, detail, and activity verification");
+  }
+
+  if (!evidence.indexerVerified || !evidence.metadataReconciliationVerified) {
+    failures.push("smoke result must include backend indexing and metadata reconciliation verification");
+  }
+
+  if (failures.length > 0) {
+    throw new Error(`Beta readiness requires accepted protected smoke evidence: ${failures.join("; ")}.`);
+  }
+
+  return evidence;
+};
+
 const inspectReleaseManifest = ({ reference, target }) => {
   const result = readLocalJsonArtifact(reference, "BETA_READINESS_RELEASE_MANIFEST");
 
@@ -160,8 +230,8 @@ const inspectReleaseManifest = ({ reference, target }) => {
 
   const manifest = result.parsed;
 
-  if (manifest?.app !== "goal-vault" || manifest?.component !== "release") {
-    throw new Error("BETA_READINESS_RELEASE_MANIFEST must reference a Goal Vault release manifest.");
+  if (manifest?.app !== "pocket-vault" || manifest?.component !== "release") {
+    throw new Error("BETA_READINESS_RELEASE_MANIFEST must reference a Pocket Vault release manifest.");
   }
 
   const evidence = {
@@ -200,8 +270,8 @@ const inspectPreflightReport = ({ reference, target, persistenceDriver }) => {
   const report = result.parsed;
   const persistence = report?.persistence;
 
-  if (report?.app !== "goal-vault" || report?.component !== "api") {
-    throw new Error("BETA_READINESS_PREFLIGHT_REPORT must reference a Goal Vault API preflight report.");
+  if (report?.app !== "pocket-vault" || report?.component !== "api") {
+    throw new Error("BETA_READINESS_PREFLIGHT_REPORT must reference a Pocket Vault API preflight report.");
   }
 
   if (!persistence || typeof persistence !== "object") {
@@ -218,6 +288,7 @@ const inspectPreflightReport = ({ reference, target, persistenceDriver }) => {
     publicBaseUrl: report.publicBaseUrl ?? null,
     primaryChainId: report.primaryChainId ?? null,
     supportEnabled: report.supportEnabled ?? null,
+    productionActivation: report.productionActivation ?? null,
     persistence: {
       driver: persistence.driver,
       runtimeReady: persistence.runtimeReady,
@@ -265,6 +336,14 @@ const inspectPreflightReport = ({ reference, target, persistenceDriver }) => {
     }
   }
 
+  if (target === "production") {
+    if (!evidence.productionActivation || typeof evidence.productionActivation !== "object") {
+      failures.push("preflight is missing production activation gates");
+    } else if (evidence.productionActivation.safeForLimitedBetaTraffic !== true) {
+      failures.push("production activation gates are not safe for limited beta traffic");
+    }
+  }
+
   if (failures.length > 0) {
     throw new Error(`Beta readiness requires accepted API preflight evidence: ${failures.join("; ")}.`);
   }
@@ -281,8 +360,8 @@ const inspectTrafficPlan = ({ reference, target, releaseManifestReference, prefl
 
   const trafficPlan = result.parsed;
 
-  if (trafficPlan?.app !== "goal-vault" || trafficPlan?.component !== "api-traffic-plan") {
-    throw new Error("BETA_READINESS_TRAFFIC_PLAN must reference a Goal Vault API traffic plan.");
+  if (trafficPlan?.app !== "pocket-vault" || trafficPlan?.component !== "api-traffic-plan") {
+    throw new Error("BETA_READINESS_TRAFFIC_PLAN must reference a Pocket Vault API traffic plan.");
   }
 
   const evidence = {
@@ -361,8 +440,8 @@ const inspectDatabaseRuntimePlan = ({
 
   const plan = result.parsed;
 
-  if (plan?.app !== "goal-vault" || plan?.component !== "api-managed-database-runtime-plan") {
-    throw new Error("BETA_READINESS_DATABASE_RUNTIME_PLAN must reference a Goal Vault managed database runtime plan.");
+  if (plan?.app !== "pocket-vault" || plan?.component !== "api-managed-database-runtime-plan") {
+    throw new Error("BETA_READINESS_DATABASE_RUNTIME_PLAN must reference a Pocket Vault managed database runtime plan.");
   }
 
   const evidence = {
@@ -445,6 +524,7 @@ const releaseManifest = requireReference("BETA_READINESS_RELEASE_MANIFEST");
 const preflightReport = requireReference("BETA_READINESS_PREFLIGHT_REPORT");
 const trafficPlan = requireReference("BETA_READINESS_TRAFFIC_PLAN");
 const databaseRuntimePlan = requireOptionalDatabaseRuntimeReference(persistenceDriver);
+const smokeResult = requireReference("BETA_READINESS_SMOKE_RESULT");
 const sourceSnapshot = requireReference("BETA_READINESS_SOURCE_SNAPSHOT");
 const rollbackSnapshot = requireReference("BETA_READINESS_ROLLBACK_SNAPSHOT");
 const observeMinutes = requirePositiveInteger("BETA_READINESS_OBSERVE_MINUTES", "30");
@@ -452,6 +532,7 @@ const supportReference = requireText("BETA_READINESS_SUPPORT_REFERENCE");
 
 const releaseEvidence = inspectReleaseManifest({ reference: releaseManifest, target });
 const preflightEvidence = inspectPreflightReport({ reference: preflightReport, target, persistenceDriver });
+const smokeEvidence = inspectSmokeResult({ reference: smokeResult, target });
 
 if (supportReference.includes("/support") && preflightEvidence.inspected && preflightEvidence.supportEnabled !== true) {
   throw new Error("BETA_READINESS_SUPPORT_REFERENCE points to /support but API preflight does not show support intake enabled.");
@@ -474,7 +555,7 @@ const databaseRuntimeEvidence = inspectDatabaseRuntimePlan({
 });
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "beta-readiness-plan",
   target,
   readinessLabel,
@@ -492,6 +573,7 @@ const plan = {
     preflightReport,
     trafficPlan,
     databaseRuntimePlan,
+    smokeResult,
     sourceSnapshot,
     rollbackSnapshot,
   },
@@ -512,12 +594,14 @@ const plan = {
     preflight: preflightEvidence,
     trafficPlan: trafficEvidence,
     databaseRuntimePlan: databaseRuntimeEvidence,
+    smokeResult: smokeEvidence,
   },
   acceptanceGates: [
     "Release manifest target, app URL, API URL, API image, and rollback image are reviewed.",
     "API preflight is valid for the beta target.",
     "API traffic plan is a promotion plan with candidate and rollback URLs.",
     "Managed database runtime plan is accepted when PostgreSQL persistence is selected.",
+    "Protected production smoke evidence includes create, deposit, support, dashboard, detail, activity, indexer, and metadata checks.",
     "Source and rollback snapshots are available in approved operational storage.",
     "Participant limit, per-vault USDC limit, support route, and incident owner are recorded.",
     "Rollback procedure is reviewed before any beta invitations are sent.",
@@ -533,7 +617,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-beta-readiness-${target}-${readinessLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-beta-readiness-${target}-${readinessLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

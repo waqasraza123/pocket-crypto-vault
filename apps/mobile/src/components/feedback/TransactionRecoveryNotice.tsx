@@ -1,4 +1,4 @@
-import type { TransactionRecoveryRecord } from "@goal-vault/shared";
+import type { TransactionRecoveryRecord } from "@pocket-vault/shared";
 
 import { useI18n } from "../../lib/i18n";
 import { RecoveryNotice } from "./RecoveryNotice";

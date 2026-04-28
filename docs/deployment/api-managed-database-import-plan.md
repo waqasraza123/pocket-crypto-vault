@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Import Plan
+# Pocket Vault API Managed Database Import Plan
 
 ## Purpose
 The API managed database import plan turns a reviewed managed database export bundle into an operator-facing PostgreSQL import SQL artifact and JSON execution plan.
@@ -16,8 +16,18 @@ It does not connect to PostgreSQL, use credentials, apply schema, import rows, r
   - manual staging or production workflow
   - can download a prior export artifact by run ID or use a runner-local export path
   - uploads the import plan and SQL artifacts
+- `scripts/execute-api-managed-database-import.mjs`
+  - reads a reviewed import plan plus verified JSONL export bundle
+  - connects to PostgreSQL with `API_DATABASE_URL`
+  - upserts all managed database tables inside one transaction
+  - writes a redacted import execution result artifact
+- `.github/workflows/api-managed-database-import-execute.yml`
+  - approval-gated staging or production workflow
+  - requires `confirm_execute=import`
+  - downloads the import plan and export bundle artifacts before execution
 - `package.json`
   - exposes `pnpm api:database:import:plan`
+  - exposes `pnpm api:database:import:execute`
 
 ## Required Inputs
 - `API_DATABASE_IMPORT_TARGET`
@@ -51,11 +61,13 @@ Do not put database connection strings, passwords, API tokens, RPC URLs, or priv
 
 `API_DATABASE_IMPORT_TARGET_REFERENCE` is intentionally a non-secret label. The generated SQL is only an artifact. Operators run it later through approved provider access with credentials outside this repository.
 
+Import execution uses `API_DATABASE_URL` only from protected runtime secrets. Execution result artifacts record row counts and checksums, but never record connection strings.
+
 ## Generated Artifacts
 The script writes:
 
-- `goal-vault-api-database-import-<target>-<label>.json`
-- `goal-vault-api-database-import-<target>-<label>.sql`
+- `pocket-vault-api-database-import-<target>-<label>.json`
+- `pocket-vault-api-database-import-<target>-<label>.sql`
 
 The JSON plan records:
 
@@ -83,8 +95,8 @@ The SQL artifact:
 - upserts by primary key so retry runs are deterministic
 - reports current table row counts after each import
 
-## psql Execution Shape
-Operators should review and copy the generated SQL into the approved operational procedure.
+## Execution Shape
+Operators can either run the generated SQL through approved provider access or use the guarded repository execution workflow.
 
 The SQL expects these psql variables:
 
@@ -103,10 +115,18 @@ psql "$APPROVED_DATABASE_URL" \
   -v sync_states_jsonl=/approved/export/sync_states.jsonl \
   -v analytics_events_jsonl=/approved/export/analytics_events.jsonl \
   -v support_requests_jsonl=/approved/export/support_requests.jsonl \
-  -f goal-vault-api-database-import-staging-v0.1.0-db-import.sql
+  -f pocket-vault-api-database-import-staging-v0.1.0-db-import.sql
 ```
 
 Do not store the connection string in repository files, workflow inputs, release manifests, or import plans.
+
+The guarded workflow path is:
+
+1. Run `API Managed Database Import Plan`.
+2. Review the generated plan, SQL, source export manifest, and schema evidence.
+3. Run `API Managed Database Import Execute`.
+4. Provide the import plan artifact, export artifact, run IDs, target reference, and `confirm_execute=import`.
+5. Download the execution result artifact and keep it with release evidence.
 
 ## GitHub Workflow Usage
 Run `API Managed Database Import Plan` manually.
@@ -128,7 +148,7 @@ Use this import plan after export bundle review:
 5. Generate this import plan and SQL artifact.
 6. Provision the PostgreSQL target outside this repository.
 7. Apply the schema SQL through approved operational access.
-8. Run the import SQL through approved operational access.
+8. Run the import through approved operational access or `API Managed Database Import Execute`.
 9. Generate or review the managed database parity plan.
 10. Run parity queries before API traffic movement.
 
@@ -142,4 +162,4 @@ Rollback or abort the import when:
 - `/ready` reports blocked checks after managed database runtime configuration
 
 ## Boundary
-This phase creates an import execution artifact. Credential handling, actual import execution, provider provisioning, runtime adapter changes, live parity automation, and traffic movement remain deferred until a managed database provider and driver are selected.
+The planning workflow remains non-mutating. The execution workflow mutates the selected PostgreSQL target only when protected environment approval, `API_DATABASE_URL`, reviewed artifacts, and `confirm_execute=import` are present.

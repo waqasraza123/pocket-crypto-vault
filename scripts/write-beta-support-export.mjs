@@ -137,8 +137,8 @@ const readSnapshotManifest = (snapshotSource) => {
   const manifestPath = findManifestPath(snapshotSource);
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
 
-  if (manifest.app !== "goal-vault" || manifest.component !== "api-data") {
-    throw new Error("Snapshot manifest must be a Goal Vault API data snapshot.");
+  if (manifest.app !== "pocket-vault" || manifest.component !== "api-data") {
+    throw new Error("Snapshot manifest must be a Pocket Vault API data snapshot.");
   }
 
   if (!Array.isArray(manifest.files) || manifest.files.length === 0) {
@@ -406,7 +406,7 @@ const summaryPath = path.join(outputDir, "support-summary.json");
 writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`);
 
 const manifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "beta-support-export",
   target,
   label,

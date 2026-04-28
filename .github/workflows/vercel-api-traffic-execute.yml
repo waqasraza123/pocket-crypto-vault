@@ -1,0 +1,106 @@
+name: Vercel API Traffic Execute
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Backend environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      execution_label:
+        description: Stable execution label.
+        type: string
+        required: true
+      command_plan_artifact:
+        description: Vercel API traffic command plan artifact to download.
+        type: string
+        required: true
+      command_plan_run_id:
+        description: Workflow run ID that produced command_plan_artifact.
+        type: string
+        required: true
+      production_domain:
+        description: Current production API domain.
+        type: string
+        required: true
+      operator:
+        description: Operator or team responsible for execution.
+        type: string
+        required: false
+      confirm_execute:
+        description: Type execute to move Vercel API traffic.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: vercel-api-traffic-execute-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  VERCEL_API_TRAFFIC_EXECUTION_TARGET: ${{ inputs.target }}
+  VERCEL_API_TRAFFIC_EXECUTION_LABEL: ${{ inputs.execution_label }}
+  VERCEL_API_PRODUCTION_DOMAIN: ${{ inputs.production_domain }}
+  VERCEL_API_TRAFFIC_OPERATOR: ${{ inputs.operator }}
+  VERCEL_API_TRAFFIC_CONFIRM_EXECUTE: ${{ inputs.confirm_execute }}
+  VERCEL_API_TRAFFIC_EXECUTION_DIR: artifacts/vercel-traffic-execute
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  vercel-api-traffic-execute:
+    name: Execute ${{ inputs.target }} Vercel API traffic
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_execute != 'execute' }}
+        run: |
+          echo "Traffic execution requires confirm_execute=execute."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Download Vercel command plan artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.command_plan_artifact }}
+          run-id: ${{ inputs.command_plan_run_id }}
+          github-token: ${{ github.token }}
+          path: artifacts/vercel-command-plan
+
+      - name: Resolve command plan path
+        id: command-plan
+        shell: bash
+        run: |
+          command_plan="$(find artifacts/vercel-command-plan -name '*.json' -type f | head -n 1)"
+          if [ -z "$command_plan" ] || [ ! -f "$command_plan" ]; then
+            echo "Vercel command plan JSON was not found."
+            exit 1
+          fi
+          echo "command_plan=$command_plan" >> "$GITHUB_OUTPUT"
+
+      - name: Execute Vercel API traffic
+        id: traffic-execute
+        env:
+          VERCEL_API_TRAFFIC_COMMAND_PLAN: ${{ steps.command-plan.outputs.command_plan }}
+        run: pnpm api:traffic:vercel:execute
+
+      - name: Upload Vercel traffic execution result
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-vercel-api-traffic-execute-${{ inputs.target }}
+          path: ${{ steps.traffic-execute.outputs.result_path }}
+          if-no-files-found: error

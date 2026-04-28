@@ -28,4 +28,4 @@ COPY packages/shared ./packages/shared
 
 EXPOSE 3001
 
-CMD ["pnpm", "--filter", "@goal-vault/api", "start"]
+CMD ["pnpm", "--filter", "@pocket-vault/api", "start"]

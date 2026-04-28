@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { PostTransactionRefreshState, SyncFreshnessSnapshot } from "@goal-vault/shared";
+import type { PostTransactionRefreshState, SyncFreshnessSnapshot } from "@pocket-vault/shared";
 
 import { useI18n } from "../lib/i18n";
 import { getVaultDegradedState } from "../lib/sync/freshness";

@@ -3,8 +3,8 @@ import {
   parseActivityFeedResponse,
   parseVaultActivityPayload,
   parseVaultActivityResponse,
-} from "@goal-vault/api-client";
-import type { SupportedChainId, VaultActivityItem } from "@goal-vault/shared";
+} from "@pocket-vault/api-client";
+import type { SupportedChainId, VaultActivityItem } from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 import { fetchBackendJson } from "./client";

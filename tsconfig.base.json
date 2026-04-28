@@ -13,10 +13,10 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@goal-vault/shared": ["packages/shared/src/index.ts"],
-      "@goal-vault/api-client": ["packages/api-client/src/index.ts"],
-      "@goal-vault/contracts-sdk": ["packages/contracts-sdk/src/index.ts"],
-      "@goal-vault/config": ["packages/config/src/index.ts"]
+      "@pocket-vault/shared": ["packages/shared/src/index.ts"],
+      "@pocket-vault/api-client": ["packages/api-client/src/index.ts"],
+      "@pocket-vault/contracts-sdk": ["packages/contracts-sdk/src/index.ts"],
+      "@pocket-vault/config": ["packages/config/src/index.ts"]
     }
   }
 }

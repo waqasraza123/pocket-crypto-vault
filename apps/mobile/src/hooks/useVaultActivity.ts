@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { SyncFreshnessSnapshot, VaultActivityItem } from "@goal-vault/shared";
+import type { SyncFreshnessSnapshot, VaultActivityItem } from "@pocket-vault/shared";
 
 import { fetchOwnerActivityFeed } from "../lib/api/activity";
 import { mergeOwnerActivityFeed } from "../lib/data/source-of-truth";

@@ -33,7 +33,7 @@ on:
         required: false
         default: goal_vault_api
       driver_package:
-        description: Planned Node PostgreSQL driver package.
+        description: Planned Node PostgreSQL driver package, such as pg or @neondatabase/serverless.
         type: string
         required: true
       database_plan:
@@ -159,6 +159,6 @@ jobs:
       - name: Upload API managed database runtime plan
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-managed-database-runtime-${{ inputs.target }}-${{ inputs.mode }}
+          name: pocket-vault-api-managed-database-runtime-${{ inputs.target }}-${{ inputs.mode }}
           path: ${{ steps.runtime.outputs.plan_path }}
           if-no-files-found: error

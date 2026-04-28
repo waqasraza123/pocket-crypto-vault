@@ -1,4 +1,4 @@
-import type { TransactionRecoveryRecord } from "@goal-vault/shared";
+import type { TransactionRecoveryRecord } from "@pocket-vault/shared";
 
 import { getTransactionRecoveryCopy } from "./copy";
 

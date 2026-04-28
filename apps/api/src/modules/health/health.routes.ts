@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import type { HealthResponse, ServiceHealthResponse } from "@goal-vault/api-client";
+import type { HealthResponse, ServiceHealthResponse } from "@pocket-vault/api-client";
 
 import type { ApiRuntimeEnv } from "../../env";
 import type { IndexerContext } from "../indexer/context";

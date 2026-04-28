@@ -5,7 +5,7 @@ import type {
   ErrorClass,
   TransactionFlow,
   TransactionLifecycleEvent,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 type TrackEvent = <Name extends AnalyticsEventName>(
   name: Name,

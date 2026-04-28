@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
-import type { TransactionRecoveryRecord, TransactionRecoveryState } from "@goal-vault/shared";
+import type { TransactionRecoveryRecord, TransactionRecoveryState } from "@pocket-vault/shared";
 
 import { createConnectionAnalyticsContext, trackTransactionLifecycle } from "../lib/analytics";
 import { saveVaultMetadata } from "../lib/api/vaults";
@@ -123,7 +123,7 @@ export const useTransactionRecovery = ({
                 chainId: item.chainId,
                 ownerWallet: item.ownerAddress,
                 createdTxHash: item.txHash,
-                displayName: item.metadata.displayName ?? "Goal Vault",
+                displayName: item.metadata.displayName ?? "Pocket Vault",
                 category: item.metadata.category ?? undefined,
                 note: item.metadata.note ?? undefined,
                 accentTheme: item.metadata.accentTheme ?? undefined,
@@ -140,7 +140,7 @@ export const useTransactionRecovery = ({
                   chainId: item.chainId,
                   ownerWallet: item.ownerAddress,
                   createdTxHash: item.txHash,
-                  displayName: item.metadata.displayName ?? "Goal Vault",
+                  displayName: item.metadata.displayName ?? "Pocket Vault",
                   category: item.metadata.category ?? undefined,
                   note: item.metadata.note ?? undefined,
                   accentTheme: item.metadata.accentTheme ?? undefined,

@@ -1,4 +1,4 @@
-# Goal Vault API Traffic Plan
+# Pocket Vault API Traffic Plan
 
 ## Purpose
 The API traffic plan records exactly how an operator intends to promote, roll back, or disable public API traffic.
@@ -81,11 +81,11 @@ API_TRAFFIC_ACTION=promote \
 API_TRAFFIC_PLAN_LABEL=v0.1.0-rc.1 \
 API_TRAFFIC_CANDIDATE_URL=https://candidate-api.example.com \
 API_TRAFFIC_ROLLBACK_URL=https://previous-api.example.com \
-API_TRAFFIC_API_IMAGE=ghcr.io/example/goal-vault-api:staging-abc123 \
-API_TRAFFIC_ROLLBACK_API_IMAGE=ghcr.io/example/goal-vault-api:staging-previous \
-API_TRAFFIC_RELEASE_MANIFEST=goal-vault-release-staging-v0.1.0-rc.1 \
-API_TRAFFIC_PREFLIGHT_REPORT=goal-vault-api-preflight-staging \
-API_TRAFFIC_DATA_SNAPSHOT=goal-vault-api-data-snapshot-staging-20260427 \
+API_TRAFFIC_API_IMAGE=ghcr.io/example/pocket-vault-api:staging-abc123 \
+API_TRAFFIC_ROLLBACK_API_IMAGE=ghcr.io/example/pocket-vault-api:staging-previous \
+API_TRAFFIC_RELEASE_MANIFEST=pocket-vault-release-staging-v0.1.0-rc.1 \
+API_TRAFFIC_PREFLIGHT_REPORT=pocket-vault-api-preflight-staging \
+API_TRAFFIC_DATA_SNAPSHOT=pocket-vault-api-data-snapshot-staging-20260427 \
 pnpm api:traffic:plan
 ```
 
@@ -128,7 +128,7 @@ Use the traffic plan after the supporting artifacts exist:
 8. Generate the managed database import plan when persistence is changing.
 9. Import data through the selected provider or future migration tool when persistence is changing.
 10. Generate the managed database parity plan when persistence is changing.
-11. Keep `API_PERSISTENCE_DRIVER=sqlite` until the PostgreSQL runtime adapter exists and has passed preflight.
+11. Keep `API_PERSISTENCE_DRIVER=sqlite` until PostgreSQL runtime preflight, parity, rollback, and activation evidence are accepted.
 12. Generate the release manifest.
 13. Generate the API traffic plan.
 14. When generating a managed database runtime cutover plan, prefer passing the downloaded traffic plan JSON file path so local evidence validation can confirm target, action, image, release manifest, and preflight alignment.

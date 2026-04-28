@@ -81,7 +81,7 @@ const resolveFactoryAddress = () => {
 
 const latestBroadcastResult = readBroadcastResult();
 const manifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "contracts",
   contract: "GoalVaultFactory",
   target,
@@ -96,7 +96,7 @@ const manifest = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-factory-${target}-${manifest.chainId}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-factory-${target}-${manifest.chainId}.json`);
 writeFileSync(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 const githubOutput = process.env.GITHUB_OUTPUT;
@@ -108,7 +108,7 @@ if (githubOutput) {
 }
 
 const existingManifests = readdirSync(outputDir)
-  .filter((fileName) => fileName.startsWith("goal-vault-factory-"))
+  .filter((fileName) => fileName.startsWith("pocket-vault-factory-"))
   .sort();
 
 console.log(JSON.stringify({ outputPath, manifests: existingManifests }, null, 2));

@@ -249,7 +249,7 @@ const targetReference = requireNonSecretReference("API_DATABASE_TARGET_REFERENCE
 const observeMinutes = requirePositiveInteger("API_DATABASE_OBSERVE_MINUTES", "30");
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-plan",
   target,
   engine,
@@ -303,7 +303,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-api-database-${target}-${planLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-api-database-${target}-${planLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

@@ -1,7 +1,7 @@
 import type { Address, PublicClient } from "viem";
 
 import { erc20Abi } from "../abi";
-import type { TokenReadResult } from "@goal-vault/shared";
+import type { TokenReadResult } from "@pocket-vault/shared";
 
 export const readErc20Balance = async ({
   client,

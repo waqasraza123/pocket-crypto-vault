@@ -1,12 +1,35 @@
 # Project State
 
 ## Product
-Goal Vault is a Base-native USDC savings product where a user creates a named vault for one specific goal, deposits over time, and can only withdraw when the vault's unlock rule allows it.
+Pocket Vault is a Base-native USDC pocket-money savings product for 18+ college and university students starting with crypto. A student creates a named vault for one specific emergency or student-life goal, deposits over time, and can only withdraw when the vault's unlock rule allows it.
 
 Core promise:
-- Create a vault for one goal.
-- Lock it with rules.
-- Protect the money from impulse withdrawals.
+- Save pocket money in crypto.
+- Lock it with clear rules.
+- Protect emergency savings from impulse withdrawals.
+
+## Current Functional State
+Pocket Vault is functionally a wallet-first savings app with real onchain vault flows, API-backed indexing, and beta operations support.
+
+User-facing product state:
+- Public users can view the landing page, How It Works, and Security surfaces before connecting a wallet.
+- Connected users can use Base or Base Sepolia configurations, see unsupported-network and degraded-state messaging, and recover from interrupted transaction flows.
+- Users can create a goal vault with a goal name, target USDC amount, optional category or note, visual accent metadata, and a withdrawal rule.
+- The implemented rule set supports time-lock, cooldown unlock, and guardian approval flows across app, contract reads/writes, backend indexing, and activity display.
+- Vault metadata is signed by the owner and tied to the creation transaction; metadata failures are surfaced without pretending the onchain vault failed.
+- Users can view their vault dashboard, vault detail, saved amount, target progress, lock state, and recent activity through API-enriched reads with chain/session fallbacks.
+- Users can deposit USDC after balance and allowance checks; approval and deposit confirmations refresh vault and activity state.
+- Users can withdraw only when the selected rule allows it. Time-lock vaults wait for the unlock date, cooldown vaults require an unlock request and cooldown maturity, and guardian vaults require the assigned guardian approval path.
+- Users can see an activity timeline for vault creation, deposits, withdrawals, unlock requests, cooldown events, and guardian decisions when indexed or locally confirmed.
+- Beta users can submit structured support requests from the app with wallet, vault, runtime, priority, and issue category context.
+- Product copy and identity now position the app as Pocket Vault for student pocket-money savings while keeping the existing Base, USDC, wallet-first vault behavior.
+
+Operator-facing product state:
+- The API exposes health and readiness surfaces, internal sync triggers, enriched vault/activity reads, analytics ingestion, support intake, and internal support triage.
+- Backend persistence runs through typed ports with SQLite as the local/default durable store and PostgreSQL runtime support available when schema, credentials, and preflight gates are accepted.
+- Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, and production smoke evidence.
+- Production activation readiness now has explicit runtime gates for PostgreSQL cutover, protected smoke evidence, rollback evidence, support, analytics, and limited beta scope in API preflight and `/ready`.
+- Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover, traffic movement, and provider-specific public API disablement automation remain unexecuted/deferred.
 
 ## Current Repository Reality
 The repository now has a real v1 foundation:
@@ -30,18 +53,19 @@ The repository now has a real v1 foundation:
 - release manifest workflow for promotion records and rollback pointers
 - API data snapshot and restore tooling for the current SQLite-backed persistence layer
 - API runtime preflight tooling for redacted staging and production environment validation
-- API persistence runtime guardrails that keep SQLite explicit and block PostgreSQL mode until an adapter exists
+- API persistence runtime guardrails that keep SQLite explicit and require accepted PostgreSQL schema/runtime evidence before managed database cutover
 - centralized API persistence store construction for the current SQLite indexer and analytics stores
 - typed API persistence ports for indexer records, sync state, and analytics batches
-- asynchronous API persistence read boundary for future external database adapters
-- inactive PostgreSQL persistence store core behind the same API ports
-- transaction-aware PostgreSQL query executor boundary for future driver wiring
-- driver-neutral pooled PostgreSQL executor boundary for future connection lifecycle wiring
+- asynchronous API persistence read boundary for external database adapters
+- PostgreSQL persistence store core behind the same API ports
+- transaction-aware PostgreSQL query executor boundary for driver wiring
+- driver-neutral pooled PostgreSQL executor boundary for connection lifecycle wiring
 - API persistence lifecycle shutdown boundary for server and one-shot job contexts
 - redacted API persistence capability reporting for PostgreSQL runtime activation gates
 - local API preflight evidence validation for managed database runtime cutover planning
 - local release and traffic artifact evidence validation for managed database runtime cutover planning
 - PostgreSQL API runtime adapter, store factory wiring, and redacted preflight connection/schema checks behind the existing persistence ports
+- selectable PostgreSQL runtime client with `pg` by default and Neon through `API_POSTGRES_DRIVER=neon`
 - provider-neutral limited beta readiness artifact tying together release, preflight, traffic, persistence, rollback, support, and audience-limit evidence
 - beta support intake across the app and API with durable SQLite/PostgreSQL persistence for structured real-user issue reports
 - operator-only beta support triage API for listing, reading, and updating support request status through internal access
@@ -49,16 +73,21 @@ The repository now has a real v1 foundation:
 - beta data retention plan artifacts covering support, snapshots, analytics, exports, logs, incidents, deletion requests, and legal holds
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
 - Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote or rollback commands without moving traffic
+- guarded Vercel API traffic execution workflow for reviewed promote and rollback command plans
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
 - provider-neutral managed database export bundles that convert API data snapshots into JSONL handoff files
 - provider-neutral managed database import plan artifacts that turn export bundles into PostgreSQL import SQL handoffs
 - provider-neutral managed database parity plan artifacts for restore and pre-traffic comparison review
 - provider-neutral managed database runtime activation plan artifacts before PostgreSQL mode is enabled
+- guarded PostgreSQL schema apply, JSONL import execution, and parity execution workflows behind protected credentials and explicit confirmations
+- guarded production v1 smoke workflow for public API health/readiness checks and operator-recorded create/deposit/withdraw/support evidence
+- production activation readiness gates that block ambiguous production SQLite mode, reject mixed SQLite/PostgreSQL runtime env, and require accepted smoke, rollback, and beta scope evidence before limited beta traffic
+- production activation, production cutover, production smoke, limited beta, and rollback runbooks under `docs/plans/`
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- execution of hosting-provider backend promotion, automated provider-specific traffic rollback, accepted managed database schema/import/parity execution, production PostgreSQL traffic cutover, and rollback operation
+- provider-specific public API disablement automation and live production execution of the approved database cutover and traffic movement procedures
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -67,6 +96,7 @@ Still not implemented:
 - One owner per vault
 - Private vault metadata by default
 - No yield, swaps, multi-asset support, multi-chain support, social layer, or AI features in MVP
+- Audience is 18+ college and university students; the product stays adult, calm, and emergency-first.
 
 ## Planned Release Order
 - `v1`: time-lock vaults only, followed by release hardening, staging readiness, launch-candidate presentation polish, deployment packaging, and final demo or case-study support
@@ -83,6 +113,7 @@ Still not implemented:
 
 ## Product Principles
 - Goal-first, not protocol-first
+- Student pocket-money first, not generic finance
 - Calm, premium, non-speculative UX
 - Easy deposits, serious withdrawals
 - Minimal but polished UI with strong hierarchy
@@ -152,6 +183,7 @@ Still not implemented:
 - Phase 46: Vercel API traffic command artifacts for provider-specific promotion and rollback handoff without automatic traffic movement
 - Phase 47: beta support export artifacts for offline operator review without live database access or support status mutation
 - Phase 48: beta data retention plan artifacts for real-audience private data handling before broader beta expansion
+- Phase 49: production v1 completion with CI blocker fixes, guarded PostgreSQL schema/import/parity execution, and guarded Vercel promote/rollback execution
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -200,17 +232,17 @@ Still not implemented:
 - Phase 8 updates the near-term roadmap order so demo polish and packaging land before cooldown unlock and guardian expansion.
 - Phase 9 centralizes deployment env handling, moves Expo packaging to environment-aware app config, separates API liveness from readiness, and adds repo-local launch documentation.
 - Phase 10 keeps real product behavior honest while adding guided presentation paths, stronger screenshot states, and repo-local demo artifacts.
-- Phase 12 refreshes the universal app with brighter layered tokens, app-owned motion primitives, reduced-motion handling, and Apple-like polish translated into an original Goal Vault visual system.
+- Phase 12 refreshes the universal app with brighter layered tokens, app-owned motion primitives, reduced-motion handling, and Apple-like polish translated into an original Pocket Vault visual system.
 - Phase 12 initially kept the existing Expo React Native styling model and a small shared `Animated`-based motion layer, but the mobile marketing refresh now adopts NativeWind v5 preview with Tailwind CSS v4 for production-grade public mobile surfaces.
 - NativeWind is configured in `apps/mobile` with CSS-first tokens in `global.css`, a root `_layout.tsx` CSS import, `react-native-css`, and `withNativewind` wrapping Metro while preserving the required `valtio` resolver alias.
 - The current public mobile visual direction uses deep slate foundations, vibrant blue, cyan, emerald, and fuchsia accents, tighter radii, modern shadows, compact mobile spacing, and avoids Apple-like glass or decorative blob-heavy mobile layouts.
 - The compact public homepage keeps the footer inside the scroll content, removes mobile decorative hero circles, and uses dense below-hero content sections to avoid the previous oversized empty scroll region.
-- The current mobile UI polish direction is documented in `docs/plans/goal-vault-mobile-ui-polish.md`, including reusable feedback surfaces, icon-led cards, semantic accent usage, RTL layout expectations, and empty-state treatment.
+- The current mobile UI polish direction is documented in `docs/plans/pocket-vault-mobile-ui-polish.md`, including reusable feedback surfaces, icon-led cards, semantic accent usage, RTL layout expectations, and empty-state treatment.
 - Phase 11 adds a typed analytics boundary in the universal app, lean API-side event ingestion, structured backend observability signals, and post-launch metric definitions without collecting freeform private vault content.
 - Phase 13 makes the API-backed read model the default product path for dashboard, detail, and activity, while keeping chain reads limited to correctness fallbacks and session overlays limited to in-flight recovery.
 - Phase 13 centralizes frontend merge logic for backend, chain, and session state so create, deposit, withdraw, and recovery refresh the same product surfaces consistently.
 - Phase 14 removes unused authenticated mocks, dead wrapper modules, and duplicate backend freshness helpers so the repository reads as a cleaner production codebase instead of layered phase scaffolding.
-- Phase 15 completes the original Goal Vault rule system with generalized rule typing, backward-aware vault reads, cooldown unlock, guardian approval, and rule-aware activity or API responses.
+- Phase 15 completes the original Pocket Vault rule system with generalized rule typing, backward-aware vault reads, cooldown unlock, guardian approval, and rule-aware activity or API responses.
 - Phase 15 keeps the existing legacy time-lock summary read path available while introducing richer rule-state reads and `VaultCreatedV2` for new deployments so old time-lock vaults can still be rendered cleanly.
 - Phase 17 adds GitHub Actions CI and manual release-candidate verification for staging and production artifact checks.
 - Phase 18 adds guarded Foundry deployment automation for `GoalVaultFactory` on Base Sepolia and Base mainnet.
@@ -258,67 +290,72 @@ Still not implemented:
 - Support export artifacts are private operational data and must not be committed, attached to public issues, or copied into public release notes.
 - Phase 48 adds a beta data retention plan artifact that records retention windows, data classes, deletion request flow, legal-hold flow, and operator review checks without reading live data or deleting records.
 - Beta data retention plans are planning artifacts only; provider-specific deletion procedures and public privacy policy language remain separate approval tracks.
-- Product docs live in `docs/product/goal-vault/`:
+- Phase 49 fixes API support route runtime exports and SQLite row typing so CI can cover beta support intake and triage.
+- Phase 49 adds guarded managed database execution scripts and workflows for schema apply, JSONL import, and parity comparison. These workflows require protected `API_DATABASE_URL` plus explicit confirmation inputs and write redacted execution result artifacts.
+- Phase 49 adds guarded Vercel API traffic execution for reviewed promote and rollback command plans. Disablement remains manual-only until the selected Vercel routing policy is explicit.
+- Phase 49 adds a production v1 smoke artifact workflow that checks public API `/health` and `/ready` and records operator-provided create, deposit, withdraw, vault, wallet, and support evidence without sending chain transactions.
+- Phase 50 adds production-only Neon readiness through `API_POSTGRES_DRIVER=neon`, `@neondatabase/serverless`, and `ws` while keeping the existing API persistence tables and `API_DATABASE_URL` secret boundary.
+- Product docs live in `docs/product/pocket-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
   - `execution-plan.md` for the build-ready implementation map
-- The Phase 0 engineering spec lives at `docs/plans/goal-vault-phase-0.md`.
-- The active universal React Native Phase 0 engineering spec lives at `docs/plans/goal-vault-universal-react-native-phase-0.md`.
-- The Phase 1 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-1.md`.
-- The Phase 2 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-2.md`.
-- The Phase 3 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-3.md`.
-- The Phase 4 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-4.md`.
-- The Phase 5 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-5.md`.
-- The Phase 7 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-7.md`.
-- The Phase 8 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-8.md`.
-- The Phase 9 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-9.md`.
-- The Phase 10 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-10.md`.
-- The Phase 11 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-11.md`.
-- The Phase 11 event taxonomy note lives at `docs/plans/goal-vault-analytics-event-taxonomy.md`.
-- The Phase 11 post-launch metrics note lives at `docs/plans/goal-vault-post-launch-metrics.md`.
-- The Phase 12 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-12.md`.
-- The Phase 12 motion system note lives at `docs/plans/goal-vault-motion-system.md`.
-- The Phase 12 theme refresh note lives at `docs/plans/goal-vault-theme-refresh-notes.md`.
-- The Phase 13 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-13.md`.
-- The Phase 14 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-14.md`.
-- The Phase 15 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-15.md`.
-- The Phase 16 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-16.md`.
-- The Phase 15 rule-system note lives at `docs/plans/goal-vault-rule-system.md`.
-- The current mobile UI polish note lives at `docs/plans/goal-vault-mobile-ui-polish.md`.
-- The Phase 16 test coverage note lives at `docs/plans/goal-vault-test-coverage-notes.md`.
-- The Phase 17 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-17.md`.
-- The Phase 18 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-18.md`.
-- The Phase 19 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-19.md`.
-- The Phase 20 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-20.md`.
-- The Phase 21 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-21.md`.
-- The Phase 22 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-22.md`.
-- The Phase 23 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-23.md`.
-- The Phase 24 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-24.md`.
-- The Phase 25 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-25.md`.
-- The Phase 26 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-26.md`.
-- The Phase 27 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-27.md`.
-- The Phase 28 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-28.md`.
-- The Phase 29 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-29.md`.
-- The Phase 30 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-30.md`.
-- The Phase 31 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-31.md`.
-- The Phase 32 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-32.md`.
-- The Phase 33 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-33.md`.
-- The Phase 34 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-34.md`.
-- The Phase 35 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-35.md`.
-- The Phase 36 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-36.md`.
-- The Phase 37 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-37.md`.
-- The Phase 38 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-38.md`.
-- The Phase 39 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-39.md`.
-- The Phase 40 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-40.md`.
-- The Phase 41 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-41.md`.
-- The Phase 42 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-42.md`.
-- The Phase 43 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-43.md`.
-- The Phase 44 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-44.md`.
-- The Phase 45 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-45.md`.
-- The Phase 46 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-46.md`.
-- The Phase 47 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-47.md`.
-- The Phase 48 implementation note lives at `docs/plans/goal-vault-universal-react-native-phase-48.md`.
-- The CI and release workflow note lives at `docs/plans/goal-vault-ci-release-workflows.md`.
+- The Phase 0 engineering spec lives at `docs/plans/pocket-vault-phase-0.md`.
+- The active universal React Native Phase 0 engineering spec lives at `docs/plans/pocket-vault-universal-react-native-phase-0.md`.
+- The Phase 1 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-1.md`.
+- The Phase 2 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-2.md`.
+- The Phase 3 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-3.md`.
+- The Phase 4 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-4.md`.
+- The Phase 5 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-5.md`.
+- The Phase 7 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-7.md`.
+- The Phase 8 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-8.md`.
+- The Phase 9 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-9.md`.
+- The Phase 10 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-10.md`.
+- The Phase 11 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-11.md`.
+- The Phase 11 event taxonomy note lives at `docs/plans/pocket-vault-analytics-event-taxonomy.md`.
+- The Phase 11 post-launch metrics note lives at `docs/plans/pocket-vault-post-launch-metrics.md`.
+- The Phase 12 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-12.md`.
+- The Phase 12 motion system note lives at `docs/plans/pocket-vault-motion-system.md`.
+- The Phase 12 theme refresh note lives at `docs/plans/pocket-vault-theme-refresh-notes.md`.
+- The Phase 13 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-13.md`.
+- The Phase 14 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-14.md`.
+- The Phase 15 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-15.md`.
+- The Phase 16 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-16.md`.
+- The Phase 15 rule-system note lives at `docs/plans/pocket-vault-rule-system.md`.
+- The current mobile UI polish note lives at `docs/plans/pocket-vault-mobile-ui-polish.md`.
+- The Phase 16 test coverage note lives at `docs/plans/pocket-vault-test-coverage-notes.md`.
+- The Phase 17 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-17.md`.
+- The Phase 18 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-18.md`.
+- The Phase 19 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-19.md`.
+- The Phase 20 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-20.md`.
+- The Phase 21 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-21.md`.
+- The Phase 22 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-22.md`.
+- The Phase 23 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-23.md`.
+- The Phase 24 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-24.md`.
+- The Phase 25 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-25.md`.
+- The Phase 26 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-26.md`.
+- The Phase 27 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-27.md`.
+- The Phase 28 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-28.md`.
+- The Phase 29 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-29.md`.
+- The Phase 30 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-30.md`.
+- The Phase 31 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-31.md`.
+- The Phase 32 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-32.md`.
+- The Phase 33 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-33.md`.
+- The Phase 34 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-34.md`.
+- The Phase 35 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-35.md`.
+- The Phase 36 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-36.md`.
+- The Phase 37 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-37.md`.
+- The Phase 38 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-38.md`.
+- The Phase 39 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-39.md`.
+- The Phase 40 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-40.md`.
+- The Phase 41 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-41.md`.
+- The Phase 42 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-42.md`.
+- The Phase 43 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-43.md`.
+- The Phase 44 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-44.md`.
+- The Phase 45 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-45.md`.
+- The Phase 46 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-46.md`.
+- The Phase 47 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-47.md`.
+- The Phase 48 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-48.md`.
+- The CI and release workflow note lives at `docs/plans/pocket-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
 - The API managed database plan runbook lives at `docs/deployment/api-managed-database-plan.md`.
@@ -354,9 +391,9 @@ Still not implemented:
 ## Standard Verification
 - `find docs -maxdepth 3 -type f | sort`
 - `pnpm typecheck`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform web --output-dir ../../dist/web`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform ios --output-dir ../../dist/ios`
-- `pnpm --filter @goal-vault/mobile exec expo export --platform android --output-dir ../../dist/android`
+- `pnpm --filter @pocket-vault/mobile exec expo export --platform web --output-dir ../../dist/web`
+- `pnpm --filter @pocket-vault/mobile exec expo export --platform ios --output-dir ../../dist/ios`
+- `pnpm --filter @pocket-vault/mobile exec expo export --platform android --output-dir ../../dist/android`
 - `git status --short`
 - `sed -n '1,220p' docs/project-state.md`
 - `sed -n '1,220p' docs/_local/current-session.md`

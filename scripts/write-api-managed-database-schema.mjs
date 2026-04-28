@@ -187,7 +187,7 @@ const outputDir = readText("API_DATABASE_SCHEMA_DIR", path.join(process.cwd(), "
 const schemaSql = buildPostgresqlSchema(schemaName);
 
 const manifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-schema",
   target,
   engine,
@@ -248,7 +248,7 @@ const manifest = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const baseName = `goal-vault-api-database-schema-${target}-${schemaLabel}`;
+const baseName = `pocket-vault-api-database-schema-${target}-${schemaLabel}`;
 const schemaPath = path.join(outputDir, `${baseName}.sql`);
 const manifestPath = path.join(outputDir, `${baseName}.json`);
 

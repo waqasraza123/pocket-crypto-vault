@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { isAddress } from "viem";
 import { z } from "zod";
 
-import type { VaultMetadataPayload, VaultMetadataWriteRequest } from "@goal-vault/shared";
+import type { VaultMetadataPayload, VaultMetadataWriteRequest } from "@pocket-vault/shared";
 
 import { classifyObservedError } from "../../lib/observability/event-classification";
 import { logObservabilitySignal } from "../../lib/observability/logger";

@@ -1,4 +1,4 @@
-import type { AppConnectionState } from "@goal-vault/shared";
+import type { AppConnectionState } from "@pocket-vault/shared";
 
 import { routes } from "../routing";
 

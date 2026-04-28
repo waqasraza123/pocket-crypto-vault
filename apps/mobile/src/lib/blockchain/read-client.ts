@@ -1,6 +1,6 @@
 import { createPublicClient, http, type PublicClient } from "viem";
 
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 import { clientEnv } from "../env/client";
 import { goalVaultSupportedViemChains } from "./chains";

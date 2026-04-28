@@ -1,5 +1,5 @@
-import { mapVaultDetail, mapVaultSummary } from "@goal-vault/contracts-sdk";
-import type { VaultDetail, VaultSummary, SupportedChainId } from "@goal-vault/shared";
+import { mapVaultDetail, mapVaultSummary } from "@pocket-vault/contracts-sdk";
+import type { VaultDetail, VaultSummary, SupportedChainId } from "@pocket-vault/shared";
 
 import { getReadClient } from "../blockchain/read-client";
 import { getFactoryAddressForChain } from "./registry";

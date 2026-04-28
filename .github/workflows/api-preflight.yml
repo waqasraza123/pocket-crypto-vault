@@ -28,12 +28,16 @@ env:
   API_PUBLIC_BASE_URL: ${{ vars.API_PUBLIC_BASE_URL }}
   API_DATA_DIR: ${{ vars.API_DATA_DIR || '/data' }}
   API_PERSISTENCE_DRIVER: ${{ vars.API_PERSISTENCE_DRIVER || 'sqlite' }}
+  API_POSTGRES_DRIVER: ${{ vars.API_POSTGRES_DRIVER }}
   API_DATABASE_URL: ${{ secrets.API_DATABASE_URL }}
-  API_PERSISTENCE_SCHEMA_NAME: ${{ vars.API_PERSISTENCE_SCHEMA_NAME || 'goal_vault_api' }}
+  API_PERSISTENCE_SCHEMA_NAME: ${{ vars.API_PERSISTENCE_SCHEMA_NAME }}
   API_SYNC_INTERVAL_MS: ${{ vars.API_SYNC_INTERVAL_MS || '30000' }}
   API_ENABLE_INDEXER: ${{ vars.API_ENABLE_INDEXER || 'true' }}
   API_ENABLE_ANALYTICS: ${{ vars.API_ENABLE_ANALYTICS || 'true' }}
   API_ENABLE_SUPPORT: ${{ vars.API_ENABLE_SUPPORT || 'true' }}
+  API_ROLLBACK_EVIDENCE_ACCEPTED: ${{ vars.API_ROLLBACK_EVIDENCE_ACCEPTED || 'false' }}
+  API_SMOKE_EVIDENCE_ACCEPTED: ${{ vars.API_SMOKE_EVIDENCE_ACCEPTED || 'false' }}
+  API_LIMITED_BETA_SCOPE_APPROVED: ${{ vars.API_LIMITED_BETA_SCOPE_APPROVED || 'false' }}
   API_INTERNAL_TOKEN: ${{ secrets.API_INTERNAL_TOKEN }}
   API_SIGNED_REQUEST_MAX_AGE_SECONDS: ${{ vars.API_SIGNED_REQUEST_MAX_AGE_SECONDS || '900' }}
   API_LOG_LEVEL: ${{ vars.API_LOG_LEVEL || 'info' }}
@@ -43,7 +47,7 @@ env:
   EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS: ${{ vars.EXPO_PUBLIC_BASE_SEPOLIA_FACTORY_ADDRESS }}
   API_BASE_START_BLOCK: ${{ vars.API_BASE_START_BLOCK || '0' }}
   API_BASE_SEPOLIA_START_BLOCK: ${{ vars.API_BASE_SEPOLIA_START_BLOCK || '0' }}
-  API_PREFLIGHT_OUTPUT: artifacts/goal-vault-api-preflight-${{ inputs.target }}.json
+  API_PREFLIGHT_OUTPUT: artifacts/pocket-vault-api-preflight-${{ inputs.target }}.json
 
 jobs:
   api-preflight:
@@ -65,6 +69,6 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-preflight-${{ inputs.target }}
-          path: artifacts/goal-vault-api-preflight-${{ inputs.target }}.json
+          name: pocket-vault-api-preflight-${{ inputs.target }}
+          path: artifacts/pocket-vault-api-preflight-${{ inputs.target }}.json
           if-no-files-found: error

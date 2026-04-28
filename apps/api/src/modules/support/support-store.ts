@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { DatabaseSync, type SQLOutputValue } from "node:sqlite";
 
-import type { SupportRequestListFilters, SupportRequestRecord, SupportRequestStatus } from "@goal-vault/shared";
+import type { SupportRequestListFilters, SupportRequestRecord, SupportRequestStatus } from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 import type { ApiSupportStore } from "../persistence/ports";
@@ -68,6 +68,107 @@ const supportRequestColumns = [
   "requester_ip_hash",
   "created_at",
 ];
+
+const requiredStringSupportRequestColumns = [
+  "id",
+  "status",
+  "category",
+  "priority",
+  "subject",
+  "message",
+  "environment",
+  "deployment_target",
+  "created_at",
+] as const;
+
+const nullableStringSupportRequestColumns = [
+  "reporter_wallet",
+  "contact_email",
+  "route",
+  "wallet_status",
+  "vault_address",
+  "user_agent",
+  "requester_ip_hash",
+] as const;
+
+const assertSupportRequestRowValue = (
+  row: Record<string, SQLOutputValue>,
+  column: string,
+  acceptsNull: boolean,
+  type: "string" | "number",
+) => {
+  const value = row[column];
+
+  if (acceptsNull && value === null) {
+    return;
+  }
+
+  if (typeof value !== type) {
+    throw new Error(`Support request row column ${column} has invalid storage type.`);
+  }
+};
+
+const getStringRowValue = (row: Record<string, SQLOutputValue>, column: string) => {
+  const value = row[column];
+
+  if (typeof value !== "string") {
+    throw new Error(`Support request row column ${column} has invalid storage type.`);
+  }
+
+  return value;
+};
+
+const getNullableStringRowValue = (row: Record<string, SQLOutputValue>, column: string) => {
+  const value = row[column];
+
+  if (value !== null && typeof value !== "string") {
+    throw new Error(`Support request row column ${column} has invalid storage type.`);
+  }
+
+  return value;
+};
+
+const getNullableNumberRowValue = (row: Record<string, SQLOutputValue>, column: string) => {
+  const value = row[column];
+
+  if (value !== null && typeof value !== "number") {
+    throw new Error(`Support request row column ${column} has invalid storage type.`);
+  }
+
+  return value;
+};
+
+const mapRawSupportRequestRow = (row: Record<string, SQLOutputValue>): SupportRequestRow => {
+  for (const column of requiredStringSupportRequestColumns) {
+    assertSupportRequestRowValue(row, column, false, "string");
+  }
+
+  for (const column of nullableStringSupportRequestColumns) {
+    assertSupportRequestRowValue(row, column, true, "string");
+  }
+
+  assertSupportRequestRowValue(row, "chain_id", true, "number");
+
+  return {
+    id: getStringRowValue(row, "id"),
+    status: getStringRowValue(row, "status"),
+    category: getStringRowValue(row, "category"),
+    priority: getStringRowValue(row, "priority"),
+    subject: getStringRowValue(row, "subject"),
+    message: getStringRowValue(row, "message"),
+    reporter_wallet: getNullableStringRowValue(row, "reporter_wallet"),
+    contact_email: getNullableStringRowValue(row, "contact_email"),
+    route: getNullableStringRowValue(row, "route"),
+    environment: getStringRowValue(row, "environment"),
+    deployment_target: getStringRowValue(row, "deployment_target"),
+    chain_id: getNullableNumberRowValue(row, "chain_id"),
+    wallet_status: getNullableStringRowValue(row, "wallet_status"),
+    vault_address: getNullableStringRowValue(row, "vault_address"),
+    user_agent: getNullableStringRowValue(row, "user_agent"),
+    requester_ip_hash: getNullableStringRowValue(row, "requester_ip_hash"),
+    created_at: getStringRowValue(row, "created_at"),
+  };
+};
 
 export class SupportStore implements ApiSupportStore {
   private readonly dbPath: string;
@@ -170,7 +271,8 @@ export class SupportStore implements ApiSupportStore {
          ORDER BY created_at DESC, id DESC
          LIMIT ?`,
       )
-      .all(...values) as SupportRequestRow[];
+      .all(...values)
+      .map(mapRawSupportRequestRow);
 
     return rows.map(mapSupportRequestRow);
   }
@@ -179,9 +281,9 @@ export class SupportStore implements ApiSupportStore {
     const database = await this.initialize();
     const row = database
       .prepare(`SELECT ${supportRequestColumns.join(", ")} FROM support_requests WHERE id = ?`)
-      .get(id) as SupportRequestRow | undefined;
+      .get(id);
 
-    return row ? mapSupportRequestRow(row) : null;
+    return row ? mapSupportRequestRow(mapRawSupportRequestRow(row)) : null;
   }
 
   async updateStatus(id: string, status: SupportRequestStatus) {

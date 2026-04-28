@@ -11,8 +11,18 @@ interface PgModule {
   Pool: PgPoolConstructor;
 }
 
+interface NeonModule {
+  Pool: PgPoolConstructor;
+  neonConfig: {
+    webSocketConstructor: unknown;
+  };
+}
+
+export type PostgresqlDriverName = "pg" | "neon";
+
 export interface PostgresqlDriverOptions {
   connectionString: string;
+  driver?: PostgresqlDriverName;
 }
 
 export interface PostgresqlSchemaCheckResult {
@@ -34,8 +44,32 @@ const loadPgModule = (): PgModule => {
   return { Pool: module.Pool };
 };
 
+const loadWsConstructor = () => {
+  const module = require("ws") as unknown;
+  const webSocketConstructor =
+    typeof module === "function" ? module : (module as { default?: unknown } | null)?.default;
+
+  if (typeof webSocketConstructor !== "function") {
+    throw new Error("Neon PostgreSQL driver requires the ws WebSocket constructor.");
+  }
+
+  return webSocketConstructor;
+};
+
+const loadNeonModule = (): PgModule => {
+  const module = require("@neondatabase/serverless") as Partial<NeonModule>;
+
+  if (typeof module.Pool !== "function" || !module.neonConfig) {
+    throw new Error("Neon PostgreSQL driver package did not expose a Pool constructor.");
+  }
+
+  module.neonConfig.webSocketConstructor = loadWsConstructor();
+
+  return { Pool: module.Pool };
+};
+
 export const createPostgresqlQueryExecutor = (options: PostgresqlDriverOptions) => {
-  const { Pool } = loadPgModule();
+  const { Pool } = options.driver === "neon" ? loadNeonModule() : loadPgModule();
   const pool = new Pool({ connectionString: options.connectionString });
 
   return new PostgresqlPooledQueryExecutor({ pool });

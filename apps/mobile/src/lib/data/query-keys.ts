@@ -1,4 +1,4 @@
-import type { SupportedChainId, VaultAddress } from "@goal-vault/shared";
+import type { SupportedChainId, VaultAddress } from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 export const queryKeys = {

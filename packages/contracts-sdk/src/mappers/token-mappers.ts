@@ -5,7 +5,7 @@ import {
   hasDecimalAmountShape,
   normalizeAmountInput,
   parseAmountInput,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 export interface ParsedTokenAmount {
   normalized: string;

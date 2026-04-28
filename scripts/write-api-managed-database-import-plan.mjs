@@ -412,13 +412,13 @@ if (exportBundle.manifest.target !== target) {
 
 mkdirSync(outputDir, { recursive: true });
 
-const baseName = `goal-vault-api-database-import-${target}-${importLabel}`;
+const baseName = `pocket-vault-api-database-import-${target}-${importLabel}`;
 const sqlPath = path.join(outputDir, `${baseName}.sql`);
 const planPath = path.join(outputDir, `${baseName}.json`);
 const importSql = buildImportSql(schemaName);
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-import-plan",
   target,
   engine,

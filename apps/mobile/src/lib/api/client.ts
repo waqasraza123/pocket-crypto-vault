@@ -33,7 +33,7 @@ export const fetchBackendJson = async <T>({
     return {
       status: "unavailable",
       data: null,
-      message: "Some Goal Vault services are still being prepared.",
+      message: "Some Pocket Vault services are still being prepared.",
       responseStatus: null,
     };
   }
@@ -77,9 +77,9 @@ export const fetchBackendJson = async <T>({
       data: null,
       message:
         error instanceof Error && error.name === "AbortError"
-          ? "Goal Vault took too long to reach the latest app data."
+          ? "Pocket Vault took too long to reach the latest app data."
           : error instanceof Error && error.message.toLowerCase().includes("network")
-            ? "Goal Vault could not reach the latest app data right now."
+            ? "Pocket Vault could not reach the latest app data right now."
           : fallbackMessage,
       responseStatus: null,
     };

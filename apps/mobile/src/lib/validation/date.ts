@@ -1,1 +1,1 @@
-export { isFutureDate } from "@goal-vault/shared";
+export { isFutureDate } from "@pocket-vault/shared";

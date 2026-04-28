@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { VaultActivityEvent, VaultSummary } from "@goal-vault/shared";
+import type { VaultActivityEvent, VaultSummary } from "@pocket-vault/shared";
 
 import { applySessionRuleActivityToVault } from "./rule-overrides";
 

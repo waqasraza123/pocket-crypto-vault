@@ -213,6 +213,27 @@ export const HealthResponseSchema = z.object({
       }),
     ),
   }),
+  productionActivation: z.object({
+    environment: appEnvironmentSchema,
+    deploymentTarget: deploymentTargetSchema,
+    status: z.enum(["ready", "degraded", "blocked"]),
+    safeForLimitedBetaTraffic: z.boolean(),
+    productionDatabaseSelected: z.boolean(),
+    databaseCutoverReady: z.boolean(),
+    rollbackReady: z.boolean(),
+    protectedSmokeReady: z.boolean(),
+    supportReady: z.boolean(),
+    analyticsReady: z.boolean(),
+    message: z.string(),
+    gates: z.array(
+      z.object({
+        key: z.string(),
+        area: z.string(),
+        status: z.enum(["ready", "warning", "blocked"]),
+        message: z.string(),
+      }),
+    ),
+  }),
   validationErrors: z.array(z.string()),
 });
 

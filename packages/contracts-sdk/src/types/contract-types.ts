@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { VaultRuleType } from "@goal-vault/shared";
+import type { VaultRuleType } from "@pocket-vault/shared";
 
 export interface GoalVaultContractSummary {
   owner: Address;

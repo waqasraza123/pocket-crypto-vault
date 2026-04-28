@@ -1,1 +1,1 @@
-export { isPositiveAmount, parseAmountInput } from "@goal-vault/shared";
+export { isPositiveAmount, parseAmountInput } from "@pocket-vault/shared";

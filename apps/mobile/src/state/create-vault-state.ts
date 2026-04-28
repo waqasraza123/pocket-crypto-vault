@@ -1,4 +1,4 @@
-import type { AppTransactionStatus, CreateVaultTransactionState, MetadataSaveResult, VaultAddress } from "@goal-vault/shared";
+import type { AppTransactionStatus, CreateVaultTransactionState, MetadataSaveResult, VaultAddress } from "@pocket-vault/shared";
 import type { Hash } from "viem";
 
 import { getCurrentMessages } from "../lib/i18n";

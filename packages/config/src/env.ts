@@ -9,12 +9,12 @@ import type {
   ReleaseReadinessCheck,
   ReleaseReadinessState,
   SupportedChainId,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import { supportedChains } from "./chains";
 import { getReleaseStatus, resolveAppEnvironment, resolveDeploymentTarget } from "./deployment";
 
-const walletMetadataDefaultUrl = "https://github.com/waqasraza123/goal-vault-usdc";
+const walletMetadataDefaultUrl = "https://github.com/waqasraza123/pocket-vault-usdc";
 const optionalUrlSchema = z
   .string()
   .trim()

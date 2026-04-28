@@ -14,7 +14,7 @@ import type {
   VaultSummary,
   VaultSummaryApiModel,
   VaultSummaryViewModel,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import { createSessionVaultDetail, createSessionVaultSummary } from "../contracts/mappers";
 import { mapActivityItemToViewEvent, mapActivityItemsToPreview, mapFreshnessToProductSyncState, getMetadataReconciliationState, createActivityDedupeKey } from "../api/mappers";

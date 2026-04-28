@@ -1,5 +1,5 @@
 {
-  "name": "@goal-vault/api-client",
+  "name": "@pocket-vault/api-client",
   "private": true,
   "version": "0.1.0",
   "main": "src/index.ts",
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@goal-vault/shared": "workspace:*",
+    "@pocket-vault/shared": "workspace:*",
     "zod": "^4.1.12"
   }
 }

@@ -60,7 +60,7 @@ export const requireInternalRequestAccess = async ({
   }
 
   await reply.status(401).send({
-    message: "This Goal Vault route requires internal access.",
+    message: "This Pocket Vault route requires internal access.",
   });
 
   return false;

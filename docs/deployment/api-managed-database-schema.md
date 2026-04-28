@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Schema
+# Pocket Vault API Managed Database Schema
 
 ## Purpose
 The API managed database schema bundle writes the PostgreSQL DDL that mirrors the current SQLite-backed API persistence contract.
@@ -38,8 +38,8 @@ Optional inputs:
 ## Output Artifacts
 The script writes:
 
-- `goal-vault-api-database-schema-<target>-<label>.sql`
-- `goal-vault-api-database-schema-<target>-<label>.json`
+- `pocket-vault-api-database-schema-<target>-<label>.sql`
+- `pocket-vault-api-database-schema-<target>-<label>.json`
 
 The SQL artifact contains:
 
@@ -97,4 +97,4 @@ Use the schema bundle after the managed database plan:
 10. Run parity checks before API traffic movement.
 
 ## Boundary
-This phase creates a portable PostgreSQL schema artifact. Provider-specific provisioning, credentials, schema application, data copy, live parity automation, runtime adapter changes, migrations, and traffic movement remain deferred.
+This phase creates a portable PostgreSQL schema artifact. Schema application is handled separately by `API Managed Database Schema Apply` after protected environment approval, `API_DATABASE_URL`, a reviewed schema artifact, and `confirm_apply=apply` are present.

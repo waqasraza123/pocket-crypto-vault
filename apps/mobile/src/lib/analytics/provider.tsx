@@ -7,8 +7,8 @@ import type {
   AnalyticsEventName,
   AnalyticsEventPayload,
   AnalyticsProviderState,
-} from "@goal-vault/shared";
-import { analyticsEventCategoryMap } from "@goal-vault/shared";
+} from "@pocket-vault/shared";
+import { analyticsEventCategoryMap } from "@pocket-vault/shared";
 
 import { clientEnv } from "../env/client";
 
@@ -65,7 +65,7 @@ export const AnalyticsProvider = ({ children }: PropsWithChildren) => {
       }
 
       if (clientEnv.analyticsMode === "local_log" || !clientEnv.analyticsEndpoint) {
-        console.info("[goal-vault-analytics]", envelope);
+        console.info("[pocket-vault-analytics]", envelope);
         return;
       }
 

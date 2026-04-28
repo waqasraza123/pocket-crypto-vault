@@ -1,4 +1,4 @@
-import type { AppConnectionState, SupportedChainId, WalletSession } from "@goal-vault/shared";
+import type { AppConnectionState, SupportedChainId, WalletSession } from "@pocket-vault/shared";
 
 export interface WalletRuntimeStatus {
   isEnabled: boolean;

@@ -1,4 +1,4 @@
-import { parseSupportRequestResponsePayload, type SupportRequestInput, type SupportRequestResponse } from "@goal-vault/api-client";
+import { parseSupportRequestResponsePayload, type SupportRequestInput, type SupportRequestResponse } from "@pocket-vault/api-client";
 
 import { fetchBackendJson, type BackendReadResult } from "./client";
 

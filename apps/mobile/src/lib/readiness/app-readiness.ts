@@ -1,4 +1,4 @@
-import type { AppReadinessIssue, AppReadinessState } from "@goal-vault/shared";
+import type { AppReadinessIssue, AppReadinessState } from "@pocket-vault/shared";
 
 import type { AppConnectionState } from "../../types";
 import { envDiagnostics, hasApiBaseUrl, hasFactoryAddressForChain, hasRpcUrlForChain } from "../env/client";
@@ -25,7 +25,7 @@ export const createBaseReadinessState = (): AppReadinessState => ({
   api: {
     status: hasApiBaseUrl() ? "healthy" : "unavailable",
     checkedAt: null,
-    message: hasApiBaseUrl() ? "Goal Vault services are available." : "Goal Vault services are running without a backend connection.",
+    message: hasApiBaseUrl() ? "Pocket Vault services are available." : "Pocket Vault services are running without a backend connection.",
     checks: [],
     chains: [],
   },
@@ -56,7 +56,7 @@ export const buildAppReadinessState = ({
         code: "wallet_unavailable",
         severity: "blocking",
         title: "Wallet setup is incomplete",
-        description: "Wallet connectivity needs runtime configuration before Goal Vault can accept wallet actions.",
+        description: "Wallet connectivity needs runtime configuration before Pocket Vault can accept wallet actions.",
         action: "review_status",
       }),
     );

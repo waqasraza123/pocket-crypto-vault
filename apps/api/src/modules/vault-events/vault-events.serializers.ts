@@ -1,7 +1,7 @@
 import { formatUnits } from "viem";
 
-import type { ApiVaultActivityItem, ActivityFeedResponse, VaultActivityResponse } from "@goal-vault/api-client";
-import type { SyncFreshnessSnapshot, SupportedChainId } from "@goal-vault/shared";
+import type { ApiVaultActivityItem, ActivityFeedResponse, VaultActivityResponse } from "@pocket-vault/api-client";
+import type { SyncFreshnessSnapshot, SupportedChainId } from "@pocket-vault/shared";
 
 import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 

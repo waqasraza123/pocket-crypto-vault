@@ -1,4 +1,4 @@
-import type { AppConfigState, AppEnvironment, DeploymentTarget, ReleaseReadinessState } from "@goal-vault/shared";
+import type { AppConfigState, AppEnvironment, DeploymentTarget, ReleaseReadinessState } from "@pocket-vault/shared";
 
 export interface AppEnvDiagnostics {
   environment: AppEnvironment;

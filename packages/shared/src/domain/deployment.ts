@@ -8,6 +8,8 @@ export type ReleaseCheckStatus = "ready" | "warning" | "blocked";
 export type ReleaseReadinessStatus = "ready" | "degraded" | "blocked";
 export type LaunchChecklistItemStatus = "pending" | "ready" | "optional";
 export type SmokeCheckStatus = "pass" | "fail" | "skip";
+export type ProductionActivationGateStatus = "ready" | "warning" | "blocked";
+export type ProductionActivationReadinessStatus = "ready" | "degraded" | "blocked";
 
 export interface ChainConfigState {
   chainId: SupportedChainId;
@@ -39,6 +41,28 @@ export interface ReleaseReadinessState {
   status: ReleaseReadinessStatus;
   message: string;
   checks: ReleaseReadinessCheck[];
+}
+
+export interface ProductionActivationGate {
+  key: string;
+  area: string;
+  status: ProductionActivationGateStatus;
+  message: string;
+}
+
+export interface ProductionActivationReadinessState {
+  environment: AppEnvironment;
+  deploymentTarget: DeploymentTarget;
+  status: ProductionActivationReadinessStatus;
+  safeForLimitedBetaTraffic: boolean;
+  productionDatabaseSelected: boolean;
+  databaseCutoverReady: boolean;
+  rollbackReady: boolean;
+  protectedSmokeReady: boolean;
+  supportReady: boolean;
+  analyticsReady: boolean;
+  message: string;
+  gates: ProductionActivationGate[];
 }
 
 export interface BackendReadinessState {

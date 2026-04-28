@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Parity
+# Pocket Vault API Managed Database Parity
 
 ## Purpose
 The API managed database parity plan records the source and target comparison checks operators must run after restoring API data into a managed PostgreSQL target.
@@ -106,4 +106,4 @@ Rollback is required when:
 - `/ready` reports blocked checks after managed database configuration
 
 ## Boundary
-This phase writes a parity review plan. Live query execution, credential handling, data import, parity automation, runtime adapter changes, and traffic movement remain deferred until a managed database provider and driver are selected.
+The parity plan remains non-mutating. Live comparison can be executed through `API Managed Database Parity Execute` after protected environment approval, `API_DATABASE_URL`, a reviewed parity plan, a source snapshot artifact, and `confirm_execute=compare` are present.

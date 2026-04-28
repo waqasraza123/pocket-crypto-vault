@@ -1,4 +1,4 @@
-# Goal Vault Mobile Distribution
+# Pocket Vault Mobile Distribution
 
 ## Purpose
 This runbook covers the guarded EAS workflow for mobile build and store submission operations.
@@ -78,7 +78,7 @@ Before using submit mode:
 ## Manifest Artifact
 Each run uploads:
 
-- `goal-vault-mobile-<target>-<platform>-<mode>.json`
+- `pocket-vault-mobile-<target>-<platform>-<mode>.json`
 
 The manifest includes:
 

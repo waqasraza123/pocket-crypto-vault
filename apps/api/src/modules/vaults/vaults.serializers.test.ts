@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import type { SyncFreshnessSnapshot } from "@goal-vault/shared";
+import type { SyncFreshnessSnapshot } from "@pocket-vault/shared";
 
 import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";
 import { serializeVaultActivityItem } from "../vault-events/vault-events.serializers";

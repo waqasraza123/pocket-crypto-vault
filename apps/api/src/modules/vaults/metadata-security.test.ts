@@ -4,8 +4,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import type { VaultMetadataWriteRequest } from "@goal-vault/shared";
-import * as metadataAuthModule from "@goal-vault/shared/src/validation/metadataAuth";
+import type { VaultMetadataWriteRequest } from "@pocket-vault/shared";
+import * as metadataAuthModule from "@pocket-vault/shared/src/validation/metadataAuth";
 import { privateKeyToAccount } from "viem/accounts";
 
 import { createApiPersistenceRuntimeCapabilities, type ApiRuntimeEnv } from "../../env";
@@ -35,6 +35,7 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
   dataDir,
   persistence: {
     driver: "sqlite",
+    postgresqlDriver: "pg",
     sqliteDataDir: dataDir,
     postgresUrlConfigured: false,
     schemaName: "goal_vault_api",
@@ -46,6 +47,9 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
   indexerEnabled: true,
   analyticsEnabled: false,
   supportEnabled: true,
+  rollbackEvidenceAccepted: false,
+  smokeEvidenceAccepted: false,
+  limitedBetaScopeApproved: false,
   internalToken: null,
   signedRequestMaxAgeSeconds: 900,
   logLevel: "info",
@@ -67,7 +71,7 @@ const createEnv = (dataDir: string): ApiRuntimeEnv => ({
 });
 
 test("verifyVaultMetadataWriteRequest validates the signed owner and materializes a cooldown vault", async () => {
-  const dataDir = await mkdtemp(path.join(tmpdir(), "goal-vault-api-metadata-security-"));
+  const dataDir = await mkdtemp(path.join(tmpdir(), "pocket-vault-api-metadata-security-"));
 
   try {
     const store = new IndexerStore(dataDir);

@@ -39,7 +39,7 @@ env:
   CI: true
   FORCE_COLOR: 1
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/goal-vault-api
+  IMAGE_NAME: ${{ github.repository_owner }}/pocket-vault-api
 
 jobs:
   api-image:
@@ -78,11 +78,11 @@ jobs:
             type=raw,value=${{ inputs.target }}-${{ github.run_number }}
             type=raw,value=${{ inputs.image_tag }},enable=${{ inputs.image_tag != '' }}
           labels: |
-            org.opencontainers.image.title=Goal Vault API
-            org.opencontainers.image.description=Goal Vault Fastify API and indexer service
+            org.opencontainers.image.title=Pocket Vault API
+            org.opencontainers.image.description=Pocket Vault Fastify API and indexer service
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-            app.goal-vault.target=${{ inputs.target }}
+            app.pocket-vault.target=${{ inputs.target }}
 
       - name: Build API image
         uses: docker/build-push-action@v6
@@ -99,9 +99,9 @@ jobs:
       - name: Write image manifest
         run: |
           mkdir -p artifacts
-          cat > artifacts/goal-vault-api-image-${{ inputs.target }}.json <<EOF
+          cat > artifacts/pocket-vault-api-image-${{ inputs.target }}.json <<EOF
           {
-            "app": "goal-vault",
+            "app": "pocket-vault",
             "component": "api",
             "target": "${{ inputs.target }}",
             "mode": "${{ inputs.mode }}",
@@ -117,6 +117,6 @@ jobs:
       - name: Upload image manifest
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-image-${{ inputs.target }}
-          path: artifacts/goal-vault-api-image-${{ inputs.target }}.json
+          name: pocket-vault-api-image-${{ inputs.target }}
+          path: artifacts/pocket-vault-api-image-${{ inputs.target }}.json
           if-no-files-found: error

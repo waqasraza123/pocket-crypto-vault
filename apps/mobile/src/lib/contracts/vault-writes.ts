@@ -11,7 +11,7 @@ import {
   parseVaultWithdrawalEvent,
   prepareDepositToVaultWriteRequest,
   prepareWithdrawFromVaultWriteRequest,
-} from "@goal-vault/contracts-sdk";
+} from "@pocket-vault/contracts-sdk";
 import { createWalletClient, custom, type Address, type EIP1193Provider, type Hash, type TransactionReceipt } from "viem";
 
 import type { SupportedChainId } from "../../types";

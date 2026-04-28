@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import type { AppReadinessState } from "@goal-vault/shared";
+import type { AppReadinessState } from "@pocket-vault/shared";
 
 import { fetchApiHealth } from "../lib/api/health";
 import { buildAppReadinessState, createBaseReadinessState } from "../lib/readiness/app-readiness";

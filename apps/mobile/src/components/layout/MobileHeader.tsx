@@ -3,7 +3,7 @@ import { Pressable, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { productConfig } from "@goal-vault/config";
+import { productConfig } from "@pocket-vault/config";
 
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";

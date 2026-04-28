@@ -1,7 +1,7 @@
 import { usePathname } from "expo-router";
 import { useCallback } from "react";
 
-import type { AnalyticsContext, AnalyticsEventName, AnalyticsEventPayload } from "@goal-vault/shared";
+import type { AnalyticsContext, AnalyticsEventName, AnalyticsEventPayload } from "@pocket-vault/shared";
 
 import { useAnalyticsContext } from "../lib/analytics/provider";
 

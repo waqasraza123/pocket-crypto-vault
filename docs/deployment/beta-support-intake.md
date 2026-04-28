@@ -1,6 +1,6 @@
 # Beta Support Intake
 
-Goal Vault beta support intake gives real users a structured way to report product issues from the app while giving operators enough context to triage without asking for secrets.
+Pocket Vault beta support intake gives real users a structured way to report product issues from the app while giving operators enough context to triage without asking for secrets.
 
 ## Runtime Surface
 

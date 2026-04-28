@@ -1,7 +1,7 @@
 import type { Chain } from "viem";
 import { base, baseSepolia } from "viem/chains";
 
-import type { SupportedChain, SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChain, SupportedChainId } from "@pocket-vault/shared";
 
 export const supportedChainIds = [8453, 84532] as const satisfies readonly SupportedChainId[];
 

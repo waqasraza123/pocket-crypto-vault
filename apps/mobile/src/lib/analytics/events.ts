@@ -5,7 +5,7 @@ import type {
   SupportedChainId,
   SyncFreshnessState,
   WithdrawalAvailability,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 export const createConnectionAnalyticsContext = (
   connectionState: AppConnectionState,

@@ -1,12 +1,15 @@
 import type {
   ApiChainReadiness,
   ApiHealthSummary,
+  ChainSyncStatus,
   EnvironmentCheckStatus,
+  ProductionActivationGate,
+  ProductionActivationReadinessState,
   ReadinessCheck,
   ReleaseReadinessState,
   StagingReadinessSummary,
   SupportedChainId,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import type { ApiRuntimeEnv } from "../../env";
 
@@ -80,6 +83,49 @@ const getStagingStatus = (checks: ReadinessCheck[]): StagingReadinessSummary["st
   return "ready";
 };
 
+const getProductionActivationStatus = (
+  gates: ProductionActivationGate[],
+): ProductionActivationReadinessState["status"] => {
+  if (gates.some((gate) => gate.status === "blocked")) {
+    return "blocked";
+  }
+
+  if (gates.some((gate) => gate.status === "warning")) {
+    return "degraded";
+  }
+
+  return "ready";
+};
+
+const getProductionActivationMessage = (status: ProductionActivationReadinessState["status"]) => {
+  if (status === "ready") {
+    return "Production activation gates are ready for controlled limited-beta traffic.";
+  }
+
+  if (status === "degraded") {
+    return "Production activation still needs operator evidence before limited beta opens.";
+  }
+
+  return "Production activation is blocked by runtime, database, chain, or operational gate failures.";
+};
+
+const hasCurrentOrSyncingPrimarySync = (chainSync: ChainSyncStatus[] | undefined, primaryChainId: SupportedChainId) => {
+  if (!chainSync) {
+    return true;
+  }
+
+  if (chainSync.length === 0) {
+    return false;
+  }
+
+  return chainSync.some(
+    (item) =>
+      item.chainId === primaryChainId &&
+      item.lifecycle !== "error" &&
+      (item.freshness === "current" || item.freshness === "syncing"),
+  );
+};
+
 export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
   const chains = ([8453, 84532] as const).map((chainId) => getApiChainReadiness(env, chainId));
   const hasValidationErrors = env.validationErrors.length > 0;
@@ -122,7 +168,7 @@ export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
         env.persistence.driver === "sqlite"
           ? `Indexer data will persist in SQLite under ${env.persistence.sqliteDataDir}.`
           : env.persistence.runtimeReady
-            ? `Indexer data will persist in PostgreSQL schema ${env.persistence.schemaName}.`
+            ? `Indexer data will persist in PostgreSQL schema ${env.persistence.schemaName} through ${env.persistence.postgresqlDriver}.`
             : "PostgreSQL persistence is configured but not runtime-ready.",
     }),
     createCheck({
@@ -133,7 +179,7 @@ export const buildApiHealthSummary = (env: ApiRuntimeEnv): ApiHealthSummary => {
         env.persistence.driver === "sqlite"
           ? "SQLite is the active API persistence driver."
           : env.persistence.postgresUrlConfigured
-            ? "PostgreSQL is the active API persistence driver."
+            ? `PostgreSQL is the active API persistence driver through ${env.persistence.postgresqlDriver}.`
             : "PostgreSQL persistence requires API_DATABASE_URL and the runtime adapter before use.",
     }),
     createCheck({
@@ -277,7 +323,7 @@ export const buildReleaseReadinessSummary = (env: ApiRuntimeEnv): ReleaseReadine
         env.persistence.driver === "sqlite"
           ? "SQLite persistence is active for this API release."
           : env.persistence.runtimeReady
-            ? "PostgreSQL persistence is active for this API release."
+            ? `PostgreSQL persistence is active for this API release through ${env.persistence.postgresqlDriver}.`
             : "PostgreSQL persistence is not release-ready until API_DATABASE_URL and runtime capabilities are configured.",
     },
     {
@@ -324,5 +370,148 @@ export const buildReleaseReadinessSummary = (env: ApiRuntimeEnv): ReleaseReadine
           ? "Backend release configuration is usable with warnings."
           : "Backend release configuration is blocked by missing values.",
     checks,
+  };
+};
+
+export const buildProductionActivationReadinessSummary = (
+  env: ApiRuntimeEnv,
+  chainSync?: ChainSyncStatus[],
+): ProductionActivationReadinessState => {
+  const primaryChainId = env.environment === "production" ? 8453 : 84532;
+  const primaryChain = getApiChainReadiness(env, primaryChainId);
+  const hasValidationErrors = env.validationErrors.length > 0;
+  const productionDatabaseSelected = env.persistence.driver === "postgresql";
+  const databaseCutoverReady =
+    productionDatabaseSelected && env.persistence.runtimeReady && env.persistence.postgresUrlConfigured;
+  const supportReady = env.supportEnabled && env.persistence.runtimeReady;
+  const analyticsReady = env.analyticsEnabled && env.persistence.runtimeReady;
+  const smokePrerequisitesReady = env.environment === "production" && databaseCutoverReady && primaryChain.writesReady;
+  const primarySyncReady =
+    env.environment === "development" || !env.indexerEnabled
+      ? true
+      : hasCurrentOrSyncingPrimarySync(chainSync, primaryChainId);
+  const gates: ProductionActivationGate[] = [
+    {
+      key: "code-ready",
+      area: "code",
+      status: hasValidationErrors ? "blocked" : "ready",
+      message: hasValidationErrors
+        ? `Resolve runtime validation errors: ${env.validationErrors.join(" ")}`
+        : "Runtime configuration validates without ambiguous mixed modes.",
+    },
+    {
+      key: "database-selected",
+      area: "database",
+      status: env.environment === "production" ? (productionDatabaseSelected ? "ready" : "blocked") : productionDatabaseSelected ? "ready" : "warning",
+      message: productionDatabaseSelected
+        ? `PostgreSQL persistence is selected through ${env.persistence.postgresqlDriver}.`
+        : env.environment === "production"
+          ? "Production activation requires PostgreSQL persistence before limited beta traffic."
+          : "SQLite remains available for local or staging rehearsal only.",
+    },
+    {
+      key: "database-runtime",
+      area: "database",
+      status: databaseCutoverReady ? "ready" : productionDatabaseSelected ? "blocked" : "warning",
+      message: databaseCutoverReady
+        ? `PostgreSQL runtime is configured for schema ${env.persistence.schemaName}.`
+        : productionDatabaseSelected
+          ? "PostgreSQL runtime still needs credentials, schema readiness, and successful startup checks."
+          : "Database cutover is not active in SQLite mode.",
+    },
+    {
+      key: "chain-config",
+      area: "chain",
+      status: primaryChain.writesReady ? "ready" : primaryChain.readsReady ? "warning" : "blocked",
+      message: primaryChain.writesReady
+        ? `Primary chain ${primaryChainId} has RPC and factory configuration.`
+        : primaryChain.readsReady
+          ? `Primary chain ${primaryChainId} can read but cannot support create/deposit/withdraw smoke without a factory address.`
+          : `Primary chain ${primaryChainId} is missing RPC and factory configuration.`,
+    },
+    {
+      key: "indexer-ready",
+      area: "indexer",
+      status: env.indexerEnabled && env.syncIntervalMs > 0 && primarySyncReady ? "ready" : "warning",
+      message:
+        env.indexerEnabled && env.syncIntervalMs > 0
+          ? primarySyncReady
+            ? "Indexer persistence and sync posture are ready for launch monitoring."
+            : "Indexer is enabled, but primary-chain sync evidence is not current yet."
+          : "Indexer background sync is not automatic; operators must run manual syncs during activation.",
+    },
+    {
+      key: "internal-token",
+      area: "security",
+      status: env.environment === "development" ? (env.internalToken ? "ready" : "warning") : env.internalToken ? "ready" : "blocked",
+      message: env.internalToken
+        ? "Internal API routes are token protected."
+        : env.environment === "development"
+          ? "Local development may rely on loopback internal access."
+          : "Production and staging require API_INTERNAL_TOKEN before activation.",
+    },
+    {
+      key: "support-ready",
+      area: "support",
+      status: supportReady ? "ready" : "blocked",
+      message: supportReady
+        ? "Support intake and internal triage persistence are enabled."
+        : "Support intake must be enabled and backed by the active persistence runtime for beta.",
+    },
+    {
+      key: "analytics-ready",
+      area: "analytics",
+      status: analyticsReady ? "ready" : "warning",
+      message: analyticsReady
+        ? "Analytics persistence is enabled for post-launch monitoring."
+        : "Analytics is disabled; beta monitoring must use alternate evidence.",
+    },
+    {
+      key: "protected-smoke-ready",
+      area: "smoke",
+      status: smokePrerequisitesReady && env.smokeEvidenceAccepted ? "ready" : smokePrerequisitesReady ? "warning" : "blocked",
+      message:
+        smokePrerequisitesReady && env.smokeEvidenceAccepted
+          ? "Protected live smoke evidence is accepted for this runtime."
+          : smokePrerequisitesReady
+            ? "Protected live smoke prerequisites are present; record accepted smoke evidence before beta traffic."
+            : "Protected live smoke still needs production database and primary-chain write readiness.",
+    },
+    {
+      key: "rollback-ready",
+      area: "rollback",
+      status: env.rollbackEvidenceAccepted ? "ready" : "blocked",
+      message: env.rollbackEvidenceAccepted
+        ? "Rollback URL, image, snapshot, and traffic reversal evidence are accepted for this runtime."
+        : "Confirm rollback URL, image, snapshot, and traffic reversal artifacts before beta.",
+    },
+    {
+      key: "limited-beta-scope",
+      area: "beta",
+      status: env.limitedBetaScopeApproved ? "ready" : "blocked",
+      message: env.limitedBetaScopeApproved
+        ? "Limited beta audience, value limits, support owner, and monitoring window are approved."
+        : "Approve participant limit, value limit, support owner, monitoring window, and pause criteria before opening beta.",
+    },
+  ];
+  const status = getProductionActivationStatus(gates);
+  const rollbackReady = gates.find((gate) => gate.key === "rollback-ready")?.status === "ready";
+  const protectedSmokeReady = gates.find((gate) => gate.key === "protected-smoke-ready")?.status === "ready";
+  const safeForLimitedBetaTraffic =
+    status === "ready" && databaseCutoverReady && supportReady && analyticsReady && protectedSmokeReady && rollbackReady;
+
+  return {
+    environment: env.environment,
+    deploymentTarget: env.deploymentTarget,
+    status,
+    safeForLimitedBetaTraffic,
+    productionDatabaseSelected,
+    databaseCutoverReady,
+    rollbackReady,
+    protectedSmokeReady,
+    supportReady,
+    analyticsReady,
+    message: getProductionActivationMessage(status),
+    gates,
   };
 };

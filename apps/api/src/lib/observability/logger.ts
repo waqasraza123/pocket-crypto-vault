@@ -1,6 +1,6 @@
 import type { FastifyBaseLogger } from "fastify";
 
-import type { ObservabilitySignal } from "@goal-vault/shared";
+import type { ObservabilitySignal } from "@pocket-vault/shared";
 
 type LoggerLike = Pick<FastifyBaseLogger, "info" | "warn" | "error"> | null | undefined;
 

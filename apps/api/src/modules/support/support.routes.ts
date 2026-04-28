@@ -8,7 +8,7 @@ import {
   type SupportRequestRecord,
   type SupportRequestResponse,
   type SupportRequestStatus,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 import { isAddress } from "viem";
 import { z } from "zod";
 

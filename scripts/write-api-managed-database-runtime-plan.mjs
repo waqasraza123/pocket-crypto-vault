@@ -167,8 +167,8 @@ const inspectApiPreflightReport = ({ reference, mode }) => {
   const persistence = report?.persistence;
   const capabilities = persistence?.capabilities;
 
-  if (report?.app !== "goal-vault" || report?.component !== "api") {
-    throw new Error("API_DATABASE_RUNTIME_PREFLIGHT_REPORT must reference a Goal Vault API preflight report.");
+  if (report?.app !== "pocket-vault" || report?.component !== "api") {
+    throw new Error("API_DATABASE_RUNTIME_PREFLIGHT_REPORT must reference a Pocket Vault API preflight report.");
   }
 
   if (!persistence || typeof persistence !== "object") {
@@ -188,11 +188,16 @@ const inspectApiPreflightReport = ({ reference, mode }) => {
     deploymentTarget: report.deploymentTarget,
     persistence: {
       driver: persistence.driver,
+      postgresqlDriver: persistence.postgresqlDriver,
       postgresUrlConfigured: requireBoolean(persistence.postgresUrlConfigured, "postgresUrlConfigured"),
       runtimeReady: requireBoolean(persistence.runtimeReady, "runtimeReady"),
       schemaName: persistence.schemaName,
       postgresqlRuntimeReady: requireBoolean(capabilities.postgresqlRuntimeReady, "postgresqlRuntimeReady"),
       postgresqlDriverAdapterReady: requireBoolean(capabilities.postgresqlDriverAdapterReady, "postgresqlDriverAdapterReady"),
+      neonPostgresqlDriverAdapterReady: requireBoolean(
+        capabilities.neonPostgresqlDriverAdapterReady,
+        "neonPostgresqlDriverAdapterReady",
+      ),
       postgresqlFactoryWiringReady: requireBoolean(capabilities.postgresqlFactoryWiringReady, "postgresqlFactoryWiringReady"),
       postgresqlPreflightConnectionCheckReady: requireBoolean(
         capabilities.postgresqlPreflightConnectionCheckReady,
@@ -215,6 +220,10 @@ const inspectApiPreflightReport = ({ reference, mode }) => {
       failures.push("persistence driver is not postgresql");
     }
 
+    if (!["pg", "neon"].includes(evidence.persistence.postgresqlDriver)) {
+      failures.push("PostgreSQL client driver is not recorded");
+    }
+
     if (!evidence.persistence.postgresUrlConfigured) {
       failures.push("PostgreSQL URL is not configured");
     }
@@ -229,6 +238,10 @@ const inspectApiPreflightReport = ({ reference, mode }) => {
 
     if (!evidence.persistence.postgresqlDriverAdapterReady) {
       failures.push("PostgreSQL driver adapter capability is not ready");
+    }
+
+    if (evidence.persistence.postgresqlDriver === "neon" && !evidence.persistence.neonPostgresqlDriverAdapterReady) {
+      failures.push("Neon PostgreSQL driver adapter capability is not ready");
     }
 
     if (!evidence.persistence.postgresqlFactoryWiringReady) {
@@ -256,8 +269,8 @@ const inspectReleaseManifest = ({ reference, target, candidateApiImage, rollback
 
   const manifest = result.parsed;
 
-  if (manifest?.app !== "goal-vault" || manifest?.component !== "release") {
-    throw new Error("API_DATABASE_RUNTIME_RELEASE_MANIFEST must reference a Goal Vault release manifest.");
+  if (manifest?.app !== "pocket-vault" || manifest?.component !== "release") {
+    throw new Error("API_DATABASE_RUNTIME_RELEASE_MANIFEST must reference a Pocket Vault release manifest.");
   }
 
   const evidence = {
@@ -311,8 +324,8 @@ const inspectTrafficPlan = ({
 
   const trafficPlan = result.parsed;
 
-  if (trafficPlan?.app !== "goal-vault" || trafficPlan?.component !== "api-traffic-plan") {
-    throw new Error("API_DATABASE_RUNTIME_TRAFFIC_PLAN must reference a Goal Vault API traffic plan.");
+  if (trafficPlan?.app !== "pocket-vault" || trafficPlan?.component !== "api-traffic-plan") {
+    throw new Error("API_DATABASE_RUNTIME_TRAFFIC_PLAN must reference a Pocket Vault API traffic plan.");
   }
 
   const evidence = {
@@ -463,7 +476,7 @@ const trafficPlanEvidence = inspectTrafficPlan({
 });
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-runtime-plan",
   target,
   engine,
@@ -539,7 +552,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-api-database-runtime-${target}-${mode}-${runtimeLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-api-database-runtime-${target}-${mode}-${runtimeLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

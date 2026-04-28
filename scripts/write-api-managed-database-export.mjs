@@ -233,7 +233,7 @@ if (exports.length === 0) {
 }
 
 const exportManifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-export",
   target,
   exportLabel,

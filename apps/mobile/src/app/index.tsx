@@ -27,7 +27,7 @@ export default function LandingScreen() {
 
   return (
     <MarketingShell>
-      <Stack.Screen options={{ title: "Goal Vault" }} />
+      <Stack.Screen options={{ title: "Pocket Vault" }} />
       <LandingPageContent
         connectionNotice={<WalletStatusCard />}
         onCreateVault={() => router.push(routes.createVault)}

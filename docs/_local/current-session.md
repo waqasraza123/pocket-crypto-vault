@@ -1,41 +1,68 @@
 # Current Session
 
 ## Date
-2026-04-27
+2026-04-28
 
 ## Current Objective
-Commit current work, then implement the next real-audience beta data handling step with code and documentation only.
+Implement the Pocket Vault niche plan: rebrand the previous generic vault identity into a student-focused pocket-money crypto savings product while keeping the implemented Base/USDC vault product narrow.
 
-## Last Completed Step
-Added beta data retention plan tooling that records retention windows, data classes, deletion request handling, legal-hold handling, and operator review checks.
+## Completed
+- Renamed workspace/package identity from `@goal-vault/*` to `@pocket-vault/*`.
+- Renamed public product identity to Pocket Vault across README, docs, workflows, app metadata, package metadata, and generated artifact names.
+- Updated app IDs to `com.pocketvault.app`, `com.pocketvault.app.staging`, and `com.pocketvault.app.dev`.
+- Updated English and Arabic product copy around 18+ college/university students saving pocket money in USDC for emergencies, books, rent gaps, repairs, medical costs, and travel home.
+- Updated `docs/product/pocket-vault/goal.md` and `docs/project-state.md` with the durable student niche and emergency-first product posture.
+- Kept Solidity contract identifiers, ABI names, legacy SQLite filenames, schema names, and internal access header stable for compatibility.
+- Refreshed pnpm workspace links after the package-scope rename.
 
-## Files Touched
-- `scripts/write-beta-data-retention-plan.mjs`
-- `.github/workflows/beta-data-retention-plan.yml`
-- `package.json`
-- `docs/deployment/beta-data-retention.md`
-- `docs/deployment/beta-support-export.md`
-- `docs/plans/goal-vault-ci-release-workflows.md`
-- `docs/plans/goal-vault-launch-checklist.md`
-- `docs/plans/goal-vault-universal-react-native-phase-48.md`
+## Important Boundaries
+- No new product features were added.
+- No UI redesign was introduced.
+- No multichain, yield, swaps, social, AI, or student social features were added.
+- Onchain contracts remain `GoalVault` and `GoalVaultFactory`.
+
+## Main Files/Folders Touched
+- `README.md`
+- `package.json`, `pnpm-lock.yaml`, `tsconfig.base.json`
+- `apps/mobile/app.config.js`
+- `apps/mobile/src/lib/i18n/messages.ts`
+- `apps/mobile/src/lib/analytics/provider.tsx`
+- `packages/*/package.json`
+- `packages/config/src/app-metadata.ts`
+- `packages/config/src/index.ts`
+- `.github/actions/setup-pnpm/action.yml`
+- `.github/workflows/*`
+- `docs/product/pocket-vault/*`
+- `docs/plans/pocket-vault-*`
 - `docs/project-state.md`
-- `docs/_local/current-session.md`
-
-## Durable Decisions Captured
-- Beta data retention plans are planning artifacts only and do not read, delete, or mutate live data.
-- Beta data retention plan artifacts set `commitAllowed: false` and should be treated as operational artifacts, not committed generated output.
-- Retention planning now covers support requests, support exports, analytics events, API snapshots, managed database exports, release artifacts, runtime logs, and incident records.
-- Deletion request handling must distinguish mutable application-owned records from immutable public onchain data.
-- Provider-specific deletion procedures and public privacy/support policy language remain separate approval tracks.
-
-## Scope Boundaries
-- No production build, Expo export, deployment, Vercel CLI execution, live database connection, data deletion, support status mutation, provider retention change, database provisioning, schema application, import, parity comparison, traffic movement, beta invitations, contract work, live chain interaction, or real test suite was run.
-- This step adds retention planning artifact-generation code plus operator documentation only.
 
 ## Verification Commands
-- `node --check scripts/write-beta-data-retention-plan.mjs`
-- `BETA_DATA_RETENTION_TARGET=staging BETA_DATA_RETENTION_LABEL=smoke BETA_DATA_RETENTION_POLICY_OWNER=ops BETA_DATA_RETENTION_SUPPORT_OWNER=support BETA_DATA_RETENTION_INCIDENT_OWNER=incident-lead BETA_DATA_RETENTION_SNAPSHOT_REFERENCE=goal-vault-api-data-snapshot-staging-smoke BETA_DATA_RETENTION_SUPPORT_EXPORT_REFERENCE=goal-vault-beta-support-export-staging-smoke BETA_DATA_RETENTION_DIR=/tmp/goal-vault-beta-data-retention node scripts/write-beta-data-retention-plan.mjs`
+- `pnpm install`
+- `pnpm typecheck`
+- `pnpm test:ts`
+- `pnpm test:contracts`
+- `pnpm api:preflight`
+- `pnpm verify:ci`
+- `API_PORT=3101 pnpm dev:api`
+- `EXPO_PUBLIC_API_BASE_URL=http://127.0.0.1:3101 pnpm dev:web -- --port 19006`
+- `ruby -e 'require "yaml"; Dir[".github/workflows/*.yml"].sort.each { |f| YAML.load_file(f); puts f }'`
 - `git diff --check`
+- `wc -m README.md`
+- stale public brand/path search across the repo, excluding generated contract outputs and cache folders
+- `pnpm beta:readiness`
 
-## Handoff Note
-Next code-focused step can add provider-specific deletion procedure artifacts once the production storage provider is finalized, or add reviewer-protected Vercel command execution after the promotion approval model is finalized.
+## Verification Result
+- TypeScript passed.
+- TS tests passed.
+- Foundry contract tests passed.
+- API preflight passed for local development with expected production activation gates blocked until production evidence is supplied.
+- GitHub workflow YAML parsed.
+- Diff whitespace check passed.
+- README is 4990 characters.
+- No stale public previous-brand names, old package scope, old app IDs, malformed factory copy, or old docs path references remain.
+- Local API and Expo web servers started for review; rendered landing, how-it-works, security, vaults, and create-vault surfaces returned the student-focused Pocket Vault copy. Dev servers were stopped after review.
+- `pnpm verify:ci` passed.
+- `pnpm beta:readiness` correctly requires operator evidence inputs such as `BETA_READINESS_TARGET`, release manifest, traffic plan, smoke result, snapshots, participant limit, max vault USDC, support reference, and incident owner. No fake beta readiness artifact was generated.
+
+## Next Step
+Review the student copy in the running web app, then decide whether to keep internal compatibility names indefinitely or schedule a separate migration for legacy SQLite filenames and the internal access header.

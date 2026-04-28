@@ -1,4 +1,4 @@
-import type { VaultDegradedState } from "@goal-vault/shared";
+import type { VaultDegradedState } from "@pocket-vault/shared";
 
 import { useI18n } from "../../lib/i18n";
 import { AppErrorState } from "../feedback/AppErrorState";

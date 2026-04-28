@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 import { readGoalVaultSummaryForIndexer } from "../../lib/contracts";
 import { classifyObservedError } from "../../lib/observability/event-classification";

@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Link, type Href, useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 
-import { productConfig } from "@goal-vault/config";
+import { productConfig } from "@pocket-vault/config";
 
 import { routes } from "../../lib/routing";
 import { useI18n } from "../../lib/i18n";

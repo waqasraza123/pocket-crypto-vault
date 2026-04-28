@@ -1,4 +1,4 @@
-# Goal Vault API Preflight
+# Pocket Vault API Preflight
 
 ## Purpose
 The API runtime preflight validates that staging or production backend configuration is coherent before an operator deploys or promotes the API.
@@ -11,12 +11,13 @@ It does not start the server, connect to RPC providers, run database migrations,
   - validates target-chain RPC and factory configuration
   - validates persistence driver selection
   - checks PostgreSQL connection and expected schema tables when `API_PERSISTENCE_DRIVER=postgresql`
+  - reports production activation gates for database cutover, rollback, protected smoke, support, analytics, and limited beta scope
   - reports redacted persistence runtime capabilities and PostgreSQL activation blockers
   - reports booleans for secrets instead of printing secret values
   - writes a JSON preflight report
   - exits nonzero when runtime validation fails
 - `apps/api/package.json`
-  - exposes `pnpm --filter @goal-vault/api preflight`
+  - exposes `pnpm --filter @pocket-vault/api preflight`
 - `package.json`
   - exposes `pnpm api:preflight`
 - `.github/workflows/api-preflight.yml`
@@ -34,13 +35,13 @@ pnpm api:preflight
 Optional output override:
 
 ```bash
-API_PREFLIGHT_OUTPUT=artifacts/goal-vault-api-preflight-staging.json pnpm api:preflight
+API_PREFLIGHT_OUTPUT=artifacts/pocket-vault-api-preflight-staging.json pnpm api:preflight
 ```
 
 The default local output is:
 
 ```text
-artifacts/goal-vault-api-preflight.json
+artifacts/pocket-vault-api-preflight.json
 ```
 
 ## GitHub Workflow Usage
@@ -58,10 +59,13 @@ Variables:
 - `API_PORT`
 - `API_DATA_DIR`
 - `API_PERSISTENCE_DRIVER`
-- `API_PERSISTENCE_SCHEMA_NAME`
 - `API_SYNC_INTERVAL_MS`
 - `API_ENABLE_INDEXER`
 - `API_ENABLE_ANALYTICS`
+- `API_ENABLE_SUPPORT`
+- `API_ROLLBACK_EVIDENCE_ACCEPTED`
+- `API_SMOKE_EVIDENCE_ACCEPTED`
+- `API_LIMITED_BETA_SCOPE_APPROVED`
 - `API_SIGNED_REQUEST_MAX_AGE_SECONDS`
 - `API_LOG_LEVEL`
 - `EXPO_PUBLIC_BASE_FACTORY_ADDRESS`
@@ -69,12 +73,20 @@ Variables:
 - `API_BASE_START_BLOCK`
 - `API_BASE_SEPOLIA_START_BLOCK`
 
+PostgreSQL-only variables:
+
+- `API_POSTGRES_DRIVER`
+- `API_PERSISTENCE_SCHEMA_NAME`
+
 Secrets:
 
 - `API_INTERNAL_TOKEN`
-- `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
+
+PostgreSQL-only secrets:
+
+- `API_DATABASE_URL`
 
 The workflow defaults safe operational values for optional knobs, but staging and production still require:
 
@@ -91,10 +103,12 @@ The preflight report records:
 - host, port, and data directory path
 - whether the data directory currently exists
 - selected persistence driver
+- selected PostgreSQL client driver
 - SQLite data directory
 - whether `API_DATABASE_URL` is configured
 - PostgreSQL schema name selected for future managed database runtime
 - whether the selected persistence runtime is ready
+- production activation gate status and `safeForLimitedBetaTraffic`
 - PostgreSQL connection check status when PostgreSQL mode is selected
 - PostgreSQL schema check status and missing table names when PostgreSQL mode is selected
 - persistence runtime capabilities:
@@ -105,6 +119,7 @@ The preflight report records:
   - PostgreSQL pooled executor boundary readiness
   - lifecycle shutdown readiness
   - PostgreSQL driver adapter readiness
+  - Neon PostgreSQL driver adapter readiness
   - PostgreSQL store factory wiring readiness
   - PostgreSQL preflight connection-check readiness
   - PostgreSQL runtime readiness
@@ -140,7 +155,10 @@ Common failures:
 - target-chain factory address missing or invalid
 - `APP_ENV` and `EXPO_PUBLIC_APP_ENV` mismatch
 - malformed numeric or boolean env values
+- unsupported `API_POSTGRES_DRIVER`
 - `API_DATABASE_URL` missing when `API_PERSISTENCE_DRIVER=postgresql`
+- `API_DATABASE_URL`, `API_POSTGRES_DRIVER`, or `API_PERSISTENCE_SCHEMA_NAME` configured while SQLite mode is active
+- production runtime using SQLite
 - PostgreSQL connection failure
 - PostgreSQL schema missing `vaults`, `vault_events`, `sync_states`, `analytics_events`, or `support_requests`
 

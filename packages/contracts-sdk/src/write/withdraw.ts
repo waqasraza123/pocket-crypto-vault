@@ -1,7 +1,7 @@
 import type { Address } from "viem";
 
 import { buildWithdrawVaultWriteRequest, type WithdrawVaultWriteRequest } from "./vault";
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 export type WithdrawVaultWriteRequestResult =
   | {

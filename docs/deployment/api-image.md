@@ -1,4 +1,4 @@
-# Goal Vault API Image
+# Pocket Vault API Image
 
 ## Purpose
 This runbook covers the repository-owned container path for the Fastify API and indexer service.
@@ -11,7 +11,7 @@ The workflow builds an immutable API image and can publish it to GitHub Containe
   - installs the pinned pnpm workspace
   - copies only API and shared workspace package sources needed by the backend
   - exposes port `3001`
-  - starts `@goal-vault/api`
+  - starts `@pocket-vault/api`
 - `apps/api/package.json`
   - keeps `tsx` in runtime dependencies because the current API start path executes TypeScript directly
 - `.dockerignore`
@@ -75,12 +75,14 @@ The image expects environment configuration at runtime:
 - `API_PUBLIC_BASE_URL`
 - `API_DATA_DIR`
 - `API_PERSISTENCE_DRIVER`
-- `API_PERSISTENCE_SCHEMA_NAME`
 - `API_SYNC_INTERVAL_MS`
 - `API_ENABLE_INDEXER`
 - `API_ENABLE_ANALYTICS`
+- `API_ENABLE_SUPPORT`
+- `API_ROLLBACK_EVIDENCE_ACCEPTED`
+- `API_SMOKE_EVIDENCE_ACCEPTED`
+- `API_LIMITED_BETA_SCOPE_APPROVED`
 - `API_INTERNAL_TOKEN`
-- `API_DATABASE_URL`
 - `EXPO_PUBLIC_BASE_RPC_URL`
 - `EXPO_PUBLIC_BASE_FACTORY_ADDRESS`
 - `EXPO_PUBLIC_BASE_SEPOLIA_RPC_URL`
@@ -88,7 +90,7 @@ The image expects environment configuration at runtime:
 - `API_BASE_START_BLOCK`
 - `API_BASE_SEPOLIA_START_BLOCK`
 
-Use `API_HOST=0.0.0.0` in container hosting. Keep `API_PERSISTENCE_DRIVER=sqlite` for the current API image and mount durable storage for `API_DATA_DIR` when relying on indexed history. `API_DATABASE_URL` is reserved for the future PostgreSQL adapter and must remain secret.
+Set `API_POSTGRES_DRIVER`, `API_DATABASE_URL`, and `API_PERSISTENCE_SCHEMA_NAME` only when `API_PERSISTENCE_DRIVER=postgresql`. Use `API_HOST=0.0.0.0` in container hosting. Production activation requires PostgreSQL after managed database evidence is accepted. Use `API_POSTGRES_DRIVER=neon` only for an approved Neon PostgreSQL cutover. `API_DATABASE_URL` must remain secret.
 
 ## Promotion Flow
 1. Run release-candidate verification for the target.

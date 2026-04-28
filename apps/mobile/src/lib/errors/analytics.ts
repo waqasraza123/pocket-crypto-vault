@@ -1,4 +1,4 @@
-import type { ErrorClass } from "@goal-vault/shared";
+import type { ErrorClass } from "@pocket-vault/shared";
 
 const hasCode = (error: unknown, code: string) =>
   typeof error === "object" && error !== null && "code" in error && String((error as { code?: string | number }).code) === code;

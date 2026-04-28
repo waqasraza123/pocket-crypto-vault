@@ -2,7 +2,7 @@ import { parseEventLogs, type Address, type Hash, type TransactionReceipt } from
 
 import { goalVaultFactoryAbi } from "../abi";
 import { goalVaultAbi } from "../abi";
-import type { VaultCreatedResolution } from "@goal-vault/shared";
+import type { VaultCreatedResolution } from "@pocket-vault/shared";
 
 export const parseVaultCreatedResolution = ({
   receipt,

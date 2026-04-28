@@ -1,0 +1,172 @@
+name: Production V1 Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Release environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      smoke_label:
+        description: Stable smoke label.
+        type: string
+        required: true
+      api_base_url:
+        description: Public API base URL.
+        type: string
+        required: true
+      app_url:
+        description: Public app URL.
+        type: string
+        required: false
+      wallet_address:
+        description: Smoke wallet address.
+        type: string
+        required: false
+      vault_address:
+        description: Vault address created during smoke.
+        type: string
+        required: false
+      create_tx_hash:
+        description: Create vault transaction hash.
+        type: string
+        required: false
+      deposit_tx_hash:
+        description: Deposit transaction hash.
+        type: string
+        required: false
+      rule_path:
+        description: Rule path exercised during smoke.
+        type: choice
+        required: false
+        default: notApplicable
+        options:
+          - timeLock
+          - cooldownUnlock
+          - guardianApproval
+          - notApplicable
+      unlock_request_tx_hash:
+        description: Cooldown or guardian unlock request transaction hash.
+        type: string
+        required: false
+      guardian_decision_tx_hash:
+        description: Guardian approval or rejection transaction hash.
+        type: string
+        required: false
+      withdraw_tx_hash:
+        description: Withdraw transaction hash.
+        type: string
+        required: false
+      support_request_id:
+        description: Support request id observed during smoke.
+        type: string
+        required: false
+      dashboard_verified:
+        description: Dashboard was verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      detail_verified:
+        description: Vault detail was verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      activity_verified:
+        description: Activity feed was verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      indexer_verified:
+        description: Backend indexing was verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      metadata_reconciliation_verified:
+        description: Metadata reconciliation was verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      support_verified:
+        description: Support intake and triage visibility were verified after smoke.
+        type: boolean
+        required: false
+        default: false
+      operator:
+        description: Operator or team responsible for smoke.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret notes.
+        type: string
+        required: false
+      confirm_smoke:
+        description: Type smoke to run checks.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-v1-smoke-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  PRODUCTION_V1_SMOKE_TARGET: ${{ inputs.target }}
+  PRODUCTION_V1_SMOKE_LABEL: ${{ inputs.smoke_label }}
+  PRODUCTION_V1_SMOKE_API_BASE_URL: ${{ inputs.api_base_url }}
+  PRODUCTION_V1_SMOKE_APP_URL: ${{ inputs.app_url }}
+  PRODUCTION_V1_SMOKE_WALLET_ADDRESS: ${{ inputs.wallet_address }}
+  PRODUCTION_V1_SMOKE_VAULT_ADDRESS: ${{ inputs.vault_address }}
+  PRODUCTION_V1_SMOKE_CREATE_TX_HASH: ${{ inputs.create_tx_hash }}
+  PRODUCTION_V1_SMOKE_DEPOSIT_TX_HASH: ${{ inputs.deposit_tx_hash }}
+  PRODUCTION_V1_SMOKE_RULE_PATH: ${{ inputs.rule_path }}
+  PRODUCTION_V1_SMOKE_UNLOCK_REQUEST_TX_HASH: ${{ inputs.unlock_request_tx_hash }}
+  PRODUCTION_V1_SMOKE_GUARDIAN_DECISION_TX_HASH: ${{ inputs.guardian_decision_tx_hash }}
+  PRODUCTION_V1_SMOKE_WITHDRAW_TX_HASH: ${{ inputs.withdraw_tx_hash }}
+  PRODUCTION_V1_SMOKE_SUPPORT_REQUEST_ID: ${{ inputs.support_request_id }}
+  PRODUCTION_V1_SMOKE_DASHBOARD_VERIFIED: ${{ inputs.dashboard_verified }}
+  PRODUCTION_V1_SMOKE_DETAIL_VERIFIED: ${{ inputs.detail_verified }}
+  PRODUCTION_V1_SMOKE_ACTIVITY_VERIFIED: ${{ inputs.activity_verified }}
+  PRODUCTION_V1_SMOKE_INDEXER_VERIFIED: ${{ inputs.indexer_verified }}
+  PRODUCTION_V1_SMOKE_METADATA_RECONCILIATION_VERIFIED: ${{ inputs.metadata_reconciliation_verified }}
+  PRODUCTION_V1_SMOKE_SUPPORT_VERIFIED: ${{ inputs.support_verified }}
+  PRODUCTION_V1_SMOKE_OPERATOR: ${{ inputs.operator }}
+  PRODUCTION_V1_SMOKE_NOTES: ${{ inputs.notes }}
+  PRODUCTION_V1_SMOKE_CONFIRM: ${{ inputs.confirm_smoke }}
+  PRODUCTION_V1_SMOKE_DIR: artifacts/production-v1-smoke
+
+jobs:
+  production-v1-smoke:
+    name: Run ${{ inputs.target }} production v1 smoke checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_smoke != 'smoke' }}
+        run: |
+          echo "Production v1 smoke requires confirm_smoke=smoke."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Run production v1 smoke checks
+        id: smoke
+        run: pnpm smoke:production-v1
+
+      - name: Upload production v1 smoke result
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-production-v1-smoke-${{ inputs.target }}
+          path: ${{ steps.smoke.outputs.smoke_result_path }}
+          if-no-files-found: error

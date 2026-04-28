@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Export
+# Pocket Vault API Managed Database Export
 
 ## Purpose
 The API managed database export converts an API data snapshot into table-level JSONL files that an operator can import into a managed PostgreSQL target.
@@ -62,8 +62,8 @@ API_DATABASE_EXPORT_TARGET=staging \
 API_DATABASE_EXPORT_LABEL=v0.1.0-db-export \
 API_DATABASE_EXPORT_FORMAT=jsonl \
 API_DATABASE_EXPORT_SNAPSHOT_SOURCE=artifacts/api-data-snapshots/staging-before-cutover \
-API_DATABASE_EXPORT_DATABASE_PLAN=goal-vault-api-database-staging-v0.1.0-db-cutover \
-API_DATABASE_EXPORT_SCHEMA_MANIFEST=goal-vault-api-database-schema-staging-v0.1.0-db-schema \
+API_DATABASE_EXPORT_DATABASE_PLAN=pocket-vault-api-database-staging-v0.1.0-db-cutover \
+API_DATABASE_EXPORT_SCHEMA_MANIFEST=pocket-vault-api-database-schema-staging-v0.1.0-db-schema \
 pnpm api:database:export
 ```
 

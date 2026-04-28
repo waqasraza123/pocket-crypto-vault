@@ -58,7 +58,7 @@ jobs:
       - name: Upload API managed database schema
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-managed-database-schema-${{ inputs.target }}
+          name: pocket-vault-api-managed-database-schema-${{ inputs.target }}
           path: |
             ${{ steps.schema.outputs.schema_path }}
             ${{ steps.schema.outputs.manifest_path }}

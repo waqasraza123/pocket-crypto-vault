@@ -1,4 +1,4 @@
-import type { ErrorClass } from "@goal-vault/shared";
+import type { ErrorClass } from "@pocket-vault/shared";
 
 export const classifyObservedError = (error: unknown): ErrorClass => {
   const message = error instanceof Error ? error.message.toLowerCase() : "";

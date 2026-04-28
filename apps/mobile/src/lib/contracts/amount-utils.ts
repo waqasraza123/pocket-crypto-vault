@@ -4,7 +4,7 @@ import {
   type ParsedTokenAmountResult,
   getUsdcAddress,
   parseTokenAmount,
-} from "@goal-vault/contracts-sdk";
+} from "@pocket-vault/contracts-sdk";
 
 import type { DepositPreview, SupportedChainId, VaultSummary, WithdrawPreview } from "../../types";
 

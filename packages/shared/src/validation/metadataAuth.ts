@@ -16,7 +16,7 @@ export const buildVaultMetadataAuthorizationMessage = ({
   issuedAt: string;
 }) =>
   [
-    "Goal Vault metadata authorization",
+    "Pocket Vault metadata authorization",
     "version:1",
     `chainId:${metadata.chainId}`,
     `contractAddress:${normalizeValue(metadata.contractAddress).toLowerCase()}`,

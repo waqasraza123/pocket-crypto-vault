@@ -8,7 +8,7 @@ const start = async () => {
   const env = readApiRuntimeEnv();
 
   if (env.validationErrors.length > 0) {
-    const error = new Error(`Goal Vault API cannot start with invalid configuration: ${env.validationErrors.join(" ")}`);
+    const error = new Error(`Pocket Vault API cannot start with invalid configuration: ${env.validationErrors.join(" ")}`);
     console.error(error.message);
     process.exit(1);
   }
@@ -22,26 +22,26 @@ const start = async () => {
         domain: "indexer",
         action: "full_sync",
         status: "started",
-        message: "Goal Vault indexer sync started.",
+        message: "Pocket Vault indexer sync started.",
       });
       await runFullIndexerSync(context);
       logObservabilitySignal(app.log, {
         domain: "indexer",
         action: "full_sync",
         status: "succeeded",
-        message: "Goal Vault indexer sync completed.",
+        message: "Pocket Vault indexer sync completed.",
       });
     } catch (error) {
-      app.log.error(error, "Goal Vault indexer sync failed.");
+      app.log.error(error, "Pocket Vault indexer sync failed.");
     }
   };
   const closeApp = async (signal: NodeJS.Signals) => {
     try {
-      app.log.info({ signal }, "Goal Vault API shutting down.");
+      app.log.info({ signal }, "Pocket Vault API shutting down.");
       await app.close();
       process.exit(0);
     } catch (error) {
-      app.log.error(error, "Goal Vault API shutdown failed.");
+      app.log.error(error, "Pocket Vault API shutdown failed.");
       process.exit(1);
     }
   };
@@ -71,6 +71,7 @@ const start = async () => {
       analyticsEnabled: env.analyticsEnabled,
       supportEnabled: env.supportEnabled,
       persistenceDriver: env.persistence.driver,
+      postgresqlDriver: env.persistence.postgresqlDriver,
       postgresPersistenceConfigured: env.persistence.postgresUrlConfigured,
       persistenceSchemaName: env.persistence.schemaName,
       syncIntervalMs: env.syncIntervalMs,
@@ -81,7 +82,7 @@ const start = async () => {
         startBlock: chain.startBlock,
       })),
     },
-    "Goal Vault API starting.",
+    "Pocket Vault API starting.",
   );
 
   if (env.indexerEnabled && env.syncIntervalMs > 0) {
@@ -90,9 +91,9 @@ const start = async () => {
       void runSync();
     }, env.syncIntervalMs).unref();
   } else if (!env.indexerEnabled) {
-    app.log.warn("Goal Vault indexer loop is disabled. Manual syncs are required.");
+    app.log.warn("Pocket Vault indexer loop is disabled. Manual syncs are required.");
   } else {
-    app.log.warn("Goal Vault indexer loop is disabled by sync interval. Manual syncs are required.");
+    app.log.warn("Pocket Vault indexer loop is disabled by sync interval. Manual syncs are required.");
   }
 
   await app.listen({

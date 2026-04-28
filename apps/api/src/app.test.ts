@@ -10,6 +10,7 @@ import { AnalyticsStore } from "./lib/observability/analytics";
 import type { IndexerContext } from "./modules/indexer/context";
 import { IndexerStore } from "./modules/indexer/indexer-store";
 import { internalAccessHeaderName } from "./lib/security/internal-access";
+import { SupportStore } from "./modules/support/support-store";
 
 const createEnv = ({
   dataDir,
@@ -27,6 +28,7 @@ const createEnv = ({
   dataDir,
   persistence: {
     driver: "sqlite",
+    postgresqlDriver: "pg",
     sqliteDataDir: dataDir,
     postgresUrlConfigured: false,
     schemaName: "goal_vault_api",
@@ -38,6 +40,9 @@ const createEnv = ({
   indexerEnabled: true,
   analyticsEnabled: false,
   supportEnabled: true,
+  rollbackEvidenceAccepted: false,
+  smokeEvidenceAccepted: false,
+  limitedBetaScopeApproved: false,
   internalToken,
   signedRequestMaxAgeSeconds: 900,
   logLevel: "info",
@@ -59,7 +64,7 @@ const createEnv = ({
 });
 
 test("internal indexer routes require the configured token", async () => {
-  const dataDir = await mkdtemp(path.join(tmpdir(), "goal-vault-api-app-test-"));
+  const dataDir = await mkdtemp(path.join(tmpdir(), "pocket-vault-api-app-test-"));
 
   try {
     const store = new IndexerStore(dataDir);
@@ -121,7 +126,7 @@ test("internal indexer routes require the configured token", async () => {
 });
 
 test("vault metadata route rejects invalid and unsigned requests", async () => {
-  const dataDir = await mkdtemp(path.join(tmpdir(), "goal-vault-api-metadata-route-test-"));
+  const dataDir = await mkdtemp(path.join(tmpdir(), "pocket-vault-api-metadata-route-test-"));
 
   try {
     const store = new IndexerStore(dataDir);
@@ -192,6 +197,98 @@ test("vault metadata route rejects invalid and unsigned requests", async () => {
 
     assert.equal(invalid.statusCode, 400);
     assert.equal(unsigned.statusCode, 401);
+
+    await app.close();
+  } finally {
+    await rm(dataDir, {
+      force: true,
+      recursive: true,
+    });
+  }
+});
+
+test("support intake stores requests and internal triage updates status", async () => {
+  const dataDir = await mkdtemp(path.join(tmpdir(), "pocket-vault-api-support-route-test-"));
+
+  try {
+    const store = new IndexerStore(dataDir);
+    await store.initialize();
+    const supportStore = new SupportStore(dataDir);
+    await supportStore.initialize();
+
+    const env = createEnv({
+      dataDir,
+      internalToken: "support-token",
+    });
+    const context: IndexerContext = {
+      env,
+      store,
+      analyticsStore: new AnalyticsStore(dataDir),
+      supportStore,
+      clients: {},
+      logger: null,
+      close: async () => {
+        await Promise.all([store.close(), supportStore.close()]);
+      },
+    };
+    const app = buildApp({
+      context,
+      env,
+    });
+
+    const created = await app.inject({
+      method: "POST",
+      url: "/support/requests",
+      headers: {
+        "user-agent": "pocket-vault-test",
+      },
+      payload: {
+        category: "transaction",
+        priority: "normal",
+        subject: "Deposit confirmation lag",
+        message: "My staging deposit confirmed but the vault activity has not refreshed after several minutes.",
+        reporterWallet: "0x1111111111111111111111111111111111111111",
+        contactEmail: null,
+        context: {
+          route: "/vaults/0x2222222222222222222222222222222222222222",
+          environment: "development",
+          deploymentTarget: "local",
+          chainId: 84532,
+          walletStatus: "ready",
+          vaultAddress: "0x2222222222222222222222222222222222222222",
+        },
+      },
+    });
+
+    assert.equal(created.statusCode, 201);
+    const createdBody = created.json();
+    assert.equal(createdBody.status, "open");
+
+    const listed = await app.inject({
+      method: "GET",
+      url: "/internal/support/requests?status=open",
+      headers: {
+        [internalAccessHeaderName]: "support-token",
+      },
+    });
+
+    assert.equal(listed.statusCode, 200);
+    assert.equal(listed.json().items.length, 1);
+    assert.equal(listed.json().items[0].subject, "Deposit confirmation lag");
+
+    const updated = await app.inject({
+      method: "PATCH",
+      url: `/internal/support/requests/${createdBody.id}`,
+      headers: {
+        [internalAccessHeaderName]: "support-token",
+      },
+      payload: {
+        status: "triage",
+      },
+    });
+
+    assert.equal(updated.statusCode, 200);
+    assert.equal(updated.json().item.status, "triage");
 
     await app.close();
   } finally {

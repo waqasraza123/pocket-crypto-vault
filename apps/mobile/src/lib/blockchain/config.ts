@@ -1,4 +1,4 @@
-import { productConfig } from "@goal-vault/config";
+import { productConfig } from "@pocket-vault/config";
 
 import { clientEnv, hasRpcUrlForChain } from "../env/client";
 import { defaultGoalVaultChainId, goalVaultSupportedChainIds, goalVaultSupportedChains } from "./chains";

@@ -1,4 +1,4 @@
-# Goal Vault API Managed Database Runtime Plan
+# Pocket Vault API Managed Database Runtime Plan
 
 ## Purpose
 The API managed database runtime plan records the final evidence required before PostgreSQL can become an API runtime persistence mode.
@@ -37,7 +37,7 @@ It is not a deployment workflow. It does not install a driver, connect to Postgr
 - `API_DATABASE_RUNTIME_SCHEMA_NAME`
   - PostgreSQL schema name
 - `API_DATABASE_RUNTIME_DRIVER_PACKAGE`
-  - planned Node PostgreSQL driver package label, such as `pg`
+  - planned Node PostgreSQL driver package label, such as `pg` or `@neondatabase/serverless`
 - `API_DATABASE_RUNTIME_DATABASE_PLAN`
 - `API_DATABASE_RUNTIME_SCHEMA_MANIFEST`
 - `API_DATABASE_RUNTIME_SCHEMA_SQL`
@@ -105,10 +105,12 @@ For `cutover` mode, the local preflight report must show:
 
 - `status: "valid"`
 - `persistence.driver: "postgresql"`
+- `persistence.postgresqlDriver: "pg"` or `"neon"`
 - `persistence.postgresUrlConfigured: true`
 - `persistence.runtimeReady: true`
 - `persistence.capabilities.postgresqlRuntimeReady: true`
 - `persistence.capabilities.postgresqlDriverAdapterReady: true`
+- `persistence.capabilities.neonPostgresqlDriverAdapterReady: true` when `persistence.postgresqlDriver: "neon"`
 - `persistence.capabilities.postgresqlFactoryWiringReady: true`
 - `persistence.capabilities.postgresqlPreflightConnectionCheckReady: true`
 

@@ -1,4 +1,4 @@
-import type { TransactionRecoveryKind, TransactionRecoveryLifecycle } from "@goal-vault/shared";
+import type { TransactionRecoveryKind, TransactionRecoveryLifecycle } from "@pocket-vault/shared";
 
 import { getCurrentMessages } from "../i18n";
 

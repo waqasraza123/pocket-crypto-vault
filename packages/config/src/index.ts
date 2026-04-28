@@ -1,15 +1,15 @@
 export const productConfig = {
-  name: "Goal Vault",
-  shortName: "Goal Vault",
+  name: "Pocket Vault",
+  shortName: "Pocket Vault",
   chainName: "Base",
   assetSymbol: "USDC",
   launchLocale: "en",
 } as const;
 
 export const appCopy = {
-  heroTitle: "Protect the money meant for something that matters.",
+  heroTitle: "Save pocket money in crypto.",
   heroSubtitle:
-    "Create one goal, fund it in USDC, and keep withdrawals locked until the rule allows it.",
+    "Create one student savings vault, fund it in USDC, and keep emergency money protected until your rule allows withdrawal.",
 } as const;
 
 export * from "./app-metadata";

@@ -1,4 +1,4 @@
-import type { SupportedChainId, SyncFreshnessSnapshot } from "@goal-vault/shared";
+import type { SupportedChainId, SyncFreshnessSnapshot } from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 import type { IndexerContext } from "../indexer/context";

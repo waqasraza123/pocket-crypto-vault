@@ -145,8 +145,8 @@ const requireTrafficPlanMatch = ({ action, target, candidateDeploymentUrl, rollb
 
   const plan = trafficPlanEvidence.plan;
 
-  if (plan.app !== "goal-vault") {
-    throw new Error("Traffic plan app must be goal-vault.");
+  if (plan.app !== "pocket-vault") {
+    throw new Error("Traffic plan app must be pocket-vault.");
   }
 
   if (plan.component !== "api-traffic-plan") {
@@ -295,7 +295,7 @@ const trafficPlanValidation = requireTrafficPlanMatch({
 });
 
 const commandPlan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "vercel-api-traffic-command",
   provider: "vercel",
   target,
@@ -354,7 +354,7 @@ const commandPlan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-vercel-api-traffic-${target}-${action}-${label}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-vercel-api-traffic-${target}-${action}-${label}.json`);
 writeFileSync(outputPath, `${JSON.stringify(commandPlan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

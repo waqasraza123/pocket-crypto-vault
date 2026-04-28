@@ -11,7 +11,7 @@ import { getLocaleDirection, getLocaleMessages, interpolate, isLocaleRtl, type A
 export { getLocaleDirection, getLocaleMessages, interpolate, isLocaleRtl } from "./messages";
 export type { AppDirection, AppLocale, AppMessages } from "./messages";
 
-const localeStorageKey = "@goal-vault/locale";
+const localeStorageKey = "@pocket-vault/locale";
 
 const directionalIconMap: Partial<Record<ComponentProps<typeof MaterialCommunityIcons>["name"], ComponentProps<typeof MaterialCommunityIcons>["name"]>> =
   {

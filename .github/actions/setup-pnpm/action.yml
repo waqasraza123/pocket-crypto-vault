@@ -1,5 +1,5 @@
 name: Setup pnpm workspace
-description: Install the Goal Vault pnpm workspace with a pinned Node runtime.
+description: Install the Pocket Vault pnpm workspace with a pinned Node runtime.
 runs:
   using: composite
   steps:

@@ -81,7 +81,7 @@ const outputDir = readText("RELEASE_MANIFEST_DIR", path.join(process.cwd(), "art
 const chainId = target === "production" ? 8453 : 84532;
 
 const manifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "release",
   target,
   releaseLabel,
@@ -118,7 +118,7 @@ if (manifest.rollback.previousFactoryAddress && !addressPattern.test(manifest.ro
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-release-${target}-${releaseLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-release-${target}-${releaseLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(manifest, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

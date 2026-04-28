@@ -3,7 +3,7 @@ import type { Address } from "viem";
 import { getUsdcAddress } from "../addresses";
 import { buildApproveErc20WriteRequest, type ApproveErc20WriteRequest } from "./erc20";
 import { buildDepositVaultWriteRequest, type DepositVaultWriteRequest } from "./vault";
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 type PreparedWriteResult<T> =
   | {

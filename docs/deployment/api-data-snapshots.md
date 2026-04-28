@@ -1,4 +1,4 @@
-# Goal Vault API Data Snapshots
+# Pocket Vault API Data Snapshots
 
 ## Purpose
 The current backend stores indexed vault state, analytics, and beta support intake records in SQLite files under `API_DATA_DIR`.
@@ -14,7 +14,7 @@ This runbook covers repository-owned snapshot and restore scripts for that data.
   - validates a snapshot manifest
   - checks SHA-256 checksums before restore
   - backs up existing files into a timestamped `.restore-backup-*` directory
-  - restores only expected Goal Vault API data files
+  - restores only expected Pocket Vault API data files
 
 ## Data Files
 Current files:

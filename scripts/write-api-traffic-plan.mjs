@@ -193,7 +193,7 @@ if (action === "disable" && !currentApiUrl) {
 }
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-traffic-plan",
   target,
   action,
@@ -239,7 +239,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-api-traffic-${target}-${action}-${planLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-api-traffic-${target}-${action}-${planLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

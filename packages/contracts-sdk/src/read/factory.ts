@@ -1,7 +1,7 @@
 import type { Address, PublicClient } from "viem";
 
 import { goalVaultFactoryAbi } from "../abi";
-import type { VaultAddress, VaultReadResult } from "@goal-vault/shared";
+import type { VaultAddress, VaultReadResult } from "@pocket-vault/shared";
 
 export const readFactoryVaultAddresses = async ({
   client,

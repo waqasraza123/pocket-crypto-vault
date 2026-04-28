@@ -66,7 +66,7 @@ export type {
   WalletConnectionStatus,
   WalletAvailabilityState,
   WalletSession,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 export interface DepositActivityViewModel {
   id: string;

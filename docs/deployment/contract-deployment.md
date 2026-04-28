@@ -1,4 +1,4 @@
-# Goal Vault Contract Deployment
+# Pocket Vault Contract Deployment
 
 ## Purpose
 This runbook covers the guarded GitHub Actions path for deploying `GoalVaultFactory` to Base Sepolia or Base mainnet.
@@ -105,7 +105,7 @@ After broadcast:
 ## Deployment Manifest
 Broadcast mode writes:
 
-- `deployments/goal-vault-factory-<target>-<chainId>.json`
+- `deployments/pocket-vault-factory-<target>-<chainId>.json`
 
 The manifest includes:
 

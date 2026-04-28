@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { Pressable, View } from "react-native";
 
-import { productConfig } from "@goal-vault/config";
+import { productConfig } from "@pocket-vault/config";
 
 import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useI18n } from "../../lib/i18n";
@@ -34,7 +34,7 @@ export const AppFooter = () => {
         <View style={{ gap: spacing[2] }}>
           <AppHeading size="sm" style={{ color: colors.textPrimary }}>{productConfig.name}</AppHeading>
           <AppText size="sm" tone="muted" numberOfLines={breakpoint.isCompact ? 3 : undefined}>
-            {messages.footer.description.replace("Goal Vault", productConfig.name)}
+            {messages.footer.description.replace("Pocket Vault", productConfig.name)}
           </AppText>
         </View>
         <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>

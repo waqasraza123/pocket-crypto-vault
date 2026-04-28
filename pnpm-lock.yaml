@@ -43,18 +43,21 @@ importers:
 
   apps/api:
     dependencies:
-      '@goal-vault/api-client':
+      '@pocket-vault/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@goal-vault/config':
+      '@pocket-vault/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@goal-vault/contracts-sdk':
+      '@pocket-vault/contracts-sdk':
         specifier: workspace:*
         version: link:../../packages/contracts-sdk
-      '@goal-vault/shared':
+      '@pocket-vault/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@neondatabase/serverless':
+        specifier: ^1.1.0
+        version: 1.1.0
       fastify:
         specifier: ^5.6.1
         version: 5.8.5
@@ -67,6 +70,9 @@ importers:
       viem:
         specifier: ^2.38.5
         version: 2.48.4(typescript@5.9.3)(zod@4.3.6)
+      ws:
+        specifier: ^8.20.0
+        version: 8.20.0
       zod:
         specifier: ^4.1.12
         version: 4.3.6
@@ -80,19 +86,19 @@ importers:
       '@expo/vector-icons':
         specifier: ^15.1.1
         version: 15.1.1(expo-font@55.0.6)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
-      '@goal-vault/api-client':
+      '@pocket-vault/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@goal-vault/config':
+      '@pocket-vault/config':
         specifier: workspace:*
         version: link:../../packages/config
-      '@goal-vault/contracts':
+      '@pocket-vault/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
-      '@goal-vault/contracts-sdk':
+      '@pocket-vault/contracts-sdk':
         specifier: workspace:*
         version: link:../../packages/contracts-sdk
-      '@goal-vault/shared':
+      '@pocket-vault/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@react-native-async-storage/async-storage':
@@ -198,7 +204,7 @@ importers:
 
   packages/api-client:
     dependencies:
-      '@goal-vault/shared':
+      '@pocket-vault/shared':
         specifier: workspace:*
         version: link:../shared
       zod:
@@ -207,7 +213,7 @@ importers:
 
   packages/config:
     dependencies:
-      '@goal-vault/shared':
+      '@pocket-vault/shared':
         specifier: workspace:*
         version: link:../shared
       viem:
@@ -225,10 +231,10 @@ importers:
 
   packages/contracts-sdk:
     dependencies:
-      '@goal-vault/config':
+      '@pocket-vault/config':
         specifier: workspace:*
         version: link:../config
-      '@goal-vault/shared':
+      '@pocket-vault/shared':
         specifier: workspace:*
         version: link:../shared
       viem:
@@ -1179,6 +1185,10 @@ packages:
   '@msgpack/msgpack@3.1.3':
     resolution: {integrity: sha512-47XIizs9XZXvuJgoaJUIE2lFoID8ugvc0jzSHP+Ptfk8nTbnR8g788wv48N03Kx0UkAv559HWRQ3yzOgzlRNUA==}
     engines: {node: '>= 18'}
+
+  '@neondatabase/serverless@1.1.0':
+    resolution: {integrity: sha512-r3ZZhRjEcfEdKIZnoB1RusNgvHuaBRqfCzV4Gi+5A9yUX0S4HTws/ASWqt13wL4y4I+0rqsWGdA2w7EQXHi3+Q==}
+    engines: {node: '>=19.0.0'}
 
   '@noble/ciphers@1.3.0':
     resolution: {integrity: sha512-2I0gnIVPtfnMw9ee9h1dJG7tp81+8Ob3OJb3Mv37rx5L40/b0i7djjCVvGOVqc9AEIQyvyu1i6ypKdFw8R8gQw==}
@@ -6417,6 +6427,8 @@ snapshots:
   '@msgpack/msgpack@3.1.2': {}
 
   '@msgpack/msgpack@3.1.3': {}
+
+  '@neondatabase/serverless@1.1.0': {}
 
   '@noble/ciphers@1.3.0': {}
 

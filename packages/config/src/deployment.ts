@@ -1,4 +1,4 @@
-import type { AppEnvironment, DeploymentTarget, ReleaseReadinessCheck, ReleaseReadinessState } from "@goal-vault/shared";
+import type { AppEnvironment, DeploymentTarget, ReleaseReadinessCheck, ReleaseReadinessState } from "@pocket-vault/shared";
 
 export const appEnvironmentValues = ["development", "staging", "production"] as const satisfies readonly AppEnvironment[];
 

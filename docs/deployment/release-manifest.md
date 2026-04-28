@@ -1,4 +1,4 @@
-# Goal Vault Release Manifest
+# Pocket Vault Release Manifest
 
 ## Purpose
 The release manifest records the exact artifacts and configuration an operator intends to promote.
@@ -82,7 +82,7 @@ Use this manifest before manual promotion:
 1. Confirm contract deployment manifest matches the factory address.
 2. Confirm API image manifest matches the API image tag.
 3. Confirm API preflight report is passing for the target environment.
-4. Confirm `API_PERSISTENCE_DRIVER=sqlite` unless the PostgreSQL runtime adapter is implemented and accepted.
+4. Confirm `API_PERSISTENCE_DRIVER=sqlite` unless PostgreSQL runtime preflight, parity, rollback, and activation evidence are accepted.
 5. Confirm managed database plan, schema bundle, export bundle, import plan, and parity plan are reviewed when persistence is changing.
 6. Confirm mobile distribution manifest or EAS dashboard matches the build references.
 7. Generate and review the API traffic plan.

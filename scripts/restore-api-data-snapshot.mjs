@@ -93,7 +93,7 @@ for (const file of manifest.files) {
 }
 
 const restoreManifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-data-restore",
   dataDir,
   snapshotDir,

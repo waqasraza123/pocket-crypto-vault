@@ -68,7 +68,7 @@ if (files.length === 0) {
 }
 
 const manifest = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-data",
   snapshotLabel: label,
   dataDir,

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 import type { ApiRuntimeEnv } from "../../env";
 import { requireInternalRequestAccess } from "../../lib/security/internal-access";

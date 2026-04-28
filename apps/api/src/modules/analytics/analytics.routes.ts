@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 
-import type { AnalyticsBatchResponse } from "@goal-vault/shared";
+import type { AnalyticsBatchResponse } from "@pocket-vault/shared";
 
 import type { ApiRuntimeEnv } from "../../env";
 import { analyticsBatchSchema } from "../../lib/observability/analytics";

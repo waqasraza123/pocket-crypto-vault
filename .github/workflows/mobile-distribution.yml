@@ -109,9 +109,9 @@ jobs:
       - name: Write mobile distribution manifest
         run: |
           mkdir -p ../../artifacts
-          cat > ../../artifacts/goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json <<EOF
+          cat > ../../artifacts/pocket-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json <<EOF
           {
-            "app": "goal-vault",
+            "app": "pocket-vault",
             "component": "mobile",
             "target": "${{ inputs.target }}",
             "platform": "${{ inputs.platform }}",
@@ -127,6 +127,6 @@ jobs:
       - name: Upload mobile distribution manifest
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}
-          path: artifacts/goal-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json
+          name: pocket-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}
+          path: artifacts/pocket-vault-mobile-${{ inputs.target }}-${{ inputs.platform }}-${{ inputs.mode }}.json
           if-no-files-found: error

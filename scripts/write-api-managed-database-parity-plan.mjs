@@ -240,7 +240,7 @@ const outputDir = readText("API_DATABASE_PARITY_DIR", path.join(process.cwd(), "
 const observeMinutes = requirePositiveInteger("API_DATABASE_PARITY_OBSERVE_MINUTES", "30");
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "api-managed-database-parity-plan",
   target,
   engine,
@@ -289,7 +289,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-api-database-parity-${target}-${parityLabel}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-api-database-parity-${target}-${parityLabel}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

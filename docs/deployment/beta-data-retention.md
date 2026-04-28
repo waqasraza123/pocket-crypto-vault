@@ -1,7 +1,7 @@
-# Goal Vault Beta Data Retention Plan
+# Pocket Vault Beta Data Retention Plan
 
 ## Purpose
-The beta data retention plan records how Goal Vault handles application-owned beta data before expanding beyond a limited real-user audience.
+The beta data retention plan records how Pocket Vault handles application-owned beta data before expanding beyond a limited real-user audience.
 
 It does not read live data, delete data, apply database retention policies, mutate support requests, change provider log settings, or connect to storage. It writes a reviewable JSON artifact that defines data classes, retention windows, deletion request handling, legal-hold handling, and operator review checks.
 
@@ -56,8 +56,8 @@ BETA_DATA_RETENTION_LABEL=v0.1.0-beta \
 BETA_DATA_RETENTION_POLICY_OWNER=ops \
 BETA_DATA_RETENTION_SUPPORT_OWNER=support \
 BETA_DATA_RETENTION_INCIDENT_OWNER=incident-lead \
-BETA_DATA_RETENTION_SNAPSHOT_REFERENCE=goal-vault-api-data-snapshot-staging-v0.1.0-beta \
-BETA_DATA_RETENTION_SUPPORT_EXPORT_REFERENCE=goal-vault-beta-support-export-staging \
+BETA_DATA_RETENTION_SNAPSHOT_REFERENCE=pocket-vault-api-data-snapshot-staging-v0.1.0-beta \
+BETA_DATA_RETENTION_SUPPORT_EXPORT_REFERENCE=pocket-vault-beta-support-export-staging \
 pnpm beta:data:retention
 ```
 

@@ -1,6 +1,6 @@
 import path from "node:path";
 
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 import type { Address } from "viem";
 import { isAddress } from "viem";
 import { z } from "zod";
@@ -48,12 +48,16 @@ const runtimeEnvSchema = z.object({
   API_PUBLIC_BASE_URL: optionalUrlSchema,
   API_DATA_DIR: z.string().trim().min(1).optional(),
   API_PERSISTENCE_DRIVER: z.enum(["sqlite", "postgresql"]).optional(),
+  API_POSTGRES_DRIVER: z.enum(["pg", "neon"]).optional(),
   API_DATABASE_URL: optionalSecretSchema,
   API_PERSISTENCE_SCHEMA_NAME: optionalPostgresqlIdentifierSchema,
   API_SYNC_INTERVAL_MS: z.coerce.number().int().min(0).optional(),
   API_ENABLE_INDEXER: optionalBooleanSchema,
   API_ENABLE_ANALYTICS: optionalBooleanSchema,
   API_ENABLE_SUPPORT: optionalBooleanSchema,
+  API_ROLLBACK_EVIDENCE_ACCEPTED: optionalBooleanSchema,
+  API_SMOKE_EVIDENCE_ACCEPTED: optionalBooleanSchema,
+  API_LIMITED_BETA_SCOPE_APPROVED: optionalBooleanSchema,
   API_INTERNAL_TOKEN: z.string().trim().min(1).optional(),
   API_SIGNED_REQUEST_MAX_AGE_SECONDS: z.coerce.number().int().positive().optional(),
   API_LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).optional(),
@@ -70,6 +74,7 @@ export interface ApiChainRuntimeConfig {
 
 export interface ApiPersistenceRuntimeConfig {
   driver: "sqlite" | "postgresql";
+  postgresqlDriver: "pg" | "neon";
   sqliteDataDir: string;
   postgresConnectionString?: string | null;
   postgresUrlConfigured: boolean;
@@ -87,6 +92,7 @@ export interface ApiPersistenceRuntimeCapabilities {
   postgresqlPooledExecutorBoundaryReady: boolean;
   lifecycleShutdownReady: boolean;
   postgresqlDriverAdapterReady: boolean;
+  neonPostgresqlDriverAdapterReady: boolean;
   postgresqlFactoryWiringReady: boolean;
   postgresqlPreflightConnectionCheckReady: boolean;
   postgresqlRuntimeReady: boolean;
@@ -106,6 +112,9 @@ export interface ApiRuntimeEnv {
   indexerEnabled: boolean;
   analyticsEnabled: boolean;
   supportEnabled: boolean;
+  rollbackEvidenceAccepted: boolean;
+  smokeEvidenceAccepted: boolean;
+  limitedBetaScopeApproved: boolean;
   internalToken: string | null;
   signedRequestMaxAgeSeconds: number;
   logLevel: "fatal" | "error" | "warn" | "info" | "debug" | "trace";
@@ -141,6 +150,7 @@ const parseBoolean = (value: string | undefined) => {
 
 export const createApiPersistenceRuntimeCapabilities = (): ApiPersistenceRuntimeCapabilities => {
   const postgresqlDriverAdapterReady = true;
+  const neonPostgresqlDriverAdapterReady = true;
   const postgresqlFactoryWiringReady = true;
   const postgresqlPreflightConnectionCheckReady = true;
   const postgresqlRuntimeReady =
@@ -154,6 +164,7 @@ export const createApiPersistenceRuntimeCapabilities = (): ApiPersistenceRuntime
     postgresqlPooledExecutorBoundaryReady: true,
     lifecycleShutdownReady: true,
     postgresqlDriverAdapterReady,
+    neonPostgresqlDriverAdapterReady,
     postgresqlFactoryWiringReady,
     postgresqlPreflightConnectionCheckReady,
     postgresqlRuntimeReady,
@@ -169,12 +180,14 @@ export const createApiPersistenceRuntimeCapabilities = (): ApiPersistenceRuntime
 
 const createPersistenceRuntimeConfig = ({
   driver,
+  postgresqlDriver,
   sqliteDataDir,
   postgresConnectionString,
   postgresUrlConfigured,
   schemaName,
 }: {
   driver: "sqlite" | "postgresql";
+  postgresqlDriver: "pg" | "neon";
   sqliteDataDir: string;
   postgresConnectionString: string | null;
   postgresUrlConfigured: boolean;
@@ -185,6 +198,7 @@ const createPersistenceRuntimeConfig = ({
   if (driver === "postgresql") {
     return {
       driver,
+      postgresqlDriver,
       sqliteDataDir,
       postgresConnectionString,
       postgresUrlConfigured,
@@ -193,13 +207,14 @@ const createPersistenceRuntimeConfig = ({
       runtimeReady: capabilities.postgresqlRuntimeReady && postgresUrlConfigured,
       message:
         capabilities.postgresqlRuntimeReady && postgresUrlConfigured
-          ? "PostgreSQL persistence is active."
+          ? `PostgreSQL persistence is active through the ${postgresqlDriver} driver.`
           : "PostgreSQL persistence requires API_DATABASE_URL and runtime capabilities before use.",
     };
   }
 
   return {
     driver,
+    postgresqlDriver,
     sqliteDataDir,
     postgresConnectionString,
     postgresUrlConfigured,
@@ -248,6 +263,7 @@ export const readApiRuntimeEnv = (
       dataDir: path.resolve(process.cwd(), ".data"),
       persistence: createPersistenceRuntimeConfig({
         driver: "sqlite",
+        postgresqlDriver: source.API_POSTGRES_DRIVER === "neon" ? "neon" : "pg",
         sqliteDataDir: path.resolve(process.cwd(), ".data"),
         postgresConnectionString: source.API_DATABASE_URL?.trim() || null,
         postgresUrlConfigured: Boolean(source.API_DATABASE_URL?.trim()),
@@ -257,6 +273,9 @@ export const readApiRuntimeEnv = (
       indexerEnabled: true,
       analyticsEnabled: true,
       supportEnabled: true,
+      rollbackEvidenceAccepted: false,
+      smokeEvidenceAccepted: false,
+      limitedBetaScopeApproved: false,
       internalToken: null,
       signedRequestMaxAgeSeconds: 900,
       logLevel: "info",
@@ -282,6 +301,7 @@ export const readApiRuntimeEnv = (
   const dataDir = parsed.data.API_DATA_DIR || path.resolve(process.cwd(), ".data");
   const persistence = createPersistenceRuntimeConfig({
     driver: parsed.data.API_PERSISTENCE_DRIVER || "sqlite",
+    postgresqlDriver: parsed.data.API_POSTGRES_DRIVER || "pg",
     sqliteDataDir: dataDir,
     postgresConnectionString: parsed.data.API_DATABASE_URL || null,
     postgresUrlConfigured: Boolean(parsed.data.API_DATABASE_URL),
@@ -316,6 +336,22 @@ export const readApiRuntimeEnv = (
     if (!persistence.postgresUrlConfigured) {
       validationErrors.push("API_DATABASE_URL is required when API_PERSISTENCE_DRIVER=postgresql.");
     }
+  } else {
+    if (parsed.data.API_DATABASE_URL) {
+      validationErrors.push("API_DATABASE_URL must not be configured unless API_PERSISTENCE_DRIVER=postgresql.");
+    }
+
+    if (parsed.data.API_POSTGRES_DRIVER) {
+      validationErrors.push("API_POSTGRES_DRIVER must not be configured unless API_PERSISTENCE_DRIVER=postgresql.");
+    }
+
+    if (parsed.data.API_PERSISTENCE_SCHEMA_NAME) {
+      validationErrors.push("API_PERSISTENCE_SCHEMA_NAME must not be configured unless API_PERSISTENCE_DRIVER=postgresql.");
+    }
+  }
+
+  if (environment === "production" && persistence.driver !== "postgresql") {
+    validationErrors.push("Production activation requires API_PERSISTENCE_DRIVER=postgresql.");
   }
 
   return {
@@ -331,6 +367,9 @@ export const readApiRuntimeEnv = (
     indexerEnabled: parseBoolean(parsed.data.API_ENABLE_INDEXER) ?? true,
     analyticsEnabled: parseBoolean(parsed.data.API_ENABLE_ANALYTICS) ?? true,
     supportEnabled: parseBoolean(parsed.data.API_ENABLE_SUPPORT) ?? true,
+    rollbackEvidenceAccepted: parseBoolean(parsed.data.API_ROLLBACK_EVIDENCE_ACCEPTED) ?? false,
+    smokeEvidenceAccepted: parseBoolean(parsed.data.API_SMOKE_EVIDENCE_ACCEPTED) ?? false,
+    limitedBetaScopeApproved: parseBoolean(parsed.data.API_LIMITED_BETA_SCOPE_APPROVED) ?? false,
     internalToken: parsed.data.API_INTERNAL_TOKEN ?? null,
     signedRequestMaxAgeSeconds: parsed.data.API_SIGNED_REQUEST_MAX_AGE_SECONDS ?? 900,
     logLevel: parsed.data.API_LOG_LEVEL || "info",

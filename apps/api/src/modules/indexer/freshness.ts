@@ -1,4 +1,4 @@
-import type { SyncFreshnessSnapshot, SupportedChainId } from "@goal-vault/shared";
+import type { SyncFreshnessSnapshot, SupportedChainId } from "@pocket-vault/shared";
 
 import type { IndexerContext } from "./context";
 import { getChainSyncStatuses } from "./sync-state.service";

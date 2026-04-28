@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import type { AppConnectionState, SupportedChainId, WalletConnectionStatus, WalletSession } from "@goal-vault/shared";
+import type { AppConnectionState, SupportedChainId, WalletConnectionStatus, WalletSession } from "@pocket-vault/shared";
 
 import { getSupportedChain, toSupportedChainId } from "../chains";
 

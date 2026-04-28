@@ -109,6 +109,6 @@ jobs:
       - name: Upload API managed database parity plan
         uses: actions/upload-artifact@v4
         with:
-          name: goal-vault-api-managed-database-parity-${{ inputs.target }}
+          name: pocket-vault-api-managed-database-parity-${{ inputs.target }}
           path: ${{ steps.parity.outputs.plan_path }}
           if-no-files-found: error

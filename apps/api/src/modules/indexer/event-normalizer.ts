@@ -1,6 +1,6 @@
 import { parseEventLogs, type Address, type Log } from "viem";
 
-import type { GuardianApprovalState, SupportedChainId, UnlockRequestStatus } from "@goal-vault/shared";
+import type { GuardianApprovalState, SupportedChainId, UnlockRequestStatus } from "@pocket-vault/shared";
 
 import { goalVaultAbi, goalVaultFactoryAbi } from "../../lib/contracts";
 import type { PersistedVaultEventRecord, PersistedVaultRecord } from "../persistence/ports";

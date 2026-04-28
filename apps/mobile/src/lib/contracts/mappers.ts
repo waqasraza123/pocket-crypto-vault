@@ -1,4 +1,4 @@
-import { mapVaultDetail, mapVaultSummary } from "@goal-vault/contracts-sdk";
+import { mapVaultDetail, mapVaultSummary } from "@pocket-vault/contracts-sdk";
 import type {
   CreateVaultFormInput,
   CreateVaultReviewModel,
@@ -7,8 +7,8 @@ import type {
   VaultMetadataRecord,
   VaultRuleSummary,
   VaultSummary,
-} from "@goal-vault/shared";
-import { parseAmountInput } from "@goal-vault/shared";
+} from "@pocket-vault/shared";
+import { parseAmountInput } from "@pocket-vault/shared";
 import { parseUnits, isAddress } from "viem";
 
 import { formatLongDate, formatUsdc } from "../format";

@@ -4,7 +4,7 @@ import {
   parseVaultListPayload,
   parseVaultListResponse,
   parseVaultMetadataSavePayload,
-} from "@goal-vault/api-client";
+} from "@pocket-vault/api-client";
 import type {
   MetadataSaveResult,
   SupportedChainId,
@@ -12,8 +12,8 @@ import type {
   VaultMetadataPayload,
   VaultMetadataWriteRequest,
   VaultSummaryApiModel,
-} from "@goal-vault/shared";
-import * as metadataAuthModule from "@goal-vault/shared/src/validation/metadataAuth";
+} from "@pocket-vault/shared";
+import * as metadataAuthModule from "@pocket-vault/shared/src/validation/metadataAuth";
 import type { Address, EIP1193Provider } from "viem";
 
 import { signWalletMessage } from "../blockchain/wallet/sign-message";
@@ -94,7 +94,7 @@ export const saveVaultMetadata = async ({
     return {
       status: "failed",
       persistence: "backend",
-      message: "Reconnect your wallet before saving vault details to Goal Vault.",
+      message: "Reconnect your wallet before saving vault details to Pocket Vault.",
       retryable: true,
       responseStatus: null,
     };

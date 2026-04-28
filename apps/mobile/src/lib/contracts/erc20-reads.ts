@@ -3,7 +3,7 @@ import {
   readErc20Balance,
   readErc20Decimals,
   readErc20Symbol,
-} from "@goal-vault/contracts-sdk";
+} from "@pocket-vault/contracts-sdk";
 import type { Address } from "viem";
 
 import type { AllowanceState, SupportedChainId, TokenBalanceState } from "../../types";

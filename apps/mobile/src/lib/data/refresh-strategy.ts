@@ -1,4 +1,4 @@
-import type { SupportedChainId, SyncFreshnessSnapshot, VaultMetadataStatus, VaultAddress } from "@goal-vault/shared";
+import type { SupportedChainId, SyncFreshnessSnapshot, VaultMetadataStatus, VaultAddress } from "@pocket-vault/shared";
 import type { Address, Hash } from "viem";
 
 import { triggerIndexerSync } from "../api/sync-status";

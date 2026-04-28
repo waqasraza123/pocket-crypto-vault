@@ -1,4 +1,4 @@
-import type { VaultActivityEvent, VaultDetail, VaultSummary } from "@goal-vault/shared";
+import type { VaultActivityEvent, VaultDetail, VaultSummary } from "@pocket-vault/shared";
 
 const getLockedStatus = (vault: VaultSummary | VaultDetail) => {
   if (vault.currentBalanceAtomic === 0n && vault.totalWithdrawnAtomic > 0n) {

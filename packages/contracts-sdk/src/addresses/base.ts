@@ -1,4 +1,4 @@
-import { contractsByChain } from "@goal-vault/config";
+import { contractsByChain } from "@pocket-vault/config";
 
 export const baseAddresses = {
   chainId: 8453 as const,

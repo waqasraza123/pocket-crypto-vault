@@ -8,7 +8,7 @@ import type {
   VaultAddress,
   VaultMetadataPayload,
   VaultMetadataRecord,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 interface SessionVaultInput extends VaultMetadataPayload {

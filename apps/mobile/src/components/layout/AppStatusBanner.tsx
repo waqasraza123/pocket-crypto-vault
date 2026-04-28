@@ -1,4 +1,4 @@
-import type { AppReadinessState } from "@goal-vault/shared";
+import type { AppReadinessState } from "@pocket-vault/shared";
 
 import { StateBanner } from "../feedback";
 

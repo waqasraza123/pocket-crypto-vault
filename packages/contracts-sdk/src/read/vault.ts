@@ -2,7 +2,7 @@ import type { PublicClient } from "viem";
 
 import { goalVaultAbi } from "../abi";
 import type { GoalVaultContractSummary } from "../types/contract-types";
-import type { VaultAddress, VaultReadResult } from "@goal-vault/shared";
+import type { VaultAddress, VaultReadResult } from "@pocket-vault/shared";
 
 const parseRuleType = (value: bigint): GoalVaultContractSummary["ruleType"] => {
   if (value === 1n) {

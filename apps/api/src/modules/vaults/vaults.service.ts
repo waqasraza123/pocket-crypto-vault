@@ -1,4 +1,4 @@
-import type { SupportedChainId } from "@goal-vault/shared";
+import type { SupportedChainId } from "@pocket-vault/shared";
 import type { Address } from "viem";
 
 import type { IndexerContext } from "../indexer/context";

@@ -228,7 +228,7 @@ const windows = {
 };
 
 const plan = {
-  app: "goal-vault",
+  app: "pocket-vault",
   component: "beta-data-retention-plan",
   target,
   label,
@@ -274,7 +274,7 @@ const plan = {
 
 mkdirSync(outputDir, { recursive: true });
 
-const outputPath = path.join(outputDir, `goal-vault-beta-data-retention-${target}-${label}.json`);
+const outputPath = path.join(outputDir, `pocket-vault-beta-data-retention-${target}-${label}.json`);
 writeFileSync(outputPath, `${JSON.stringify(plan, null, 2)}\n`);
 
 if (process.env.GITHUB_OUTPUT) {

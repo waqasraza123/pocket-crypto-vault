@@ -24,7 +24,10 @@ export const createApiPersistenceStores = async (env: ApiRuntimeEnv): Promise<Ap
       throw new Error("API_DATABASE_URL is required when API_PERSISTENCE_DRIVER=postgresql.");
     }
 
-    const queryExecutor = createPostgresqlQueryExecutor({ connectionString: env.persistence.postgresConnectionString });
+    const queryExecutor = createPostgresqlQueryExecutor({
+      connectionString: env.persistence.postgresConnectionString,
+      driver: env.persistence.postgresqlDriver,
+    });
     await assertPostgresqlRuntimeReady(queryExecutor, env.persistence.schemaName);
 
     return {

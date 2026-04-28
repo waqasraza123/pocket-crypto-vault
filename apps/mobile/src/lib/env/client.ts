@@ -1,5 +1,5 @@
-import { appRuntimeEnv } from "@goal-vault/config";
-import type { SupportedChainId } from "@goal-vault/shared";
+import { appRuntimeEnv } from "@pocket-vault/config";
+import type { SupportedChainId } from "@pocket-vault/shared";
 
 import type { AppEnvDiagnostics } from "./schema";
 

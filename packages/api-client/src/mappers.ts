@@ -8,7 +8,7 @@ import type {
   VaultDetailApiModel,
   VaultListResult,
   VaultSummaryApiModel,
-} from "@goal-vault/shared";
+} from "@pocket-vault/shared";
 
 import type {
   ActivityFeedResponse,
@@ -212,6 +212,7 @@ export const parseHealthResponse = (response: HealthResponse): {
   api: ApiHealthSummary;
   staging: StagingReadinessSummary;
   release: HealthResponse["release"];
+  productionActivation: HealthResponse["productionActivation"];
   validationErrors: string[];
 } => ({
   ok: response.ok,
@@ -221,5 +222,6 @@ export const parseHealthResponse = (response: HealthResponse): {
   api: response.api,
   staging: response.staging,
   release: response.release,
+  productionActivation: response.productionActivation,
   validationErrors: response.validationErrors,
 });
