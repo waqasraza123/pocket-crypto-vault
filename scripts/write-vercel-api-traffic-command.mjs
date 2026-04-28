@@ -7,6 +7,7 @@ const actionValues = new Set(["promote", "rollback", "disable"]);
 const remoteReferencePattern = /^https:\/\/[^\s]+$/;
 const secretPattern = /(password|passwd|secret|token|credential|private[_-]?key|api[_-]?key|bearer\s+|basic\s+)/i;
 const localReferencePattern = /^\.{0,2}\//;
+const disableStrategyValues = new Set(["remove-alias"]);
 
 const readText = (name, fallback = "") => (process.env[name] || fallback).trim();
 
@@ -96,6 +97,24 @@ const normalizeUrl = (name, value) => {
 };
 
 const optionalUrl = (name) => normalizeUrl(name, optionalText(name));
+
+const optionalAliasDomain = (name) => {
+  const value = optionalText(name);
+
+  if (!value) {
+    return null;
+  }
+
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:\/\//.test(value) || value.includes("/") || value.includes("?") || value.includes("#")) {
+    throw new Error(`${name} must be a bare domain without protocol, path, query, or fragment.`);
+  }
+
+  if (value.includes("@")) {
+    throw new Error(`${name} must not include credentials.`);
+  }
+
+  return value.toLowerCase();
+};
 
 const requirePositiveInteger = (name, fallback) => {
   const value = Number.parseInt(readText(name, fallback), 10);
@@ -193,7 +212,7 @@ const buildCommand = (parts, scope) => {
   return command.join(" ");
 };
 
-const buildCommands = ({ action, candidateDeploymentUrl, scope }) => {
+const buildCommands = ({ action, candidateDeploymentUrl, disableAliasDomain, scope }) => {
   if (action === "promote") {
     return [
       {
@@ -216,10 +235,21 @@ const buildCommands = ({ action, candidateDeploymentUrl, scope }) => {
     ];
   }
 
+  if (action === "disable") {
+    return [
+      {
+        name: "disable-production-api-alias",
+        command: buildCommand(["pnpm", "dlx", "vercel", "alias", "rm", shellQuote(disableAliasDomain), "--yes"], scope),
+        mutatesTraffic: true,
+        requiresHumanApproval: true,
+      },
+    ];
+  }
+
   return [];
 };
 
-const buildManualSteps = ({ action, observeMinutes }) => {
+const buildManualSteps = ({ action, disableAliasDomain, observeMinutes }) => {
   if (action === "promote") {
     return [
       "Confirm Vercel project, scope, candidate deployment URL, production API domain, and traffic plan are aligned.",
@@ -241,11 +271,12 @@ const buildManualSteps = ({ action, observeMinutes }) => {
   }
 
   return [
-    "Disablement is manual-only in this artifact because it depends on the selected Vercel project routing policy.",
-    "Use the approved Vercel dashboard or provider API procedure to remove public API routing, protect the project, or redirect clients to degraded-state messaging.",
+    `Confirm ${disableAliasDomain} is the public API alias that should stop serving Pocket Vault API traffic.`,
+    "Run the alias removal command from an authenticated operator workstation or approved CI job with VERCEL_TOKEN.",
+    "Confirm production API /health and /ready are no longer healthy on the disabled public API domain.",
     "Confirm app clients no longer claim indexed freshness while public API traffic is unavailable.",
     "Preserve logs, support requests, API snapshots, and release artifacts for incident review.",
-    "Record the disablement reason and re-enable criteria.",
+    "Record the disablement reason, alias removed, re-enable criteria, and rollback deployment reference.",
   ];
 };
 
@@ -260,6 +291,8 @@ const trafficPlanReference = requireText("VERCEL_API_TRAFFIC_PLAN");
 const candidateDeploymentUrl = optionalUrl("VERCEL_API_CANDIDATE_DEPLOYMENT_URL");
 const rollbackDeploymentUrl = optionalUrl("VERCEL_API_ROLLBACK_DEPLOYMENT_URL");
 const productionDomain = optionalUrl("VERCEL_API_PRODUCTION_DOMAIN");
+const disableStrategy = optionalText("VERCEL_API_DISABLE_STRATEGY");
+const disableAliasDomain = optionalAliasDomain("VERCEL_API_DISABLE_ALIAS_DOMAIN") ?? (productionDomain ? new URL(productionDomain).hostname : null);
 const changeWindow = optionalText("VERCEL_API_TRAFFIC_CHANGE_WINDOW");
 const operator = optionalText("VERCEL_API_TRAFFIC_OPERATOR");
 const notes = optionalText("VERCEL_API_TRAFFIC_NOTES");
@@ -270,6 +303,8 @@ const notes = optionalText("VERCEL_API_TRAFFIC_NOTES");
   ["VERCEL_API_TRAFFIC_CHANGE_WINDOW", changeWindow],
   ["VERCEL_API_TRAFFIC_OPERATOR", operator],
   ["VERCEL_API_TRAFFIC_NOTES", notes],
+  ["VERCEL_API_DISABLE_STRATEGY", disableStrategy],
+  ["VERCEL_API_DISABLE_ALIAS_DOMAIN", disableAliasDomain],
 ].forEach(([name, value]) => validateNonSecretText(name, value));
 
 if (action === "promote" && !candidateDeploymentUrl) {
@@ -282,6 +317,24 @@ if ((action === "promote" || action === "rollback") && !rollbackDeploymentUrl) {
 
 if (!productionDomain) {
   throw new Error("VERCEL_API_PRODUCTION_DOMAIN is required.");
+}
+
+if (action === "disable") {
+  if (!disableStrategy) {
+    throw new Error("VERCEL_API_DISABLE_STRATEGY is required for disable command plans.");
+  }
+
+  if (!disableStrategyValues.has(disableStrategy)) {
+    throw new Error("VERCEL_API_DISABLE_STRATEGY must be remove-alias.");
+  }
+
+  if (!disableAliasDomain) {
+    throw new Error("VERCEL_API_DISABLE_ALIAS_DOMAIN or VERCEL_API_PRODUCTION_DOMAIN is required for disable command plans.");
+  }
+
+  if (new URL(productionDomain).hostname !== disableAliasDomain) {
+    throw new Error("VERCEL_API_DISABLE_ALIAS_DOMAIN must match the hostname in VERCEL_API_PRODUCTION_DOMAIN.");
+  }
 }
 
 const trafficPlanEvidence = readTrafficPlan(trafficPlanReference);
@@ -304,7 +357,7 @@ const commandPlan = {
   generatedAt: new Date().toISOString(),
   noDeploymentPerformed: true,
   noTrafficMoved: true,
-  manualOnly: action === "disable",
+  manualOnly: false,
   requiredSecrets: ["VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID"],
   vercel: {
     project,
@@ -312,6 +365,8 @@ const commandPlan = {
     productionDomain,
     candidateDeploymentUrl,
     rollbackDeploymentUrl,
+    disableStrategy: action === "disable" ? disableStrategy : null,
+    disableAliasDomain: action === "disable" ? disableAliasDomain : null,
   },
   trafficPlan: {
     reference: trafficPlanEvidence.reference,
@@ -331,8 +386,8 @@ const commandPlan = {
     "Confirm VERCEL_TOKEN, VERCEL_ORG_ID, and VERCEL_PROJECT_ID are available only in the approved execution environment.",
     "Confirm API preflight, release manifest, support intake, data snapshot, and rollback references are available.",
   ],
-  commands: buildCommands({ action, candidateDeploymentUrl, scope }),
-  steps: buildManualSteps({ action, observeMinutes }),
+  commands: buildCommands({ action, candidateDeploymentUrl, disableAliasDomain, scope }),
+  steps: buildManualSteps({ action, disableAliasDomain, observeMinutes }),
   rollbackTriggers: [
     "Production /ready reports blocked checks after promotion.",
     "Production /health fails after promotion or rollback.",
@@ -340,8 +395,8 @@ const commandPlan = {
     "Create, deposit, withdraw, support intake, or metadata smoke checks fail against the public API.",
   ],
   postExecutionChecks: [
-    "Check /health on the production API domain.",
-    "Check /ready on the production API domain.",
+    action === "disable" ? "Confirm /health is not healthy on the disabled production API domain." : "Check /health on the production API domain.",
+    action === "disable" ? "Confirm /ready is not healthy on the disabled production API domain." : "Check /ready on the production API domain.",
     "Run product smoke checks against the app configured for this API domain.",
     "Record the final deployment URL, operator, timestamp, observation result, and rollback readiness.",
   ],

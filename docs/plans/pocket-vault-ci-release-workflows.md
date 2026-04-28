@@ -46,8 +46,8 @@ The CI and release-candidate workflows intentionally stop at verification and re
 - `.github/workflows/vercel-api-traffic-command.yml`
   - manual staging or production Vercel API traffic command plan generation
   - validates Vercel project references, deployment URLs, production domain, and traffic plan evidence
-  - uploads exact promote or rollback command strings without running Vercel CLI
-  - emits manual-only disablement steps because disablement depends on project routing policy
+  - uploads exact promote, rollback, or alias-removal disablement command strings without running Vercel CLI
+  - requires the explicit `remove-alias` strategy for disablement
 - `.github/workflows/beta-support-export.yml`
   - manual staging or production beta support export generation
   - reads a downloaded API data snapshot artifact or runner-local snapshot directory

@@ -4,7 +4,7 @@ import path from "node:path";
 import process from "node:process";
 
 const targetValues = new Set(["staging", "production"]);
-const actionValues = new Set(["promote", "rollback"]);
+const actionValues = new Set(["promote", "rollback", "disable"]);
 const secretPattern = /(password|passwd|secret|token|credential|private[_-]?key|api[_-]?key|bearer\s+|basic\s+)/i;
 
 const readText = (name, fallback = "") => (process.env[name] || fallback).trim();
@@ -90,7 +90,7 @@ const readCommandPlan = (planReference, target) => {
   }
 
   if (!actionValues.has(plan.action)) {
-    throw new Error("Only promote and rollback command plans can be executed.");
+    throw new Error("Only promote, rollback, and disable command plans can be executed.");
   }
 
   if (plan.noTrafficMoved !== true || plan.noDeploymentPerformed !== true) {
@@ -149,17 +149,29 @@ const runCommand = (command) =>
 
 const checkEndpoint = async (baseUrl, pathname) => {
   const url = `${baseUrl}${pathname}`;
-  const response = await fetch(url, {
-    headers: {
-      accept: "application/json",
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      headers: {
+        accept: "application/json",
+      },
+    });
 
-  return {
-    url,
-    ok: response.ok,
-    status: response.status,
-  };
+    return {
+      url,
+      ok: response.ok,
+      status: response.status,
+      reachable: true,
+      error: null,
+    };
+  } catch (error) {
+    return {
+      url,
+      ok: false,
+      status: null,
+      reachable: false,
+      error: error instanceof Error ? error.name : "FetchError",
+    };
+  }
 };
 
 const target = requireTarget();
@@ -189,7 +201,11 @@ const commandResult = await runCommand(commandPlan.command);
 const health = await checkEndpoint(productionDomain, "/health");
 const ready = await checkEndpoint(productionDomain, "/ready");
 
-if (!health.ok || !ready.ok) {
+if (commandPlan.plan.action === "disable" && (health.ok || ready.ok)) {
+  throw new Error("Post-execution API disablement checks failed because the production API remained healthy.");
+}
+
+if (commandPlan.plan.action !== "disable" && (!health.ok || !ready.ok)) {
   throw new Error("Post-execution API health checks failed.");
 }
 
@@ -209,6 +225,7 @@ const result = {
   startedAt,
   finishedAt,
   trafficMoved: true,
+  publicTrafficDisabled: commandPlan.plan.action === "disable",
   credentialsRedacted: true,
   commandPlan: {
     path: commandPlan.path,
@@ -217,6 +234,8 @@ const result = {
     productionDomain,
     candidateDeploymentUrl: commandPlan.plan.vercel?.candidateDeploymentUrl ?? null,
     rollbackDeploymentUrl: commandPlan.plan.vercel?.rollbackDeploymentUrl ?? null,
+    disableStrategy: commandPlan.plan.vercel?.disableStrategy ?? null,
+    disableAliasDomain: commandPlan.plan.vercel?.disableAliasDomain ?? null,
   },
   commandResult,
   checks: {

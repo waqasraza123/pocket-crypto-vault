@@ -30,7 +30,7 @@ Operator-facing product state:
 - Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, and production smoke evidence.
 - Production activation readiness now has explicit runtime gates for PostgreSQL cutover, protected smoke evidence, rollback evidence, support, analytics, and limited beta scope in API preflight and `/ready`.
 - Contract security hardening now uses SafeERC20, reentrancy protection, explicit vault and factory validation, zero-recipient withdrawal rejection, malicious-token regression tests, and a repo-local contract security audit note.
-- Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover, traffic movement, and provider-specific public API disablement automation remain unexecuted/deferred.
+- Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover and traffic movement remain unexecuted/deferred.
 
 ## Current Repository Reality
 The repository now has a real v1 foundation:
@@ -73,8 +73,8 @@ The repository now has a real v1 foundation:
 - guarded beta support export artifacts for offline operator review from verified API data snapshots
 - beta data retention plan artifacts covering support, snapshots, analytics, exports, logs, incidents, deletion requests, and legal holds
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
-- Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote or rollback commands without moving traffic
-- guarded Vercel API traffic execution workflow for reviewed promote and rollback command plans
+- Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote, rollback, or alias-removal disable commands without moving traffic
+- guarded Vercel API traffic execution workflow for reviewed promote, rollback, and alias-removal disable command plans
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
 - provider-neutral managed database export bundles that convert API data snapshots into JSONL handoff files
@@ -83,12 +83,13 @@ The repository now has a real v1 foundation:
 - provider-neutral managed database runtime activation plan artifacts before PostgreSQL mode is enabled
 - guarded PostgreSQL schema apply, JSONL import execution, and parity execution workflows behind protected credentials and explicit confirmations
 - guarded production v1 smoke workflow for public API health/readiness checks and operator-recorded create/deposit/withdraw/support evidence
+- guarded Vercel public API disablement execution through reviewed alias-removal command plans
 - production activation readiness gates that block ambiguous production SQLite mode, reject mixed SQLite/PostgreSQL runtime env, and require accepted smoke, rollback, and beta scope evidence before limited beta traffic
 - production activation, production cutover, production smoke, limited beta, and rollback runbooks under `docs/plans/`
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- provider-specific public API disablement automation and live production execution of the approved database cutover and traffic movement procedures
+- live production execution of the approved database cutover and traffic movement procedures
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -294,9 +295,10 @@ Still not implemented:
 - Beta data retention plans are planning artifacts only; provider-specific deletion procedures and public privacy policy language remain separate approval tracks.
 - Phase 49 fixes API support route runtime exports and SQLite row typing so CI can cover beta support intake and triage.
 - Phase 49 adds guarded managed database execution scripts and workflows for schema apply, JSONL import, and parity comparison. These workflows require protected `API_DATABASE_URL` plus explicit confirmation inputs and write redacted execution result artifacts.
-- Phase 49 adds guarded Vercel API traffic execution for reviewed promote and rollback command plans. Disablement remains manual-only until the selected Vercel routing policy is explicit.
+- Phase 49 adds guarded Vercel API traffic execution for reviewed promote and rollback command plans.
 - Phase 49 adds a production v1 smoke artifact workflow that checks public API `/health` and `/ready` and records operator-provided create, deposit, withdraw, vault, wallet, and support evidence without sending chain transactions.
 - Phase 50 adds production-only Neon readiness through `API_POSTGRES_DRIVER=neon`, `@neondatabase/serverless`, and `ws` while keeping the existing API persistence tables and `API_DATABASE_URL` secret boundary.
+- Phase 51 adds guarded Vercel public API disablement execution through `remove-alias` command plans. Disable command planning validates the provider-neutral disable traffic plan and production API domain, execution runs `vercel alias rm`, and post-execution checks require public `/health` and `/ready` to stop being healthy.
 - Product docs live in `docs/product/pocket-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -357,6 +359,7 @@ Still not implemented:
 - The Phase 46 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-46.md`.
 - The Phase 47 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-47.md`.
 - The Phase 48 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-48.md`.
+- The Phase 51 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-51.md`.
 - The CI and release workflow note lives at `docs/plans/pocket-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
@@ -380,7 +383,7 @@ Still not implemented:
 
 ## Deferred / Not Yet Implemented
 - Accepted managed database schema/import/parity execution, production PostgreSQL cutover, and rollback operation
-- Actual provider-specific backend deployment, traffic switching, and automated rollback execution workflows
+- Live provider-specific backend deployment and traffic movement
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

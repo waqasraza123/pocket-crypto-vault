@@ -4,43 +4,41 @@
 2026-04-28
 
 ## Current Objective
-Add subtle premium animations to authenticated Pocket Vault app flows using the existing React Native `Animated` motion layer.
+Implement the next production-readiness step with code and detailed docs only: guarded Vercel public API disablement.
 
 ## Completed
-- Added reusable `MotionPressable` and `StatusPulse` primitives.
-- Added optional completion emphasis to `ProgressBar`.
-- Added pulsing pending motion to loading, sync, metadata-pending, and transaction status surfaces.
-- Added animated selected-state feedback to create-vault accent and rule options.
-- Added motion polish to create-vault step pills and create/deposit/withdraw success states.
-- Applied completion emphasis to dashboard/detail/deposit progress bars.
+- Confirmed there was no uncommitted current work before starting.
+- Extended Vercel API traffic command plans so `disable` requires `VERCEL_API_DISABLE_STRATEGY=remove-alias`.
+- Added executable disable command generation using `vercel alias rm <api-domain> --yes`.
+- Extended guarded Vercel traffic execution to support reviewed disable command plans.
+- Added disablement-specific post-execution checks that require public `/health` and `/ready` to stop being healthy.
+- Added workflow inputs for disable strategy and alias domain.
+- Updated deployment, launch checklist, release workflow, phase, and project-state docs.
 
 ## Important Boundaries
-- No new animation dependency was introduced.
-- No wallet, contract, API, schema, transaction, or persistence behavior was changed.
-- Reduced-motion handling remains centralized through the existing motion preference hook.
-- Local `.env` remains untracked and must not be committed.
+- No tests, real builds, Vercel CLI execution, deployment, database operation, traffic movement, or chain action was run.
+- The command-plan artifact remains non-mutating with `noDeploymentPerformed: true` and `noTrafficMoved: true`.
+- Only the protected execution workflow with `confirm_execute=execute` can run the alias-removal command.
+- Secrets remain confined to protected runtime env and are not written to docs or artifacts.
 
 ## Main Files/Folders Touched
-- `apps/mobile/src/components/primitives/`
-- `apps/mobile/src/components/feedback/`
-- `apps/mobile/src/components/forms/StepPills.tsx`
-- `apps/mobile/src/components/vaults/`
-- `apps/mobile/src/app/(app)/vaults/new.tsx`
-- `docs/_local/current-session.md`
+- `scripts/write-vercel-api-traffic-command.mjs`
+- `scripts/execute-vercel-api-traffic.mjs`
+- `.github/workflows/vercel-api-traffic-command.yml`
+- `.github/workflows/vercel-api-traffic-execute.yml`
+- `docs/deployment/vercel-api-traffic.md`
+- `docs/plans/pocket-vault-universal-react-native-phase-51.md`
+- `docs/project-state.md`
 
 ## Verification Commands
-- `pnpm --filter @pocket-vault/mobile typecheck`
-- `pnpm --filter @pocket-vault/mobile test`
-- `pnpm test:ts`
-- `pnpm typecheck`
+- `node --check scripts/write-vercel-api-traffic-command.mjs`
+- `node --check scripts/execute-vercel-api-traffic.mjs`
 - `git diff --check`
 
 ## Verification Result
-- Mobile typecheck passed.
-- Mobile tests passed after rerunning with sandbox escalation for `tsx` IPC pipe creation.
-- Workspace TypeScript tests passed.
-- Workspace typecheck passed.
+- Script syntax checks passed.
 - Diff whitespace check passed.
+- Full tests and builds intentionally skipped per user request.
 
 ## Next Step
-Run a visual browser or device smoke check before release to judge motion timing in real dashboard, create-vault, deposit, and withdraw flows.
+Generate a reviewed provider-neutral disable traffic plan before using the Vercel alias-removal execution path in production.
