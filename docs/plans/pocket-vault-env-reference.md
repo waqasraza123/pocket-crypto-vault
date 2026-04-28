@@ -137,6 +137,32 @@
 - `BETA_READINESS_NOTES`
 - `BETA_READINESS_DIR`
 
+## Beta Invitation Wave Variables
+- `BETA_INVITATION_TARGET`
+  - `staging` or `production`
+- `BETA_INVITATION_WAVE_LABEL`
+  - stable invitation wave label
+- `BETA_INVITATION_READINESS_PLAN`
+  - beta readiness artifact name, URL, or local path
+- `BETA_INVITATION_OBSERVATION_REPORT`
+  - stable production observation artifact name, URL, or local path
+- `BETA_INVITATION_WAVE_NUMBER`
+- `BETA_INVITATION_WAVE_SIZE`
+- `BETA_INVITATION_PREVIOUSLY_INVITED_COUNT`
+- `BETA_INVITATION_PARTICIPANT_LIMIT`
+  - used only when readiness artifact is not locally inspected
+- `BETA_INVITATION_MAX_VAULT_USDC`
+- `BETA_INVITATION_COMMUNICATION_REFERENCE`
+  - non-secret invite copy, rollout doc, or private channel reference
+- `BETA_INVITATION_SUPPORT_REFERENCE`
+- `BETA_INVITATION_INCIDENT_OWNER`
+- `BETA_INVITATION_OWNER`
+- `BETA_INVITATION_OPERATOR`
+- `BETA_INVITATION_NOTES`
+- `BETA_INVITATION_CONFIRM_PLAN`
+  - must be `plan`
+- `BETA_INVITATION_DIR`
+
 ## Production Activation Record Variables
 - `PRODUCTION_ACTIVATION_TARGET`
   - `staging` or `production`

@@ -17,6 +17,7 @@
 - Operator evidence captured: release manifest, preflight, runtime plan, traffic plan, smoke result, snapshots, and beta readiness artifacts are stored.
 - Activation recorded: post-cutover activation record is accepted or the recovery outcome is recorded.
 - Observation clean: stable production observation report is stored for the current invitation wave.
+- Invitation wave approved: beta invitation wave plan is stored and contains no participant PII.
 - Beta scope approved: participant limit, value limit, support owner, incident owner, observation window, pause criteria, and re-enable criteria are recorded.
 
 ## Required Commands
@@ -27,6 +28,7 @@
 - `pnpm beta:readiness`
 - `pnpm production:activation:record`
 - `pnpm production:observation:report`
+- `pnpm beta:invitation:wave`
 
 ## Launch Procedure
 1. Confirm all go/no-go gates.
@@ -34,11 +36,12 @@
 3. Move traffic through the approved traffic execution path.
 4. Run the production activation record and store it with release evidence.
 5. Run a stable production observation report and store it with release evidence.
-6. Invite only the approved initial beta cohort.
-7. Monitor for the approved observation window before expanding invites.
-8. Run another observation report before each invitation expansion.
-9. Review support queue after each participant wave.
-10. Record launch outcome and incidents in release notes.
+6. Run a beta invitation wave plan for the initial cohort.
+7. Invite only the approved initial beta cohort from the private operational system.
+8. Monitor for the approved observation window before expanding invites.
+9. Run another observation report and invitation wave plan before each invitation expansion.
+10. Review support queue after each participant wave.
+11. Record launch outcome and incidents in release notes.
 
 ## Monitoring Priorities
 - `/health` alive.

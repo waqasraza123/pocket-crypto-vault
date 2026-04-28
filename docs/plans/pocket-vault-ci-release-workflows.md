@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, production activation record generation, and production observation report generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta invitation wave planning, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, production activation record generation, and production observation report generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -53,6 +53,10 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - reads a downloaded API data snapshot artifact or runner-local snapshot directory
   - writes summary or explicitly confirmed private support JSONL exports
   - uploads a private operational artifact without connecting to live storage or mutating support status
+- `.github/workflows/beta-invitation-wave-plan.yml`
+  - manual staging or production beta invitation wave plan generation
+  - validates beta readiness, stable production observation, participant counts, value guidance, support reference, incident owner, and invite owner
+  - uploads a non-PII wave plan artifact without sending invitations
 - `.github/workflows/beta-data-retention-plan.yml`
   - manual staging or production beta data retention plan generation
   - records retention windows, owners, data classes, deletion request flow, and legal-hold flow
@@ -269,6 +273,23 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `BETA_SUPPORT_EXPORT_INCIDENT_REFERENCE`
 - `BETA_SUPPORT_EXPORT_NOTES`
 - `BETA_SUPPORT_EXPORT_DIR`
+- `BETA_INVITATION_TARGET`
+- `BETA_INVITATION_WAVE_LABEL`
+- `BETA_INVITATION_READINESS_PLAN`
+- `BETA_INVITATION_OBSERVATION_REPORT`
+- `BETA_INVITATION_WAVE_NUMBER`
+- `BETA_INVITATION_WAVE_SIZE`
+- `BETA_INVITATION_PREVIOUSLY_INVITED_COUNT`
+- `BETA_INVITATION_PARTICIPANT_LIMIT`
+- `BETA_INVITATION_MAX_VAULT_USDC`
+- `BETA_INVITATION_COMMUNICATION_REFERENCE`
+- `BETA_INVITATION_SUPPORT_REFERENCE`
+- `BETA_INVITATION_INCIDENT_OWNER`
+- `BETA_INVITATION_OWNER`
+- `BETA_INVITATION_OPERATOR`
+- `BETA_INVITATION_NOTES`
+- `BETA_INVITATION_CONFIRM_PLAN`
+- `BETA_INVITATION_DIR`
 - `BETA_DATA_RETENTION_TARGET`
 - `BETA_DATA_RETENTION_LABEL`
 - `BETA_DATA_RETENTION_POLICY_OWNER`
@@ -425,6 +446,16 @@ Use the manual beta support export workflow when operators need offline support 
 5. Download the export artifact and confirm the manifest says `commitAllowed: false`, `noLiveDatabaseConnected: true`, and `noSupportStatusMutated: true`.
 6. Update request statuses through the internal support triage API after review.
 
+## Beta Invitation Wave Gate
+Use the manual beta invitation wave workflow after beta readiness and a stable observation report:
+
+1. Choose `staging` or `production`.
+2. Provide beta readiness, stable observation report, wave number, wave size, previously invited count, value guidance, communication reference, support reference, incident owner, and invite owner.
+3. Set `confirm_plan` to `plan`.
+4. Download the wave plan and confirm it says `noInvitesSent: true`.
+5. Confirm the plan contains no participant names, emails, wallet addresses, social handles, invite links, or contact details.
+6. Send invitations only from the approved private operational system after reviewing the plan.
+
 ## Beta Data Retention Gate
 Use the manual beta data retention plan workflow before expanding beyond limited beta:
 
@@ -564,6 +595,7 @@ Use the manual production observation report workflow after an activation record
 - Use `docs/deployment/vercel-api-traffic.md` for Vercel-specific command planning after a provider-neutral traffic plan exists.
 - Use `docs/deployment/production-activation-record.md` for post-cutover acceptance, rollback, or disablement evidence.
 - Use `docs/deployment/production-observation-report.md` for post-activation observation windows before beta expansion.
+- Use `docs/deployment/beta-invitation-wave.md` for non-PII invitation wave approval before sending beta invites.
 - Use `docs/deployment/beta-support-export.md` for offline support review from API data snapshots.
 - Use `docs/deployment/beta-data-retention.md` for retention-window planning before broader beta expansion.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.

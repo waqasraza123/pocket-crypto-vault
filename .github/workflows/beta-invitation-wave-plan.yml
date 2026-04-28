@@ -1,0 +1,130 @@
+name: Beta Invitation Wave Plan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Beta environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      wave_label:
+        description: Stable invitation wave label.
+        type: string
+        required: true
+      readiness_plan:
+        description: Beta readiness plan artifact name, URL, or local path.
+        type: string
+        required: true
+      observation_report:
+        description: Stable production observation report artifact name, URL, or local path.
+        type: string
+        required: true
+      wave_number:
+        description: Invitation wave number.
+        type: string
+        required: true
+        default: "1"
+      wave_size:
+        description: Number of participants approved for this wave.
+        type: string
+        required: true
+      previously_invited_count:
+        description: Participants already invited before this wave.
+        type: string
+        required: true
+        default: "0"
+      participant_limit:
+        description: Approved participant limit. Used when readiness artifact is not locally inspected.
+        type: string
+        required: false
+        default: "1"
+      max_vault_usdc:
+        description: Maximum recommended USDC per vault for this wave.
+        type: string
+        required: true
+      communication_reference:
+        description: Non-secret invite copy, rollout doc, or communication channel reference.
+        type: string
+        required: true
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for this wave.
+        type: string
+        required: true
+      invite_owner:
+        description: Operator or team responsible for sending invites outside this workflow.
+        type: string
+        required: true
+      operator:
+        description: Operator or team responsible for approving the plan.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_plan:
+        description: Type plan to write the invitation wave plan.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-invitation-wave-plan-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  BETA_INVITATION_TARGET: ${{ inputs.target }}
+  BETA_INVITATION_WAVE_LABEL: ${{ inputs.wave_label }}
+  BETA_INVITATION_READINESS_PLAN: ${{ inputs.readiness_plan }}
+  BETA_INVITATION_OBSERVATION_REPORT: ${{ inputs.observation_report }}
+  BETA_INVITATION_WAVE_NUMBER: ${{ inputs.wave_number }}
+  BETA_INVITATION_WAVE_SIZE: ${{ inputs.wave_size }}
+  BETA_INVITATION_PREVIOUSLY_INVITED_COUNT: ${{ inputs.previously_invited_count }}
+  BETA_INVITATION_PARTICIPANT_LIMIT: ${{ inputs.participant_limit }}
+  BETA_INVITATION_MAX_VAULT_USDC: ${{ inputs.max_vault_usdc }}
+  BETA_INVITATION_COMMUNICATION_REFERENCE: ${{ inputs.communication_reference }}
+  BETA_INVITATION_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  BETA_INVITATION_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  BETA_INVITATION_OWNER: ${{ inputs.invite_owner }}
+  BETA_INVITATION_OPERATOR: ${{ inputs.operator }}
+  BETA_INVITATION_NOTES: ${{ inputs.notes }}
+  BETA_INVITATION_CONFIRM_PLAN: ${{ inputs.confirm_plan }}
+  BETA_INVITATION_DIR: artifacts/beta-invitation-wave
+
+jobs:
+  beta-invitation-wave-plan:
+    name: Write ${{ inputs.target }} beta invitation wave plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_plan != 'plan' }}
+        run: |
+          echo "Beta invitation wave plan requires confirm_plan=plan."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write beta invitation wave plan
+        id: wave
+        run: node scripts/write-beta-invitation-wave-plan.mjs
+
+      - name: Upload beta invitation wave plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-beta-invitation-wave-${{ inputs.target }}
+          path: ${{ steps.wave.outputs.wave_plan_path }}
+          if-no-files-found: error

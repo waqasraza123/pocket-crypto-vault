@@ -47,6 +47,7 @@
 - Confirm `/ready.productionActivation.safeForLimitedBetaTraffic=true` before inviting production beta users.
 - Generate the production activation record after traffic execution, protected smoke, beta readiness, and snapshot evidence are accepted.
 - Generate a stable production observation report after activation and before expanding beta invitations.
+- Generate a beta invitation wave plan before each cohort invite and keep participant PII outside artifacts.
 - Confirm rollback steps are reviewed with the operator before sending invitations.
 - Treat beta limits as operational guidance, not protocol-enforced limits.
 
@@ -173,6 +174,14 @@
 - Use `observation_status=degraded` or `incident` when invitation expansion should pause.
 - Confirm the artifact says `noDeploymentPerformed: true`, `noDatabaseMutated: true`, `noTrafficMoved: true`, `noChainTransactionSent: true`, and `noUserInvitesSent: true`.
 - Store the observation report with activation evidence.
+
+## Beta Invitation Wave
+- Run the `Beta Invitation Wave Plan` workflow after beta readiness and a stable production observation report.
+- Provide readiness, observation, wave number, wave size, previously invited count, max vault USDC guidance, communication reference, support reference, incident owner, and invite owner.
+- Confirm the wave size plus previously invited count stays within the approved participant limit.
+- Confirm the artifact says `noInvitesSent: true`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, or contact details are recorded.
+- Send invitations only from the approved private operational system after reviewing the wave plan.
 
 ## Post-Deploy Checks
 - Confirm `/ready` stays usable after deployment.

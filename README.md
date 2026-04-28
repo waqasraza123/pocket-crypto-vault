@@ -172,6 +172,7 @@ pnpm smoke:production-v1
 pnpm beta:readiness
 pnpm production:activation:record
 pnpm production:observation:report
+pnpm beta:invitation:wave
 ```
 
 `pnpm smoke:production-v1` checks public API health/readiness and records operator evidence. It does not send wallet transactions.
@@ -182,6 +183,8 @@ pnpm production:observation:report
 
 `pnpm production:observation:report` records the first post-activation observation window from public API health/readiness and operator-owned support, indexer, analytics, error budget, failed transaction, and incident signals. It does not mutate infrastructure or invite users.
 
+`pnpm beta:invitation:wave` records an approved limited-beta invite wave after readiness and stable observation evidence. It does not send invites or record participant PII.
+
 Runbooks:
 
 - `docs/plans/pocket-vault-production-cutover-runbook.md`
@@ -190,6 +193,7 @@ Runbooks:
 - `docs/plans/pocket-vault-rollback-runbook.md`
 - `docs/deployment/production-activation-record.md`
 - `docs/deployment/production-observation-report.md`
+- `docs/deployment/beta-invitation-wave.md`
 
 ## Rollback
 

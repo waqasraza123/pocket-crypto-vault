@@ -29,6 +29,7 @@
 16. Generate the production activation record with `pnpm production:activation:record`.
 17. Observe `/ready`, indexer freshness, support intake, analytics, failed transaction reports, and incidents for the approved window.
 18. Generate the production observation report with `pnpm production:observation:report`.
+19. Generate the beta invitation wave plan with `pnpm beta:invitation:wave` before any invitations are sent.
 
 ## Go Criteria
 - Preflight `status` is `valid`.
@@ -39,6 +40,7 @@
 - Traffic plan records candidate and rollback URLs plus candidate and rollback images.
 - Production activation record is generated with `activationOutcome=accepted`.
 - Production observation report is generated with `observationStatus=stable`.
+- Beta invitation wave plan is generated with `noInvitesSent=true` before private outreach starts.
 
 ## No-Go Criteria
 - Any production runtime uses SQLite.
