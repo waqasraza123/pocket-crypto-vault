@@ -5,6 +5,8 @@ import { routes } from "./routes";
 
 test("public route targets stay explicit and non-conflicting", () => {
   assert.equal(routes.landing, "/");
+  assert.equal(routes.signIn, "/sign-in");
+  assert.equal(routes.createAccount, "/create-account");
   assert.equal(routes.howItWorks, "/how-it-works");
   assert.equal(routes.security, "/security");
   assert.equal(routes.appHome, "/vaults");

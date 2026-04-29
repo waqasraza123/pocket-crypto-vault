@@ -1,6 +1,6 @@
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
-import { useMemo } from "react";
-import { View } from "react-native";
+import { useMemo, useState } from "react";
+import { Pressable, View } from "react-native";
 
 import {
   createConnectionAnalyticsContext,
@@ -21,7 +21,7 @@ import { parseVaultRouteParams } from "../../../lib/validation";
 import { useAdaptiveLayout } from "../../../hooks/useAdaptiveLayout";
 import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { routes } from "../../../lib/routing";
-import { spacing } from "../../../theme";
+import { colors, radii, spacing } from "../../../theme";
 import {
   AppLoadingState,
   DisconnectedState,
@@ -30,8 +30,8 @@ import {
   StateBanner,
   TransactionRecoveryNotice,
 } from "../../../components/feedback";
-import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
-import { EmptyState, IconButton, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
+import { NativeAppScreenShell, NativeScreenHeader, NativeScrollRegion, NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
+import { AppText, EmptyState, IconButton, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
 import {
   DepositActionPanel,
   VaultActivityPreview,
@@ -53,7 +53,8 @@ export default function VaultDetailScreen() {
     vaultAddress,
   });
   const adaptiveLayout = useAdaptiveLayout();
-  const { messages } = useI18n();
+  const { inlineDirection, messages } = useI18n();
+  const [activePanel, setActivePanel] = useState<"deposit" | "withdraw" | "activity">("deposit");
   const depositFlow = useVaultDepositFlow(vault);
   const withdrawFlow = useVaultWithdrawFlow(vault);
   const unlockFlow = useVaultUnlockFlow(vault);
@@ -146,6 +147,165 @@ export default function VaultDetailScreen() {
       vaultAddress,
     },
   });
+
+  if (breakpoint.isCompact) {
+    const panelOptions = [
+      {
+        id: "deposit" as const,
+        label: messages.common.labels.depositAmount,
+      },
+      {
+        id: "withdraw" as const,
+        label: messages.common.labels.availableToWithdraw,
+      },
+      {
+        id: "activity" as const,
+        label: messages.common.labels.recentActivity,
+      },
+    ];
+
+    return (
+      <Screen
+        scroll={false}
+        contentContainerStyle={{ flex: 1 }}
+        edges={["left", "right"]}
+      >
+        <Stack.Screen options={{ title: messages.pages.vaultDetail.title }} />
+        <NativeAppScreenShell
+          top={
+            <View style={{ gap: spacing[3] }}>
+              <IconButton
+                accessibilityLabel={messages.common.buttons.backToVaults}
+                icon="arrow-left"
+                onPress={() => router.replace(routes.appHome)}
+              />
+              <NativeScreenHeader
+                eyebrow={messages.pages.vaultDetail.eyebrow}
+                title={messages.pages.vaultDetail.title}
+                description={messages.pages.vaultDetail.description}
+              />
+            </View>
+          }
+        >
+          <View style={{ flex: 1, minHeight: 0, gap: spacing[3] }}>
+            {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
+              <DisconnectedState onConnect={() => void connect()} />
+            ) : null}
+
+            {connectionState.status === "unsupportedNetwork" ? (
+              <NetworkStatusBanner onSwitch={() => void switchNetwork()} />
+            ) : null}
+
+            {connectionState.status === "ready" && isLoading ? (
+              <AppLoadingState title={messages.feedback.syncingTitle} description={messages.pages.vaultDetail.description} />
+            ) : null}
+
+            {notice && connectionState.status === "ready" ? (
+              <StateBanner
+                icon={dataSource === "fallback" ? "database-clock-outline" : "information-outline"}
+                label={notice}
+                tone={dataSource === "fallback" ? "warning" : "neutral"}
+              />
+            ) : null}
+
+            {activeRecovery ? <TransactionRecoveryNotice item={activeRecovery} onDismiss={() => void dismiss(activeRecovery.id)} /> : null}
+
+            {vault?.metadataStatus === "failed" ? (
+              <MetadataRecoveryNotice
+                description={messages.feedback.metadataFailedDescription}
+                title={messages.feedback.metadataLiveTitle}
+              />
+            ) : null}
+
+            {vault?.metadataStatus === "pending" ? (
+              <MetadataRecoveryNotice
+                description={messages.feedback.metadataPendingDescription}
+                title={messages.feedback.metadataLiveTitle}
+              />
+            ) : null}
+
+            {connectionState.status === "ready" && !isLoading && queryStatus !== "success" && degradedState === "not_found" ? (
+              <NativeScrollRegion>
+                <EmptyState
+                  eyebrow={messages.pages.vaultDetail.notAvailableEyebrow}
+                  description={messages.pages.vaultDetail.notAvailableDescription}
+                  highlights={messages.pages.myVaults.emptyHighlights}
+                  icon="shield-star-outline"
+                  title={messages.pages.vaultDetail.notAvailableTitle}
+                >
+                  <SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={() => router.replace(routes.appHome)} />
+                </EmptyState>
+              </NativeScrollRegion>
+            ) : null}
+
+            {vault ? (
+              <>
+                <MotionView intensity="structural">
+                  <VaultDetailHeader vault={vault} />
+                </MotionView>
+                <View style={{ flexDirection: inlineDirection(), gap: spacing[2] }}>
+                  {panelOptions.map((option) => {
+                    const isSelected = activePanel === option.id;
+
+                    return (
+                      <Pressable
+                        key={option.id}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: isSelected }}
+                        onPress={() => setActivePanel(option.id)}
+                        style={({ pressed }) => ({
+                          flex: 1,
+                          minHeight: 42,
+                          borderRadius: radii.md,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: isSelected || pressed ? colors.accentStrong : colors.borderStrong,
+                          backgroundColor: isSelected ? colors.accentSoft : pressed ? colors.surfaceStrong : colors.backgroundElevated,
+                          paddingHorizontal: spacing[2],
+                          paddingVertical: spacing[2],
+                        })}
+                      >
+                        <AppText
+                          align="center"
+                          numberOfLines={1}
+                          size="xs"
+                          style={isSelected ? { color: colors.accentStrong } : undefined}
+                          tone={isSelected ? "accent" : "secondary"}
+                          weight="bold"
+                        >
+                          {option.label}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+                <View style={{ flex: 1, minHeight: 0 }}>
+                  <NativeScrollRegion>
+                    {activePanel === "deposit" ? (
+                      <>
+                        <VaultProgressPanel vault={vault} />
+                        <DepositActionPanel flow={depositFlow} vault={vault} />
+                      </>
+                    ) : null}
+                    {activePanel === "withdraw" ? (
+                      <>
+                        <VaultRulePanel eligibility={withdrawFlow.eligibility} vault={vault} />
+                        <WithdrawActionPanel flow={withdrawFlow} unlockFlow={unlockFlow} vault={vault} />
+                      </>
+                    ) : null}
+                    {activePanel === "activity" ? (
+                      <VaultActivityPreview events={vault.activityPreview} onOpenTimeline={() => router.push(routes.activity)} />
+                    ) : null}
+                  </NativeScrollRegion>
+                </View>
+              </>
+            ) : null}
+          </View>
+        </NativeAppScreenShell>
+      </Screen>
+    );
+  }
 
   return (
     <Screen

@@ -11,8 +11,54 @@ import { AppHeading, AppText, MotionView, SectionContainer, SurfaceCard } from "
 
 export const StoryPrinciplesSection = () => {
   const adaptiveLayout = useAdaptiveLayout();
-  const { locale, messages } = useI18n();
+  const { inlineDirection, locale, messages } = useI18n();
   const model = getLandingPageModel(locale);
+
+  if (adaptiveLayout.isCompact) {
+    return (
+      <SectionContainer gap={spacing[3]}>
+        <MotionView style={{ gap: spacing[1] }}>
+          <AppText size="xs" tone="accent" weight="semibold">
+            {messages.landing.storyEyebrow}
+          </AppText>
+          <AppHeading size="lg">{messages.landing.storyTitle}</AppHeading>
+        </MotionView>
+        <SurfaceCard style={{ padding: spacing[4], gap: spacing[2] }}>
+          {model.storyCards.map((card, index) => (
+            <MotionView key={card.title} delay={getStaggerDelay(index)}>
+              <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>
+                <View
+                  style={{
+                    width: 34,
+                    height: 34,
+                    borderRadius: 17,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: colors.accentSoft,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    color={colors.accentStrong}
+                    name={card.icon as ComponentProps<typeof MaterialCommunityIcons>["name"]}
+                    size={18}
+                  />
+                </View>
+                <View style={{ flex: 1, gap: spacing[1] }}>
+                  <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[2] }}>
+                    <AppHeading size="sm" style={{ flex: 1 }}>{card.title}</AppHeading>
+                    <AppText size="xs" tone="muted" weight="semibold">
+                      {String(index + 1).padStart(2, "0")}
+                    </AppText>
+                  </View>
+                  <AppText size="sm" tone="secondary">{card.description}</AppText>
+                </View>
+              </View>
+            </MotionView>
+          ))}
+        </SurfaceCard>
+      </SectionContainer>
+    );
+  }
 
   return (
     <SectionContainer

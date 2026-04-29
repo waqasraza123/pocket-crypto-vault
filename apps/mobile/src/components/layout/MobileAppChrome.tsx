@@ -30,16 +30,16 @@ export const MobileAppHeader = () => {
           borderBottomWidth: 1,
           borderBottomColor: colors.borderStrong,
           backgroundColor: colors.backgroundElevated,
-          paddingHorizontal: spacing[5],
-          paddingBottom: spacing[3],
-          paddingTop: spacing[2],
+          paddingHorizontal: spacing[4],
+          paddingBottom: spacing[2],
+          paddingTop: spacing[1],
         }}
       >
         <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between", gap: spacing[3] }}>
           <Link href={routes.appHome} asChild>
             <Pressable accessibilityRole="link" style={{ flex: 1 }}>
               <View style={{ gap: spacing[1] }}>
-                <AppHeading numberOfLines={1} size="sm" style={{ color: colors.textPrimary }}>
+                    <AppHeading numberOfLines={1} size="sm" style={{ color: colors.textPrimary, fontSize: 17, lineHeight: 23 }}>
                   {productConfig.shortName}
                 </AppHeading>
                 <AppText numberOfLines={1} size="xs" tone="muted">
@@ -91,8 +91,8 @@ export const MobileAppTabBar = () => {
           borderTopWidth: 1,
           borderTopColor: colors.borderStrong,
           backgroundColor: colors.backgroundElevated,
-          paddingHorizontal: spacing[4],
-          paddingTop: spacing[2],
+          paddingHorizontal: spacing[3],
+          paddingTop: spacing[1],
         }}
       >
         <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between", gap: spacing[2] }}>
@@ -104,16 +104,16 @@ export const MobileAppTabBar = () => {
             accessibilityState={{ selected: createIsActive }}
             onPress={() => router.push(routes.createVault)}
             style={({ pressed }) => ({
-              minWidth: 74,
-              minHeight: 58,
+              minWidth: 68,
+              minHeight: 50,
               borderRadius: radii.lg,
               alignItems: "center",
               justifyContent: "center",
               backgroundColor: pressed || createIsActive ? colors.accentStrong : colors.accent,
               borderWidth: 1,
               borderColor: colors.accentStrong,
-              paddingHorizontal: spacing[3],
-              paddingVertical: spacing[2],
+              paddingHorizontal: spacing[2],
+              paddingVertical: spacing[1],
             })}
           >
             <MaterialCommunityIcons color={colors.white} name="plus" size={24} />
@@ -138,7 +138,7 @@ const MobileAppTabItem = ({ tab }: { tab: MobileAppTab }) => {
         accessibilityState={{ selected: tab.isActive }}
         style={({ pressed }) => ({
           flex: 1,
-          minHeight: 58,
+          minHeight: 50,
           alignItems: "center",
           justifyContent: "center",
           gap: spacing[1],

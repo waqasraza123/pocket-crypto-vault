@@ -28,13 +28,13 @@ export const LandingPageContent = ({
   const adaptiveLayout = useAdaptiveLayout();
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: adaptiveLayout.isCompact ? spacing[6] : spacing[12] }}>
+    <Screen contentContainerStyle={{ paddingBottom: adaptiveLayout.isCompact ? spacing[4] : spacing[12] }}>
       <>
         <PageContainer
           width="dashboard"
           style={{
-            gap: adaptiveLayout.isCompact ? spacing[8] : spacing[12],
-            paddingTop: adaptiveLayout.isCompact ? spacing[4] : spacing[6],
+            gap: adaptiveLayout.isCompact ? spacing[5] : spacing[12],
+            paddingTop: adaptiveLayout.isCompact ? spacing[2] : spacing[6],
           }}
         >
           <HeroSection onCreateVault={onCreateVault} onEnterVaults={onEnterVaults} onReviewSecurity={onReviewSecurity} />

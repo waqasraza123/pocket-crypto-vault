@@ -12,7 +12,7 @@ import {
 } from "@pocket-vault/shared";
 
 import { FeedbackStatusCard, StateBanner } from "../../components/feedback";
-import { ScreenHeader } from "../../components/layout";
+import { NativeActionDock, NativeAppScreenShell, NativeScreenHeader, ScreenHeader } from "../../components/layout";
 import {
   AppHeading,
   AppText,
@@ -55,6 +55,7 @@ export default function SupportScreen() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [supportStep, setSupportStep] = useState(0);
   const backendBaseUrl = getBackendBaseUrl();
   const chainId = connectionState.session?.chainId === 8453 || connectionState.session?.chainId === 84532 ? connectionState.session.chainId : null;
   const trimmedSubject = subject.trim();
@@ -127,6 +128,255 @@ export default function SupportScreen() {
     setStatus("error");
     setErrorMessage(response.message ?? messages.pages.support.unavailableDescription);
   };
+
+  if (breakpoint.isCompact) {
+    const stepTitles = [messages.pages.support.categoryLabel, messages.pages.support.subjectLabel, messages.pages.support.contactLabel];
+    const canContinue = supportStep === 0 || (trimmedSubject.length >= 4 && trimmedMessage.length >= 20);
+
+    return (
+      <Screen
+        scroll={false}
+        contentContainerStyle={{ flex: 1 }}
+        edges={["left", "right"]}
+        keyboardShouldPersistTaps="always"
+      >
+        <Stack.Screen options={{ title: messages.pages.support.title }} />
+        <NativeAppScreenShell
+          top={
+            <View style={{ gap: spacing[3] }}>
+              <NativeScreenHeader
+                eyebrow={messages.pages.support.eyebrow}
+                title={messages.pages.support.title}
+                description={messages.pages.support.description}
+              />
+              <View style={{ flexDirection: inlineDirection(), gap: spacing[2] }}>
+                {stepTitles.map((label, index) => (
+                  <View
+                    key={label}
+                    style={{
+                      flex: 1,
+                      height: 5,
+                      borderRadius: radii.pill,
+                      backgroundColor: index <= supportStep ? colors.accent : colors.border,
+                    }}
+                  />
+                ))}
+              </View>
+            </View>
+          }
+          bottom={
+            <NativeActionDock>
+              <View style={{ flexDirection: supportStep > 0 ? inlineDirection() : "column", gap: spacing[2] }}>
+                {supportStep > 0 ? (
+                  <SecondaryButton
+                    fullWidth
+                    icon="arrow-left"
+                    label={messages.common.buttons.back}
+                    onPress={() => setSupportStep(Math.max(supportStep - 1, 0))}
+                  />
+                ) : null}
+                {supportStep < 2 ? (
+                  <PrimaryButton
+                    fullWidth
+                    icon="arrow-right"
+                    label={messages.common.buttons.continue}
+                    disabled={!canContinue}
+                    onPress={() => setSupportStep(Math.min(supportStep + 1, 2))}
+                  />
+                ) : (
+                  <PrimaryButton
+                    fullWidth
+                    icon="send"
+                    label={status === "submitting" ? messages.common.buttons.submitting : messages.common.buttons.submitSupport}
+                    disabled={!canSubmit || !backendBaseUrl}
+                    onPress={() => void handleSubmit()}
+                  />
+                )}
+              </View>
+            </NativeActionDock>
+          }
+          scroll
+          keyboardShouldPersistTaps="always"
+        >
+          {!backendBaseUrl ? (
+            <FeedbackStatusCard
+              title={messages.pages.support.unavailableTitle}
+              description={messages.pages.support.unavailableDescription}
+              icon="cloud-alert-outline"
+              tone="warning"
+            />
+          ) : null}
+          {status === "success" && submittedId ? (
+            <FeedbackStatusCard
+              title={messages.pages.support.successTitle}
+              description={formatMessage(messages.pages.support.successDescription, { id: submittedId })}
+              icon="check-circle-outline"
+              tone="positive"
+            >
+              <SecondaryButton icon="plus" label={messages.common.buttons.submitSupport} onPress={() => setStatus("idle")} />
+            </FeedbackStatusCard>
+          ) : null}
+          {status === "error" && errorMessage ? <StateBanner icon="alert-circle-outline" label={errorMessage} tone="warning" /> : null}
+          {containsSecretLikeContent ? (
+            <StateBanner icon="shield-alert-outline" label={messages.pages.support.secretWarning} tone="warning" />
+          ) : null}
+
+          <SurfaceCard tone="accent" style={{ padding: spacing[4] }}>
+            <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>
+              <View
+                style={{
+                  width: 42,
+                  height: 42,
+                  borderRadius: radii.md,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: colors.accentSoft,
+                  borderWidth: 1,
+                  borderColor: colors.accentStrong,
+                }}
+              >
+                <MaterialCommunityIcons color={colors.accentStrong} name={supportStep === 0 ? "lifebuoy" : supportStep === 1 ? "message-text-outline" : "wallet-outline"} size={22} />
+              </View>
+              <View style={{ flex: 1, gap: spacing[1] }}>
+                <AppHeading size="sm">{stepTitles[supportStep]}</AppHeading>
+                <AppText size="sm" tone="secondary">{messages.pages.support.intakeDescription}</AppText>
+              </View>
+            </View>
+
+            {supportStep === 0 ? (
+              <>
+                <View style={{ gap: spacing[3] }}>
+                  <AppText size="sm" tone="secondary" weight="medium">
+                    {messages.pages.support.categoryLabel}
+                  </AppText>
+                  <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
+                    {supportRequestCategories.map((option) => {
+                      const isSelected = option === category;
+
+                      return (
+                        <Pressable
+                          key={option}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isSelected }}
+                          onPress={() => setCategory(option)}
+                          style={({ pressed }) => ({
+                            flexDirection: inlineDirection(),
+                            alignItems: "center",
+                            gap: spacing[2],
+                            borderRadius: radii.md,
+                            borderWidth: 1,
+                            borderColor: isSelected || pressed ? colors.accentStrong : colors.borderStrong,
+                            backgroundColor: isSelected ? colors.accentSoft : pressed ? colors.surfaceStrong : colors.surface,
+                            paddingHorizontal: spacing[3],
+                            paddingVertical: spacing[2],
+                          })}
+                        >
+                          <MaterialCommunityIcons
+                            color={isSelected ? colors.accentStrong : colors.textSecondary}
+                            name={supportCategoryIcons[option]}
+                            size={17}
+                          />
+                          <AppText size="sm" style={isSelected ? { color: colors.accentStrong } : undefined} weight="semibold">
+                            {messages.pages.support.categories[option]}
+                          </AppText>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+                <View style={{ gap: spacing[3] }}>
+                  <AppText size="sm" tone="secondary" weight="medium">
+                    {messages.pages.support.priorityLabel}
+                  </AppText>
+                  <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
+                    {supportRequestPriorities.map((option) => {
+                      const isSelected = option === priority;
+
+                      return (
+                        <Pressable
+                          key={option}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isSelected }}
+                          onPress={() => setPriority(option)}
+                          style={({ pressed }) => ({
+                            borderRadius: radii.md,
+                            borderWidth: 1,
+                            borderColor: isSelected || pressed ? colors.accentStrong : colors.borderStrong,
+                            backgroundColor: isSelected ? colors.accentSoft : pressed ? colors.surfaceStrong : colors.surface,
+                            paddingHorizontal: spacing[4],
+                            paddingVertical: spacing[2],
+                          })}
+                        >
+                          <AppText size="sm" style={isSelected ? { color: colors.accentStrong } : undefined} weight="semibold">
+                            {messages.pages.support.priorities[option]}
+                          </AppText>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                </View>
+              </>
+            ) : null}
+
+            {supportStep === 1 ? (
+              <>
+                <TextField
+                  label={messages.pages.support.subjectLabel}
+                  placeholder={messages.pages.support.subjectPlaceholder}
+                  value={subject}
+                  onChangeText={setSubject}
+                  errorMessage={subjectError}
+                  maxLength={120}
+                />
+                <TextField
+                  label={messages.pages.support.messageLabel}
+                  placeholder={messages.pages.support.messagePlaceholder}
+                  value={message}
+                  onChangeText={setMessage}
+                  errorMessage={messageError}
+                  maxLength={2_000}
+                  multiline
+                />
+              </>
+            ) : null}
+
+            {supportStep === 2 ? (
+              <>
+                <TextField
+                  label={messages.pages.support.contactLabel}
+                  placeholder={messages.pages.support.contactPlaceholder}
+                  helperText={messages.pages.support.contactHelper}
+                  errorMessage={contactError}
+                  value={contactEmail}
+                  onChangeText={setContactEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <SurfaceCard tone="muted" style={{ padding: spacing[4] }}>
+                  <View style={{ gap: spacing[2] }}>
+                    <AppHeading size="sm">{messages.pages.support.walletContextTitle}</AppHeading>
+                    <AppText tone="secondary">{messages.pages.support.walletContextDescription}</AppText>
+                  </View>
+                  <View style={{ gap: spacing[2] }}>
+                    {contextRows.map(([label, value]) => (
+                      <View key={label} style={{ flexDirection: inlineDirection(), justifyContent: "space-between", gap: spacing[3] }}>
+                        <AppText size="sm" tone="muted">
+                          {label}
+                        </AppText>
+                        <AppText numberOfLines={1} size="sm" weight="semibold">
+                          {value}
+                        </AppText>
+                      </View>
+                    ))}
+                  </View>
+                </SurfaceCard>
+              </>
+            ) : null}
+          </SurfaceCard>
+        </NativeAppScreenShell>
+      </Screen>
+    );
+  }
 
   return (
     <Screen

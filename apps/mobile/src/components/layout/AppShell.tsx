@@ -7,7 +7,7 @@ import { useAppReadiness } from "../../hooks/useAppReadiness";
 import { useTransactionRecovery } from "../../hooks/useTransactionRecovery";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useBreakpoint } from "../../hooks/useBreakpoint";
-import { spacing } from "../../theme";
+import { colors, spacing } from "../../theme";
 import { PageContainer } from "../primitives";
 import { AppFooter } from "./AppFooter";
 import { AppStatusBanner } from "./AppStatusBanner";
@@ -47,9 +47,9 @@ export const AppShell = ({ children }: PropsWithChildren) => {
 
   if (breakpoint.isCompact) {
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
         <MobileAppHeader />
-        <PageContainer width="dashboard" style={{ gap: spacing[3], paddingTop: spacing[3] }}>
+        <PageContainer width="dashboard" style={{ gap: spacing[2], paddingTop: spacing[2] }}>
           <AppStatusBanner readiness={readiness} />
           {activeRecovery ? <TransactionRecoveryNotice item={activeRecovery} onDismiss={() => void dismiss(activeRecovery.id)} /> : null}
         </PageContainer>

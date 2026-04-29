@@ -2,6 +2,8 @@ import type { Href } from "expo-router";
 
 export const routes = {
   landing: "/" as Href,
+  signIn: "/sign-in" as Href,
+  createAccount: "/create-account" as Href,
   howItWorks: "/how-it-works" as Href,
   security: "/security" as Href,
   appHome: "/vaults" as Href,

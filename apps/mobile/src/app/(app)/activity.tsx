@@ -14,7 +14,14 @@ import { getStaggerDelay } from "../../lib/motion/list-motion";
 import { colors, radii, spacing } from "../../theme";
 import type { VaultActivityEvent } from "../../types";
 import { AppErrorState, AppLoadingState, DisconnectedState, GuidedStepsCard, StateBanner } from "../../components/feedback";
-import { NetworkStatusBanner, ScreenHeader } from "../../components/layout";
+import {
+  NativeAppScreenShell,
+  NativeMetricRow,
+  NativeScreenHeader,
+  NativeScrollRegion,
+  NetworkStatusBanner,
+  ScreenHeader,
+} from "../../components/layout";
 import { AppHeading, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../components/primitives";
 import { routes } from "../../lib/routing";
 
@@ -101,6 +108,131 @@ export default function ActivityScreen() {
     key: `activity-degraded:${dataSource}:${events.length}`,
     context: analyticsContext,
   });
+
+  if (breakpoint.isCompact) {
+    return (
+      <Screen
+        scroll={false}
+        contentContainerStyle={{ flex: 1 }}
+        edges={["left", "right"]}
+      >
+        <Stack.Screen options={{ title: messages.pages.activity.title }} />
+        <NativeAppScreenShell
+          top={
+            <NativeScreenHeader
+              eyebrow={messages.pages.activity.eyebrow}
+              title={messages.pages.activity.title}
+              description={messages.pages.activity.description}
+            />
+          }
+        >
+          <View style={{ flex: 1, minHeight: 0, gap: spacing[3] }}>
+            {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
+              <DisconnectedState onConnect={() => void connect()} />
+            ) : null}
+            {connectionState.status === "unsupportedNetwork" ? (
+              <NetworkStatusBanner onSwitch={() => void switchNetwork()} />
+            ) : null}
+            {connectionState.status === "ready" && isLoading ? (
+              <AppLoadingState title={messages.feedback.syncingTitle} description={messages.pages.activity.description} />
+            ) : null}
+            {notice ? (
+              <StateBanner
+                icon={dataSource === "fallback" ? "database-clock-outline" : "information-outline"}
+                label={notice}
+                tone={dataSource === "fallback" ? "warning" : "neutral"}
+              />
+            ) : null}
+            {events.length > 0 ? (
+              <NativeMetricRow
+                items={[
+                  {
+                    label: messages.common.labels.recentActivity,
+                    value: String(events.length),
+                    icon: "timeline-clock-outline",
+                    tone: "accent",
+                  },
+                  {
+                    label: messages.common.labels.dataSource,
+                    value: dataSource === "fallback" ? messages.common.labels.fallback : messages.common.labels.synced,
+                    icon: dataSource === "fallback" ? "database-clock-outline" : "check-circle-outline",
+                    tone: dataSource === "fallback" ? "warning" : "positive",
+                  },
+                ]}
+              />
+            ) : null}
+            <View style={{ flex: 1, minHeight: 0 }}>
+              {connectionState.status === "ready" && !isLoading && events.length === 0 ? (
+                <NativeScrollRegion>
+                  <GuidedStepsCard
+                    description={messages.pages.activity.startHereDescription}
+                    eyebrow={messages.pages.activity.emptyEyebrow}
+                    icon="timeline-clock-outline"
+                    steps={messages.pages.activity.startHereSteps}
+                    title={messages.pages.activity.startHereTitle}
+                  >
+                    <PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />
+                  </GuidedStepsCard>
+                </NativeScrollRegion>
+              ) : null}
+              {connectionState.status === "ready" && !isLoading && dataSource === "fallback" && events.length > 0 ? (
+                <NativeScrollRegion>
+                  <AppErrorState
+                    description={messages.feedback.partialStateDescription}
+                    primaryAction={{
+                      label: messages.common.buttons.tryAgain,
+                      onPress: () => router.replace("/activity"),
+                      icon: "refresh",
+                    }}
+                    title={messages.feedback.partialStateTitle}
+                  />
+                </NativeScrollRegion>
+              ) : null}
+              {events.length > 0 ? (
+                <NativeScrollRegion>
+                  {events.map((event, index) => {
+                    const tone = getActivityTone(event.type);
+
+                    return (
+                      <MotionView key={event.id} delay={getStaggerDelay(index)} style={{ gap: 0 }}>
+                        <SurfaceCard accentColor={tone.iconColor} style={{ padding: spacing[4] }}>
+                          <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>
+                            <View
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: radii.md,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                backgroundColor: tone.backgroundColor,
+                                borderWidth: 1,
+                                borderColor: tone.iconColor,
+                              }}
+                            >
+                              <MaterialCommunityIcons color={tone.iconColor} name={getActivityIcon(event.type)} size={21} />
+                            </View>
+                            <View style={{ flex: 1, gap: spacing[2] }}>
+                              <View style={{ gap: spacing[1] }}>
+                                <AppText weight="semibold">{event.title}</AppText>
+                                <AppText size="sm" tone="secondary">{event.subtitle}</AppText>
+                              </View>
+                              <AppText size="xs" tone="muted">
+                                {formatLongDate(event.occurredAt)}
+                              </AppText>
+                            </View>
+                          </View>
+                        </SurfaceCard>
+                      </MotionView>
+                    );
+                  })}
+                </NativeScrollRegion>
+              ) : null}
+            </View>
+          </View>
+        </NativeAppScreenShell>
+      </Screen>
+    );
+  }
 
   return (
     <Screen

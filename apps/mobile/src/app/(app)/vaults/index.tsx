@@ -22,7 +22,16 @@ import {
   GuidedStepsCard,
   StateBanner,
 } from "../../../components/feedback";
-import { MobileActionBar, NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
+import {
+  MobileActionBar,
+  NativeActionDock,
+  NativeAppScreenShell,
+  NativeMetricRow,
+  NativeScreenHeader,
+  NativeScrollRegion,
+  NetworkStatusBanner,
+  ScreenHeader,
+} from "../../../components/layout";
 import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../../components/primitives";
 import { VaultGrid } from "../../../components/vaults";
 
@@ -125,6 +134,132 @@ export default function MyVaultsScreen() {
     key: `dashboard-degraded:${degradedState}:${dataSource ?? "none"}`,
     context: analyticsContext,
   });
+
+  if (breakpoint.isCompact) {
+    return (
+      <Screen
+        scroll={false}
+        contentContainerStyle={{ flex: 1 }}
+        edges={["left", "right"]}
+      >
+        <Stack.Screen options={{ title: messages.pages.myVaults.title }} />
+        <NativeAppScreenShell
+          top={
+            <NativeScreenHeader
+              eyebrow={messages.pages.myVaults.eyebrow}
+              title={messages.pages.myVaults.title}
+              description={messages.pages.myVaults.description}
+            />
+          }
+          bottom={
+            <NativeActionDock>
+              <PrimaryButton
+                fullWidth
+                icon="plus"
+                label={messages.common.buttons.createVault}
+                onPress={() => router.push(routes.createVault)}
+              />
+            </NativeActionDock>
+          }
+        >
+          <View style={{ flex: 1, minHeight: 0, gap: spacing[3] }}>
+            {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
+              <DisconnectedState onConnect={() => void connect()} />
+            ) : null}
+
+            {connectionState.status === "unsupportedNetwork" ? (
+              <NetworkStatusBanner
+                label={connectionState.session?.chainId ? `Chain ${connectionState.session.chainId}` : null}
+                onSwitch={() => void switchNetwork()}
+              />
+            ) : null}
+
+            {connectionState.status === "ready" && readiness.configurationStatus === "invalid" ? <ConfigurationNotice /> : null}
+
+            {connectionState.status === "ready" && isLoading ? (
+              <AppLoadingState
+                title={messages.feedback.syncingTitle}
+                description={messages.pages.myVaults.description}
+              />
+            ) : null}
+
+            {notice && connectionState.status === "ready" ? (
+              <StateBanner
+                icon={dataSource === "fallback" ? "database-clock-outline" : "information-outline"}
+                label={notice}
+                tone={dataSource === "fallback" ? "warning" : "neutral"}
+              />
+            ) : null}
+
+            <NativeMetricRow
+              items={[
+                {
+                  label: messages.common.labels.totalSaved,
+                  value: formatUsdc(totalSaved),
+                  icon: "wallet-outline",
+                  tone: "accent",
+                },
+                {
+                  label: messages.common.labels.vaultCount,
+                  value: String(vaults.length),
+                  icon: "shield-lock-outline",
+                  tone: "positive",
+                },
+                {
+                  label: messages.common.labels.eligibleSoon,
+                  value: String(unlockedCount),
+                  icon: "timer-check-outline",
+                  tone: "warning",
+                },
+              ]}
+            />
+
+            <View style={{ flex: 1, minHeight: 0 }}>
+              {connectionState.status === "ready" && !isLoading && queryStatus === "empty" ? (
+                <NativeScrollRegion>
+                  <GuidedStepsCard
+                    description={messages.pages.myVaults.startHereDescription}
+                    eyebrow={messages.pages.myVaults.emptyEyebrow}
+                    icon="bullseye-arrow"
+                    steps={messages.pages.myVaults.startHereSteps}
+                    title={messages.pages.myVaults.startHereTitle}
+                  />
+                </NativeScrollRegion>
+              ) : null}
+
+              {connectionState.status === "ready" && !isLoading && (queryStatus === "error" || queryStatus === "unavailable") ? (
+                <NativeScrollRegion>
+                  <AppErrorState
+                    description={
+                      degradedState === "partial"
+                        ? messages.feedback.partialStateDescription
+                        : messages.feedback.dataUnavailableDescription
+                    }
+                    primaryAction={{
+                      label: messages.common.buttons.tryAgain,
+                      onPress: () => router.replace(routes.appHome),
+                      icon: "refresh",
+                    }}
+                    title={
+                      degradedState === "partial"
+                        ? messages.feedback.partialStateTitle
+                        : messages.feedback.dataUnavailableTitle
+                    }
+                  />
+                </NativeScrollRegion>
+              ) : null}
+
+              {showVaultGrid ? (
+                <NativeScrollRegion>
+                  <VaultGrid vaults={vaults} />
+                </NativeScrollRegion>
+              ) : null}
+            </View>
+          </View>
+        </NativeAppScreenShell>
+      </Screen>
+    );
+  }
 
   return (
     <Screen

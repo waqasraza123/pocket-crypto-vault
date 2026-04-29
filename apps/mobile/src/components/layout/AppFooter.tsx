@@ -30,10 +30,10 @@ export const AppFooter = () => {
 
   return (
     <View className="border-t border-slate-200 bg-white">
-      <PageContainer style={{ paddingVertical: breakpoint.isCompact ? spacing[4] : spacing[5], gap: breakpoint.isCompact ? spacing[3] : spacing[4] }}>
-        <View style={{ gap: spacing[2] }}>
+      <PageContainer style={{ paddingVertical: breakpoint.isCompact ? spacing[3] : spacing[5], gap: breakpoint.isCompact ? spacing[2] : spacing[4] }}>
+        <View style={{ gap: breakpoint.isCompact ? spacing[1] : spacing[2] }}>
           <AppHeading size="sm" style={{ color: colors.textPrimary }}>{productConfig.name}</AppHeading>
-          <AppText size="sm" tone="muted" numberOfLines={breakpoint.isCompact ? 3 : undefined}>
+          <AppText size="sm" tone="muted" numberOfLines={breakpoint.isCompact ? 2 : undefined}>
             {messages.footer.description.replace("Pocket Vault", productConfig.name)}
           </AppText>
         </View>
@@ -42,7 +42,7 @@ export const AppFooter = () => {
             <Pressable
               key={link.label}
               onPress={() => router.push(link.href)}
-              className="rounded-2xl border border-slate-200 bg-white px-3 py-2 active:bg-slate-100"
+              className="rounded-2xl border border-slate-200 bg-white px-3 py-1.5 active:bg-slate-100"
               style={({ pressed }) => ({
                 borderRadius: radii.md,
                 backgroundColor: pressed ? colors.surfaceStrong : colors.surfaceGlass,

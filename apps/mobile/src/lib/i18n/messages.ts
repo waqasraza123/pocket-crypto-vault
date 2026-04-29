@@ -100,6 +100,66 @@ const enMessages = {
     description:
       "Pocket Vault helps college and university students save pocket money in USDC on Base with clear withdrawal rules and honest progress tracking.",
   },
+  onboarding: {
+    landing: {
+      eyebrow: "Wallet-first student saving",
+      title: "The most trusted platform for protected pocket money",
+      description:
+        "Create a calm USDC vault on Base, keep one student goal visible, and let the rule protect withdrawals from impulse decisions.",
+    },
+    actions: {
+      signIn: "Sign in",
+      createAccount: "Create account",
+      backToStart: "Back to start",
+    },
+    previewTitle: "Let’s secure your student savings",
+    previewSteps: [
+      {
+        title: "Create your account",
+        description: "Connect the wallet you control",
+        icon: "account-plus-outline",
+      },
+      {
+        title: "Secure your account",
+        description: "Choose a vault rule before funding",
+        icon: "shield-lock-outline",
+      },
+      {
+        title: "Verify your goal",
+        description: "Save only for one clear student need",
+        icon: "bullseye-arrow",
+      },
+    ],
+    signIn: {
+      eyebrow: "Returning wallet",
+      title: "Sign in to your protected vaults",
+      description:
+        "Connect the wallet that owns your vaults. Pocket Vault opens your dashboard only after the supported Base wallet is ready.",
+      panelTitle: "Open existing vaults",
+      panelDescription: "Your wallet is the account. No password is stored by Pocket Vault.",
+      readyAction: "Open My Vaults",
+      icon: "login-variant",
+      highlights: ["Wallet-owned access", "Base or Base Sepolia", "No email password to manage"],
+    },
+    createAccount: {
+      eyebrow: "First vault setup",
+      title: "Create an account with your wallet",
+      description:
+        "Start with the wallet you control, then create one protected student savings vault with a clear rule.",
+      panelTitle: "Start your first vault",
+      panelDescription: "The wallet creates your product identity and signs the vault setup when you are ready.",
+      readyAction: "Create first vault",
+      icon: "account-plus-outline",
+      highlights: ["Connect one wallet", "Create one student goal", "Protect withdrawals with a rule"],
+    },
+    status: {
+      ready: "Wallet is ready on a supported network.",
+      unsupported: "Switch to Base or Base Sepolia to continue.",
+      connecting: "Waiting for wallet approval.",
+      unavailable: "Wallet setup is not available in this runtime.",
+      disconnected: "Connect your wallet to continue.",
+    },
+  },
   landing: {
     heroBadge: "Student pocket-money saving",
     heroTitle: "Save pocket money in crypto.",
@@ -802,6 +862,66 @@ const arMessages: AppMessages = {
   },
   footer: {
     description: "Pocket Vault يساعد طلاب الجامعات على ادخار مصروفهم بعملة USDC على Base مع قواعد سحب واضحة وتتبع تقدّم صادق.",
+  },
+  onboarding: {
+    landing: {
+      eyebrow: "ادخار طلابي يبدأ من المحفظة",
+      title: "المنصة الأكثر ثقة لحماية مصروف الطالب",
+      description:
+        "أنشئ خزنة USDC هادئة على Base، وأبقِ هدفاً طلابياً واحداً واضحاً، ودع القاعدة تحمي السحب من قرارات الاندفاع.",
+    },
+    actions: {
+      signIn: "تسجيل الدخول",
+      createAccount: "إنشاء حساب",
+      backToStart: "العودة للبداية",
+    },
+    previewTitle: "لنؤمّن مدخراتك الطلابية",
+    previewSteps: [
+      {
+        title: "أنشئ حسابك",
+        description: "اربط المحفظة التي تتحكم بها",
+        icon: "account-plus-outline",
+      },
+      {
+        title: "أمّن حسابك",
+        description: "اختر قاعدة الخزنة قبل التمويل",
+        icon: "shield-lock-outline",
+      },
+      {
+        title: "ثبّت هدفك",
+        description: "ادخر لحاجة طلابية واضحة واحدة",
+        icon: "bullseye-arrow",
+      },
+    ],
+    signIn: {
+      eyebrow: "محفظة عائدة",
+      title: "سجّل الدخول إلى خزائنك المحمية",
+      description:
+        "اربط المحفظة التي تملك خزائنك. يفتح Pocket Vault لوحة خزائنك فقط عندما تصبح محفظة Base المدعومة جاهزة.",
+      panelTitle: "افتح الخزائن الحالية",
+      panelDescription: "محفظتك هي الحساب. لا يخزن Pocket Vault كلمة مرور لك.",
+      readyAction: "افتح خزائني",
+      icon: "login-variant",
+      highlights: ["وصول مملوك بالمحفظة", "Base أو Base Sepolia", "لا كلمة مرور بريدية لإدارتها"],
+    },
+    createAccount: {
+      eyebrow: "إعداد الخزنة الأولى",
+      title: "أنشئ حساباً بمحفظتك",
+      description:
+        "ابدأ بالمحفظة التي تتحكم بها، ثم أنشئ خزنة ادخار طلابية محمية واحدة بقاعدة واضحة.",
+      panelTitle: "ابدأ خزنتك الأولى",
+      panelDescription: "تنشئ المحفظة هويتك داخل المنتج وتوقّع إعداد الخزنة عندما تكون جاهزاً.",
+      readyAction: "أنشئ أول خزنة",
+      icon: "account-plus-outline",
+      highlights: ["اربط محفظة واحدة", "أنشئ هدفاً طلابياً واحداً", "احمِ السحب بقاعدة واضحة"],
+    },
+    status: {
+      ready: "المحفظة جاهزة على شبكة مدعومة.",
+      unsupported: "بدّل إلى Base أو Base Sepolia للمتابعة.",
+      connecting: "بانتظار موافقة المحفظة.",
+      unavailable: "إعداد المحفظة غير متاح في هذا التشغيل.",
+      disconnected: "اربط محفظتك للمتابعة.",
+    },
   },
   landing: {
     heroBadge: "ادخار مصروف الطلاب",
