@@ -11,6 +11,7 @@ import { useI18n } from "../../../lib/i18n";
 import { routes } from "../../../lib/routing";
 import { colors, radii, spacing } from "../../../theme";
 import { useAppReadiness } from "../../../hooks/useAppReadiness";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useVaults } from "../../../hooks/useVaults";
 import {
@@ -21,12 +22,13 @@ import {
   GuidedStepsCard,
   StateBanner,
 } from "../../../components/feedback";
-import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
+import { MobileActionBar, NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
 import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../../components/primitives";
 import { VaultGrid } from "../../../components/vaults";
 
 export default function MyVaultsScreen() {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { readiness } = useAppReadiness();
   const { dataSource, degradedState, isLoading, notice, queryStatus, vaults } = useVaults();
@@ -125,14 +127,30 @@ export default function MyVaultsScreen() {
   });
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+      footer={
+        breakpoint.isCompact ? (
+          <MobileActionBar>
+            <PrimaryButton
+              fullWidth
+              icon="plus"
+              label={messages.common.buttons.createVault}
+              onPress={() => router.push(routes.createVault)}
+            />
+          </MobileActionBar>
+        ) : undefined
+      }
+    >
       <Stack.Screen options={{ title: messages.pages.myVaults.title }} />
-      <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
+      <PageContainer width="dashboard" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.myVaults.eyebrow}
           title={messages.pages.myVaults.title}
           description={messages.pages.myVaults.description}
           action={
+            breakpoint.isCompact ? undefined :
             <PrimaryButton
               icon="plus"
               label={messages.common.buttons.createVault}
@@ -169,18 +187,18 @@ export default function MyVaultsScreen() {
           />
         ) : null}
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
+        <View style={{ flexDirection: breakpoint.isCompact ? "column" : "row", flexWrap: breakpoint.isCompact ? "nowrap" : "wrap", gap: breakpoint.isCompact ? spacing[3] : spacing[4] }}>
           {dashboardMetrics.map((metric, index) => (
-            <MotionView key={metric.label} delay={index * 70} style={{ flex: 1, minWidth: 220 }}>
+            <MotionView key={metric.label} delay={index * 70} style={{ flex: 1, minWidth: breakpoint.isCompact ? undefined : 220 }}>
               <SurfaceCard
                 accentColor={metric.iconColor}
                 tone={metric.tone}
                 style={{
                   flex: 1,
-                  minWidth: 220,
+                  minWidth: breakpoint.isCompact ? undefined : 220,
                   backgroundColor: metric.cardBackgroundColor,
                   borderColor: metric.borderColor,
-                  padding: spacing[5],
+                  padding: breakpoint.isCompact ? spacing[4] : spacing[5],
                 }}
               >
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>

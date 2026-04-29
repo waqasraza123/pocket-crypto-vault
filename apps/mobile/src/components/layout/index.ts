@@ -4,6 +4,8 @@ export * from "./AppStatusBanner";
 export * from "./DesktopHeader";
 export * from "./LanguageSwitcher";
 export * from "./MarketingShell";
+export * from "./MobileAppChrome";
+export * from "./MobileActionBar";
 export * from "./MobileHeader";
 export * from "./NetworkStatusBanner";
 export * from "./NetworkBadge";

@@ -13,6 +13,7 @@ import {
 } from "../feedback";
 import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { AppHeading, AppText, PrimaryButton, SurfaceCard } from "../primitives";
 import { UnlockCountdownCard } from "./UnlockCountdownCard";
 import { WithdrawAmountField } from "./WithdrawAmountField";
@@ -30,6 +31,7 @@ export const WithdrawActionPanel = ({
   flow: VaultWithdrawFlowController;
   unlockFlow: ReturnType<typeof useVaultUnlockFlow>;
 }) => {
+  const breakpoint = useBreakpoint();
   const { inlineDirection, messages } = useI18n();
   const eligibility = flow.eligibility;
 
@@ -129,6 +131,7 @@ export const WithdrawActionPanel = ({
       flow.state.status !== "failed" ? (
         <PrimaryButton
           disabled={flow.isBusy}
+          fullWidth={breakpoint.isCompact}
           icon="arrow-up-right"
           label={flow.primaryActionLabel}
           onPress={flow.requestConfirmation}
@@ -138,6 +141,7 @@ export const WithdrawActionPanel = ({
       {eligibility.canRequestUnlock ? (
         <PrimaryButton
           disabled={unlockFlow.isBusy}
+          fullWidth={breakpoint.isCompact}
           icon="shield-lock-open-outline"
           label="Request unlock"
           onPress={() => void unlockFlow.requestUnlock()}
@@ -147,6 +151,7 @@ export const WithdrawActionPanel = ({
       {eligibility.canCancelUnlockRequest ? (
         <PrimaryButton
           disabled={unlockFlow.isBusy}
+          fullWidth={breakpoint.isCompact}
           icon="close-circle-outline"
           label="Cancel unlock request"
           onPress={() => void unlockFlow.cancelUnlockRequest()}
@@ -156,6 +161,7 @@ export const WithdrawActionPanel = ({
       {eligibility.canGuardianApprove ? (
         <PrimaryButton
           disabled={unlockFlow.isBusy}
+          fullWidth={breakpoint.isCompact}
           icon="check-circle-outline"
           label="Approve unlock"
           onPress={() => void unlockFlow.approveUnlock()}
@@ -165,6 +171,7 @@ export const WithdrawActionPanel = ({
       {eligibility.canGuardianReject ? (
         <PrimaryButton
           disabled={unlockFlow.isBusy}
+          fullWidth={breakpoint.isCompact}
           icon="close-circle-outline"
           label="Reject unlock"
           onPress={() => void unlockFlow.rejectUnlock()}

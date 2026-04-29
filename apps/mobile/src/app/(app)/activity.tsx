@@ -6,6 +6,7 @@ import { View } from "react-native";
 
 import { createConnectionAnalyticsContext, useScreenTracking, useTrackEventWhen } from "../../lib/analytics";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useVaultActivity } from "../../hooks/useVaultActivity";
 import { formatLongDate } from "../../lib/format";
 import { useI18n } from "../../lib/i18n";
@@ -60,6 +61,7 @@ const getActivityTone = (type: VaultActivityEvent["type"]) => {
 
 export default function ActivityScreen() {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { dataSource, events, isLoading, notice } = useVaultActivity();
   const { inlineDirection, messages } = useI18n();
@@ -101,14 +103,17 @@ export default function ActivityScreen() {
   });
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+    >
       <Stack.Screen options={{ title: messages.pages.activity.title }} />
-      <PageContainer width="reading" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
+      <PageContainer width="reading" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.activity.eyebrow}
           title={messages.pages.activity.title}
           description={messages.pages.activity.description}
-          action={<PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />}
+          action={breakpoint.isCompact ? undefined : <PrimaryButton icon="plus" label={messages.common.buttons.createVault} onPress={() => router.push(routes.createVault)} />}
         />
         {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
           <DisconnectedState onConnect={() => void connect()} />
@@ -159,7 +164,44 @@ export default function ActivityScreen() {
             title={messages.feedback.partialStateTitle}
           />
         ) : null}
-        {events.length > 0 ? (
+        {events.length > 0 && breakpoint.isCompact ? (
+          <View style={{ flexDirection: inlineDirection(), gap: spacing[3] }}>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: radii.lg,
+                borderWidth: 1,
+                borderColor: colors.borderStrong,
+                backgroundColor: colors.backgroundElevated,
+                padding: spacing[4],
+                gap: spacing[1],
+              }}
+            >
+              <AppText size="sm" tone="secondary">
+                {messages.common.labels.recentActivity}
+              </AppText>
+              <AppText weight="semibold">{events.length}</AppText>
+            </View>
+            <View
+              style={{
+                flex: 1,
+                borderRadius: radii.lg,
+                borderWidth: 1,
+                borderColor: colors.borderStrong,
+                backgroundColor: dataSource === "fallback" ? colors.warningSoft : colors.positiveSoft,
+                padding: spacing[4],
+                gap: spacing[1],
+              }}
+            >
+              <AppText size="sm" tone="secondary">
+                {messages.common.labels.dataSource}
+              </AppText>
+              <AppText numberOfLines={1} weight="semibold">
+                {dataSource === "fallback" ? messages.common.labels.fallback : messages.common.labels.synced}
+              </AppText>
+            </View>
+          </View>
+        ) : events.length > 0 ? (
           <SurfaceCard tone="accent" style={{ padding: spacing[5] }}>
             <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>
               <View
@@ -230,7 +272,7 @@ export default function ActivityScreen() {
 
             return (
               <MotionView key={event.id} delay={getStaggerDelay(index)} style={{ gap: 0 }}>
-                <SurfaceCard accentColor={tone.iconColor} style={{ padding: spacing[5] }}>
+                <SurfaceCard accentColor={tone.iconColor} style={{ padding: breakpoint.isCompact ? spacing[4] : spacing[5] }}>
                   <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[4] }}>
                     <View
                       style={{

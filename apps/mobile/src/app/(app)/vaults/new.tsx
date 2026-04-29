@@ -6,6 +6,7 @@ import { Stack, useRouter } from "expo-router";
 
 import { useCreateVaultForm } from "../../../features/create-vault/useCreateVaultForm";
 import { useAppReadiness } from "../../../hooks/useAppReadiness";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useCreateVaultMutation } from "../../../hooks/useCreateVaultMutation";
 import { useTransactionRecovery } from "../../../hooks/useTransactionRecovery";
@@ -18,7 +19,7 @@ import { routes } from "../../../lib/routing";
 import { colors, radii, spacing } from "../../../theme";
 import { useAnalytics } from "../../../hooks/useAnalytics";
 import { FormSection, StepPills } from "../../../components/forms";
-import { ScreenHeader } from "../../../components/layout";
+import { MobileActionBar, ScreenHeader } from "../../../components/layout";
 import {
   ConfigurationNotice,
   CreateVaultErrorState,
@@ -44,6 +45,7 @@ import { CreateVaultPreviewCard, CreateVaultReviewPanel, CreateVaultSuccessCard 
 
 export default function CreateVaultScreen() {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { inlineDirection, messages } = useI18n();
   const { track } = useAnalytics();
   const { values, errors, step, setFieldValue, nextStep, previousStep, validateAll, reset } = useCreateVaultForm();
@@ -180,15 +182,55 @@ export default function CreateVaultScreen() {
     router.replace(routes.appHome);
   };
 
+  const renderStepActions = (fullWidth = false) => (
+    <View style={{ flexDirection: fullWidth ? "column" : inlineDirection(), flexWrap: fullWidth ? "nowrap" : "wrap", gap: spacing[3] }}>
+      {step > 0 ? (
+        <SecondaryButton disabled={isBusy} fullWidth={fullWidth} icon="arrow-left" label={messages.common.buttons.back} onPress={previousStep} />
+      ) : null}
+      {step < 2 ? (
+        <PrimaryButton disabled={isBusy} fullWidth={fullWidth} icon="arrow-right" label={messages.common.buttons.continue} onPress={nextStep} />
+      ) : connectionState.status === "disconnected" || connectionState.status === "walletUnavailable" ? (
+        <PrimaryButton
+          disabled={isBusy}
+          fullWidth={fullWidth}
+          icon="wallet-outline"
+          label={messages.common.buttons.connectWallet}
+          onPress={() => void connect()}
+        />
+      ) : connectionState.status === "unsupportedNetwork" ? (
+        <PrimaryButton
+          disabled={isBusy}
+          fullWidth={fullWidth}
+          icon="swap-horizontal"
+          label={interpolate(messages.wallet.switchToChain, { chain: messages.common.networkBase })}
+          onPress={() => void switchNetwork()}
+        />
+      ) : (
+        <PrimaryButton
+          disabled={!canSubmit || readiness.status === "blocked"}
+          fullWidth={fullWidth}
+          icon="shield-check-outline"
+          label={messages.common.buttons.createVault}
+          onPress={() => void handleCreate()}
+        />
+      )}
+    </View>
+  );
+
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }} keyboardShouldPersistTaps="always">
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+      footer={breakpoint.isCompact && state.status !== "success" ? <MobileActionBar>{renderStepActions(true)}</MobileActionBar> : undefined}
+      keyboardShouldPersistTaps="always"
+    >
       <Stack.Screen options={{ title: messages.pages.createVault.title }} />
-      <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
+      <PageContainer width="dashboard" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.createVault.eyebrow}
           title={messages.pages.createVault.title}
           description={messages.pages.createVault.description}
-          action={<SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={handleBackToVaults} />}
+          action={breakpoint.isCompact ? undefined : <SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={handleBackToVaults} />}
         />
 
         <StateBanner
@@ -246,8 +288,8 @@ export default function CreateVaultScreen() {
               <StepPills currentStep={step} steps={stepLabels} />
             </MotionView>
 
-            <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[6], alignItems: "flex-start" }}>
-              <MotionView key={`create-step-${step}`} intensity="structural" style={{ flex: 1, minWidth: 320, gap: spacing[6] }}>
+            <View style={{ flexDirection: breakpoint.isCompact ? "column" : inlineDirection(), flexWrap: breakpoint.isCompact ? "nowrap" : "wrap", gap: breakpoint.isCompact ? spacing[4] : spacing[6], alignItems: "flex-start" }}>
+              <MotionView key={`create-step-${step}`} intensity="structural" style={{ flex: 1, minWidth: breakpoint.isCompact ? undefined : 320, width: breakpoint.isCompact ? "100%" : undefined, gap: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
                 {showGoalStep ? (
                   <FormSection
                     icon="bullseye-arrow"
@@ -369,7 +411,7 @@ export default function CreateVaultScreen() {
                             <MotionPressable
                               key={option.value}
                               accessibilityRole="button"
-                              containerStyle={{ flex: 1, minWidth: 190 }}
+                              containerStyle={{ flex: 1, minWidth: breakpoint.isCompact ? undefined : 190 }}
                               intensity={isSelected ? "structural" : "subtle"}
                               onPress={() => setFieldValue("ruleType", option.value)}
                               style={{
@@ -455,38 +497,10 @@ export default function CreateVaultScreen() {
                   </FormSection>
                 ) : null}
 
-                <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[3] }}>
-                  {step > 0 ? (
-                    <SecondaryButton disabled={isBusy} icon="arrow-left" label={messages.common.buttons.back} onPress={previousStep} />
-                  ) : null}
-                  {step < 2 ? (
-                    <PrimaryButton disabled={isBusy} icon="arrow-right" label={messages.common.buttons.continue} onPress={nextStep} />
-                  ) : connectionState.status === "disconnected" || connectionState.status === "walletUnavailable" ? (
-                    <PrimaryButton
-                      disabled={isBusy}
-                      icon="wallet-outline"
-                      label={messages.common.buttons.connectWallet}
-                      onPress={() => void connect()}
-                    />
-                  ) : connectionState.status === "unsupportedNetwork" ? (
-                    <PrimaryButton
-                      disabled={isBusy}
-                      icon="swap-horizontal"
-                      label={interpolate(messages.wallet.switchToChain, { chain: messages.common.networkBase })}
-                      onPress={() => void switchNetwork()}
-                    />
-                  ) : (
-                    <PrimaryButton
-                      disabled={!canSubmit || readiness.status === "blocked"}
-                      icon="shield-check-outline"
-                      label={messages.common.buttons.createVault}
-                      onPress={() => void handleCreate()}
-                    />
-                  )}
-                </View>
+                {breakpoint.isCompact ? null : renderStepActions()}
               </MotionView>
 
-              <MotionView delay={120} intensity="subtle" style={{ flex: 1, minWidth: 280, gap: spacing[4] }}>
+              <MotionView delay={120} intensity="subtle" style={{ flex: 1, minWidth: breakpoint.isCompact ? undefined : 280, width: breakpoint.isCompact ? "100%" : undefined, gap: spacing[4] }}>
                 <CreateVaultPreviewCard targetAmount={Number.isFinite(targetAmount) ? targetAmount : 0} values={values} />
                 {result && state.status !== "success" && state.didOnchainSucceed ? (
                   <SecondaryButton icon="shield-check-outline" label={messages.common.buttons.viewVault} onPress={handleViewVault} />

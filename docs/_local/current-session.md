@@ -1,47 +1,28 @@
 # Current Session
 
-## Date
-2026-04-29
-
-## Current Objective
-Implement the next production-readiness step with code and detailed docs only: beta graduation decision report.
-
 ## Completed
-- Confirmed there was no uncommitted current work before starting.
-- Added `scripts/write-beta-graduation-decision-report.mjs` for graduate, extend-beta, hold, rollback, or disable decisions before public launch planning.
-- Added the guarded `Beta Graduation Decision Report` GitHub Actions workflow.
-- Added `pnpm beta:graduation:decision`.
-- Added a beta graduation decision runbook and Phase 57 implementation note.
-- Updated README, env reference, CI/release workflow docs, launch checklist, limited beta checklist, production cutover runbook, and project state docs.
+- Implemented focused mobile-native UX pass for authenticated Expo app screens.
+- Added compact authenticated mobile chrome with safe top header and bottom tab bar.
+- Converted My Vaults, Vault Detail, Create Vault, Activity, and Support to tighter compact vertical layouts.
+- Added compact sticky action support for My Vaults and Create Vault.
+- Tuned compact cards, form sections, step pills, buttons, safe-area edges, and screen spacing.
 
-## Important Boundaries
-- No real tests, builds, deployments, database operations, traffic movement, chain actions, live data reads, production health checks, invitations, public launch actions, or recovery actions were run.
-- The graduation report is non-mutating and records `noPublicLaunchPerformed: true`, `noInvitesSent: true`, `noParticipantIdentifiersRecorded: true`, `noDeploymentPerformed: true`, `noDatabaseMutated: true`, `noTrafficMoved: true`, and `noChainTransactionSent: true`.
-- Graduate decisions require expansion decision `expand`, wave outcome `continue`, stable observation when inspected, minimum participant sample, clean support/incident/failed-transaction counts, ready support/privacy/reliability/communications/store status, and accepted review gates.
-- Secrets and participant PII remain outside workflow inputs and artifacts.
+## Changed Files
+- `apps/mobile/src/components/layout/MobileAppChrome.tsx`
+- `apps/mobile/src/components/layout/MobileActionBar.tsx`
+- `apps/mobile/src/components/layout/AppShell.tsx`
+- `apps/mobile/src/app/(app)/vaults/index.tsx`
+- `apps/mobile/src/app/(app)/vaults/[vaultAddress].tsx`
+- `apps/mobile/src/app/(app)/vaults/new.tsx`
+- `apps/mobile/src/app/(app)/activity.tsx`
+- `apps/mobile/src/app/(app)/support.tsx`
+- Shared form, card, screen, button, and adaptive layout primitives.
 
-## Main Files/Folders Touched
-- `scripts/write-beta-graduation-decision-report.mjs`
-- `.github/workflows/beta-graduation-decision-report.yml`
-- `docs/deployment/beta-graduation-decision.md`
-- `docs/plans/pocket-vault-universal-react-native-phase-57.md`
-- `docs/plans/pocket-vault-ci-release-workflows.md`
-- `docs/plans/pocket-vault-env-reference.md`
-- `docs/plans/pocket-vault-launch-checklist.md`
-- `docs/plans/pocket-vault-limited-beta-launch-checklist.md`
-- `docs/plans/pocket-vault-production-cutover-runbook.md`
-- `docs/project-state.md`
-- `README.md`
-- `package.json`
+## Verification
+- `pnpm --filter @pocket-vault/mobile typecheck` passed.
+- `pnpm --filter @pocket-vault/mobile test` passed after approved rerun outside sandbox for `tsx` IPC pipe access.
+- `pnpm verify:mobile:web` passed.
 
-## Verification Commands
-- `node --check scripts/write-beta-graduation-decision-report.mjs`
-- `git diff --check`
-
-## Verification Result
-- Script syntax checks passed.
-- Diff whitespace check passed.
-- Full tests and builds intentionally skipped per user request.
-
-## Next Step
-Run `Beta Graduation Decision Report` after expanded beta outcome and review evidence is accepted before any public launch planning.
+## Notes
+- No product scope or flow behavior was intentionally changed.
+- Suggested commit message: `Make authenticated mobile UX app-native`

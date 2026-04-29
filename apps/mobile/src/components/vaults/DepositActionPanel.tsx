@@ -5,6 +5,7 @@ import { formatUsdc } from "../../lib/format";
 import { formatAtomicUsdcToNumber } from "../../lib/contracts/amount-utils";
 import { useI18n } from "../../lib/i18n";
 import { colors, radii, spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import type { VaultDetail } from "../../types";
 import type { VaultDepositFlowController } from "../../hooks/useVaultDepositFlow";
 import { DepositErrorState, TransactionStatusCard } from "../feedback";
@@ -21,6 +22,7 @@ export const DepositActionPanel = ({
   vault: VaultDetail;
   flow: VaultDepositFlowController;
 }) => {
+  const breakpoint = useBreakpoint();
   const { inlineDirection, messages } = useI18n();
   const balanceLabel =
     flow.balance.balanceAtomic !== null && flow.balance.decimals !== null
@@ -95,6 +97,7 @@ export const DepositActionPanel = ({
       {flow.state.status !== "success" && flow.state.status !== "failed" ? (
         <PrimaryButton
           disabled={flow.isBusy || (flow.state.status !== "ready_for_approval" && flow.state.status !== "ready_for_deposit")}
+          fullWidth={breakpoint.isCompact}
           icon={flow.state.status === "ready_for_approval" ? "shield-check-outline" : "plus-circle-outline"}
           label={flow.primaryActionLabel}
           onPress={() => void flow.submit()}

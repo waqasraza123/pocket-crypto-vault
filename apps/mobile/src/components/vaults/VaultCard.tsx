@@ -6,6 +6,7 @@ import { View } from "react-native";
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
 import { colors, createShadowStyle, radii, spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import type { VaultSummary } from "../../types";
 import { AppHeading, AppText, MotionView, SecondaryButton, SurfaceCard } from "../primitives";
 import { VaultCardAmount } from "./VaultCardAmount";
@@ -19,6 +20,7 @@ export interface VaultCardProps {
 
 export const VaultCard = ({ vault }: VaultCardProps) => {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { inlineDirection, messages } = useI18n();
   const isFunded = vault.progressRatio >= 1;
   const ruleLabel =
@@ -42,10 +44,10 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
       level="floating"
       style={{
         flex: 1,
-        minWidth: 280,
+        minWidth: breakpoint.isCompact ? undefined : 280,
         backgroundColor: colors.backgroundElevated,
         borderColor: isFunded ? colors.positive : colors.borderStrong,
-        padding: spacing[5],
+        padding: breakpoint.isCompact ? spacing[4] : spacing[5],
       }}
     >
       <MotionView style={{ gap: spacing[3] }}>
@@ -104,7 +106,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
               borderWidth: 1,
               borderColor: colors.borderStrong,
               backgroundColor: colors.surfaceMuted,
-              padding: spacing[4],
+            padding: spacing[4],
             }}
           >
             <AppText tone="secondary">{vault.note}</AppText>
@@ -166,6 +168,7 @@ export const VaultCard = ({ vault }: VaultCardProps) => {
       </View>
 
       <SecondaryButton
+        fullWidth={breakpoint.isCompact}
         icon="arrow-right"
         label={messages.common.buttons.openVault}
         onPress={() => router.push(routes.vaultDetail(vault.address))}

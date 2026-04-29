@@ -23,6 +23,7 @@ import {
   SurfaceCard,
   TextField,
 } from "../../components/primitives";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { submitSupportRequest } from "../../lib/api/support";
 import { getBackendBaseUrl, envDiagnostics } from "../../lib/env/client";
@@ -43,6 +44,7 @@ const supportCategoryIcons: Record<SupportRequestCategory, ComponentProps<typeof
 
 export default function SupportScreen() {
   const pathname = usePathname();
+  const breakpoint = useBreakpoint();
   const { connectionState } = useWalletConnection();
   const { formatMessage, inlineDirection, messages } = useI18n();
   const [category, setCategory] = useState<SupportRequestCategory>("transaction");
@@ -127,9 +129,12 @@ export default function SupportScreen() {
   };
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+    >
       <Stack.Screen options={{ title: messages.pages.support.title }} />
-      <PageContainer width="reading" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
+      <PageContainer width="reading" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.support.eyebrow}
           title={messages.pages.support.title}
@@ -157,7 +162,7 @@ export default function SupportScreen() {
         {containsSecretLikeContent ? (
           <StateBanner icon="shield-alert-outline" label={messages.pages.support.secretWarning} tone="warning" />
         ) : null}
-        <SurfaceCard tone="accent" style={{ padding: spacing[5] }}>
+        <SurfaceCard tone="accent" style={{ padding: breakpoint.isCompact ? spacing[4] : spacing[5] }}>
           <View style={{ flexDirection: inlineDirection(), alignItems: "flex-start", gap: spacing[3] }}>
             <View
               style={{
@@ -276,13 +281,14 @@ export default function SupportScreen() {
             autoCapitalize="none"
           />
           <PrimaryButton
+            fullWidth={breakpoint.isCompact}
             icon="send"
             label={status === "submitting" ? messages.common.buttons.submitting : messages.common.buttons.submitSupport}
             disabled={!canSubmit || !backendBaseUrl}
             onPress={() => void handleSubmit()}
           />
         </SurfaceCard>
-        <SurfaceCard tone="muted" style={{ padding: spacing[5] }}>
+        <SurfaceCard tone="muted" style={{ padding: breakpoint.isCompact ? spacing[4] : spacing[5] }}>
           <View style={{ gap: spacing[2] }}>
             <AppHeading size="sm">{messages.pages.support.walletContextTitle}</AppHeading>
             <AppText tone="secondary">{messages.pages.support.walletContextDescription}</AppText>

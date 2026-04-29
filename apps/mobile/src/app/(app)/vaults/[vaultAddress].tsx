@@ -19,6 +19,7 @@ import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useI18n } from "../../../lib/i18n";
 import { parseVaultRouteParams } from "../../../lib/validation";
 import { useAdaptiveLayout } from "../../../hooks/useAdaptiveLayout";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { routes } from "../../../lib/routing";
 import { spacing } from "../../../theme";
 import {
@@ -30,7 +31,7 @@ import {
   TransactionRecoveryNotice,
 } from "../../../components/feedback";
 import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
-import { EmptyState, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
+import { EmptyState, IconButton, MotionView, PageContainer, Screen, SecondaryButton } from "../../../components/primitives";
 import {
   DepositActionPanel,
   VaultActivityPreview,
@@ -56,6 +57,7 @@ export default function VaultDetailScreen() {
   const depositFlow = useVaultDepositFlow(vault);
   const withdrawFlow = useVaultWithdrawFlow(vault);
   const unlockFlow = useVaultUnlockFlow(vault);
+  const breakpoint = useBreakpoint();
   const activeRecovery = items[0] ?? null;
   const analyticsContext = useMemo(
     () => createConnectionAnalyticsContext(connectionState),
@@ -146,15 +148,26 @@ export default function VaultDetailScreen() {
   });
 
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+    >
       <Stack.Screen options={{ title: messages.pages.vaultDetail.title }} />
-      <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
-        <ScreenHeader
-          eyebrow={messages.pages.vaultDetail.eyebrow}
-          title={messages.pages.vaultDetail.title}
-          description={messages.pages.vaultDetail.description}
-          action={<SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={() => router.replace(routes.appHome)} />}
-        />
+      <PageContainer width="dashboard" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
+        {breakpoint.isCompact ? (
+          <IconButton
+            accessibilityLabel={messages.common.buttons.backToVaults}
+            icon="arrow-left"
+            onPress={() => router.replace(routes.appHome)}
+          />
+        ) : (
+          <ScreenHeader
+            eyebrow={messages.pages.vaultDetail.eyebrow}
+            title={messages.pages.vaultDetail.title}
+            description={messages.pages.vaultDetail.description}
+            action={<SecondaryButton icon="arrow-left" label={messages.common.buttons.backToVaults} onPress={() => router.replace(routes.appHome)} />}
+          />
+        )}
 
         {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
           <DisconnectedState onConnect={() => void connect()} />
@@ -235,7 +248,25 @@ export default function VaultDetailScreen() {
           </MotionView>
         ) : null}
 
-        {vault ? (
+        {vault && breakpoint.isCompact ? (
+          <View style={{ gap: spacing[4] }}>
+            <MotionView delay={120}>
+              <VaultProgressPanel vault={vault} />
+            </MotionView>
+            <MotionView delay={150}>
+              <VaultRulePanel eligibility={withdrawFlow.eligibility} vault={vault} />
+            </MotionView>
+            <MotionView delay={180}>
+              <DepositActionPanel flow={depositFlow} vault={vault} />
+            </MotionView>
+            <MotionView delay={210}>
+              <WithdrawActionPanel flow={withdrawFlow} unlockFlow={unlockFlow} vault={vault} />
+            </MotionView>
+            <MotionView delay={240}>
+              <VaultActivityPreview events={vault.activityPreview} onOpenTimeline={() => router.push(routes.activity)} />
+            </MotionView>
+          </View>
+        ) : vault ? (
           <View style={{ flexDirection: adaptiveLayout.useSplitLayout ? "row" : "column", gap: spacing[4] }}>
             <MotionView delay={120} style={{ flex: 1, gap: spacing[4] }}>
               <VaultProgressPanel vault={vault} />
