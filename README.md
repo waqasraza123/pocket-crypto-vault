@@ -2,6 +2,10 @@
 
 Pocket Vault is a Base-native USDC pocket-money savings app for 18+ college and university students starting with crypto. A student connects a wallet, creates one vault for an emergency or student-life goal, deposits over time, and withdraws only when the selected rule allows it.
 
+## Screenshots
+
+![alt text](.github/screenshots/image1.png) ![alt text](.github/screenshots/image2.png) ![alt text](.github/screenshots/image3.png)
+
 The product is intentionally narrow:
 
 - Base only
