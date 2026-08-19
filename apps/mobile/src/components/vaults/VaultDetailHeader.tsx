@@ -5,6 +5,7 @@ import { View } from "react-native";
 import { formatLongDate, formatProgress, formatUsdc } from "../../lib/format";
 import { interpolate, useI18n } from "../../lib/i18n";
 import { colors, createShadowStyle, radii, spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import type { VaultDetail } from "../../types";
 import { AnimatedNumberText, AppHeading, AppText, MotionView, ProgressBar, SurfaceCard } from "../primitives";
 import { VaultCardStatus } from "./VaultCardStatus";
@@ -14,6 +15,7 @@ export interface VaultDetailHeaderProps {
 }
 
 export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
+  const breakpoint = useBreakpoint();
   const { inlineDirection, messages } = useI18n();
   const accentTone = vault.accentTone || colors.accentStrong;
   const protectionDescription =
@@ -60,9 +62,9 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
     <SurfaceCard
       accentColor={accentTone}
       level="floating"
-      style={{ backgroundColor: colors.backgroundElevated, borderColor: colors.borderStrong, padding: spacing[5] }}
+      style={{ backgroundColor: colors.backgroundElevated, borderColor: colors.borderStrong, padding: breakpoint.isCompact ? spacing[4] : spacing[5] }}
     >
-      <View style={{ gap: spacing[5] }}>
+      <View style={{ gap: breakpoint.isCompact ? spacing[4] : spacing[5] }}>
         <View style={{ flexDirection: inlineDirection(), justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>
           <VaultCardStatus status={vault.status} />
           <View
@@ -97,7 +99,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
             <MaterialCommunityIcons color={accentTone} name="bullseye-arrow" size={25} />
           </View>
           <View style={{ flex: 1, gap: spacing[2] }}>
-            <AppHeading size="xl">{vault.goalName}</AppHeading>
+            <AppHeading size={breakpoint.isCompact ? "lg" : "xl"}>{vault.goalName}</AppHeading>
             {vault.note ? <AppText tone="secondary">{vault.note}</AppText> : null}
             {vault.category ? <AppText size="sm" tone="accent" weight="semibold">{vault.category}</AppText> : null}
           </View>
@@ -109,7 +111,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
             borderWidth: 1,
             borderColor: accentTone,
             backgroundColor: colors.textPrimary,
-            padding: spacing[5],
+            padding: breakpoint.isCompact ? spacing[4] : spacing[5],
             gap: spacing[4],
             overflow: "hidden",
             ...createShadowStyle({
@@ -128,7 +130,7 @@ export const VaultDetailHeader = ({ vault }: VaultDetailHeaderProps) => {
               <AppText size="sm" style={{ color: "#bfdbfe" }} weight="semibold">
                 {messages.common.labels.totalSaved}
               </AppText>
-              <AnimatedNumberText formatValue={formatUsdc} size="xl" style={{ color: colors.white }} value={vault.savedAmount} weight="semibold" />
+              <AnimatedNumberText formatValue={formatUsdc} size={breakpoint.isCompact ? "lg" : "xl"} style={{ color: colors.white }} value={vault.savedAmount} weight="semibold" />
             </View>
             <View
               style={{

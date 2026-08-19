@@ -31,7 +31,7 @@ on:
         type: string
         required: false
       confirm_execute:
-        description: Type execute to move Vercel API traffic.
+        description: Type execute to promote, roll back, or disable Vercel API traffic.
         type: string
         required: true
 
@@ -56,7 +56,7 @@ env:
 
 jobs:
   vercel-api-traffic-execute:
-    name: Execute ${{ inputs.target }} Vercel API traffic
+    name: Execute ${{ inputs.target }} Vercel API traffic command
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: ${{ inputs.target }}
@@ -64,7 +64,7 @@ jobs:
       - name: Validate confirmation
         if: ${{ inputs.confirm_execute != 'execute' }}
         run: |
-          echo "Traffic execution requires confirm_execute=execute."
+          echo "Vercel traffic command execution requires confirm_execute=execute."
           exit 1
 
       - name: Checkout
@@ -92,7 +92,7 @@ jobs:
           fi
           echo "command_plan=$command_plan" >> "$GITHUB_OUTPUT"
 
-      - name: Execute Vercel API traffic
+      - name: Execute Vercel API traffic command
         id: traffic-execute
         env:
           VERCEL_API_TRAFFIC_COMMAND_PLAN: ${{ steps.command-plan.outputs.command_plan }}

@@ -3,6 +3,7 @@ import { View, type StyleProp, type ViewStyle } from "react-native";
 
 import type { ThemeSurfaceLevel } from "../../theme";
 import { colors, radii, shadows, spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 
 export interface SurfaceCardProps {
   style?: StyleProp<ViewStyle>;
@@ -42,20 +43,22 @@ export const SurfaceCard = ({
   tone = "default",
   level = tone === "accent" ? "floating" : "elevated",
 }: PropsWithChildren<SurfaceCardProps>) => {
+  const breakpoint = useBreakpoint();
   const resolvedAccentColor = accentColor ?? (tone === "accent" ? colors.accent : colors.borderStrong);
+  const compactLevel = breakpoint.isCompact && level === "floating" ? "elevated" : level;
 
   return (
     <View
       style={[
         {
           borderWidth: 1,
-          borderRadius: radii.xl,
-          padding: spacing[6],
-          gap: spacing[4],
+          borderRadius: breakpoint.isCompact ? radii.lg : radii.xl,
+          padding: breakpoint.isCompact ? spacing[5] : spacing[6],
+          gap: breakpoint.isCompact ? spacing[3] : spacing[4],
           overflow: "hidden",
           position: "relative",
         },
-        levelStyles[level],
+        levelStyles[compactLevel],
         toneStyles[tone],
         style,
       ]}
@@ -88,7 +91,7 @@ export const SurfaceCard = ({
           opacity: 0.72,
         }}
       />
-      <View style={{ gap: spacing[4] }}>{children}</View>
+      <View style={{ gap: breakpoint.isCompact ? spacing[3] : spacing[4] }}>{children}</View>
     </View>
   );
 };

@@ -1,0 +1,191 @@
+name: Beta Expansion Decision Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Beta environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      expansion_label:
+        description: Stable beta expansion decision label.
+        type: string
+        required: true
+      decision:
+        description: Decision before expanding access.
+        type: choice
+        required: true
+        default: hold
+        options:
+          - expand
+          - hold
+          - rollback
+          - disable
+      latest_wave_outcome:
+        description: Latest beta wave outcome artifact name, URL, or local path.
+        type: string
+        required: true
+      retention_plan:
+        description: Beta data retention plan artifact name, URL, or local path.
+        type: string
+        required: true
+      current_participant_count:
+        description: Current invited participant count.
+        type: string
+        required: true
+        default: "0"
+      next_wave_size:
+        description: Proposed next invitation wave size.
+        type: string
+        required: true
+      participant_limit:
+        description: Approved participant limit for the expanded beta.
+        type: string
+        required: true
+      open_support_request_count:
+        description: Open support request count before expansion.
+        type: string
+        required: false
+        default: "0"
+      unresolved_incident_count:
+        description: Unresolved incident count before expansion.
+        type: string
+        required: false
+        default: "0"
+      failed_transaction_count:
+        description: Failed create, deposit, unlock, or withdraw count since latest outcome.
+        type: string
+        required: false
+        default: "0"
+      support_backlog_status:
+        description: Support backlog status.
+        type: choice
+        required: true
+        default: clear
+        options:
+          - clear
+          - watch
+          - blocked
+      operator_capacity_status:
+        description: Operator capacity for the next wave.
+        type: choice
+        required: true
+        default: ready
+        options:
+          - ready
+          - constrained
+          - blocked
+      retention_review_accepted:
+        description: Retention handling is accepted for expansion.
+        type: boolean
+        required: true
+        default: false
+      support_review_accepted:
+        description: Support handling is accepted for expansion.
+        type: boolean
+        required: true
+        default: false
+      privacy_review_accepted:
+        description: Privacy and PII handling are accepted for expansion.
+        type: boolean
+        required: true
+        default: false
+      participant_identifiers_recorded:
+        description: Must be false. Participant PII must not be recorded.
+        type: boolean
+        required: true
+        default: false
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for expansion.
+        type: string
+        required: true
+      expansion_owner:
+        description: Operator or team responsible for approving expansion.
+        type: string
+        required: true
+      incident_reference:
+        description: Incident ticket or review reference. Required for rollback, disable, or unresolved incidents.
+        type: string
+        required: false
+      operator:
+        description: Operator or team responsible for the report.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_report:
+        description: Type report to write the expansion decision report.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-expansion-decision-report-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  BETA_EXPANSION_TARGET: ${{ inputs.target }}
+  BETA_EXPANSION_LABEL: ${{ inputs.expansion_label }}
+  BETA_EXPANSION_DECISION: ${{ inputs.decision }}
+  BETA_EXPANSION_LATEST_WAVE_OUTCOME: ${{ inputs.latest_wave_outcome }}
+  BETA_EXPANSION_RETENTION_PLAN: ${{ inputs.retention_plan }}
+  BETA_EXPANSION_CURRENT_PARTICIPANT_COUNT: ${{ inputs.current_participant_count }}
+  BETA_EXPANSION_NEXT_WAVE_SIZE: ${{ inputs.next_wave_size }}
+  BETA_EXPANSION_PARTICIPANT_LIMIT: ${{ inputs.participant_limit }}
+  BETA_EXPANSION_OPEN_SUPPORT_REQUEST_COUNT: ${{ inputs.open_support_request_count }}
+  BETA_EXPANSION_UNRESOLVED_INCIDENT_COUNT: ${{ inputs.unresolved_incident_count }}
+  BETA_EXPANSION_FAILED_TRANSACTION_COUNT: ${{ inputs.failed_transaction_count }}
+  BETA_EXPANSION_SUPPORT_BACKLOG_STATUS: ${{ inputs.support_backlog_status }}
+  BETA_EXPANSION_OPERATOR_CAPACITY_STATUS: ${{ inputs.operator_capacity_status }}
+  BETA_EXPANSION_RETENTION_REVIEW_ACCEPTED: ${{ inputs.retention_review_accepted }}
+  BETA_EXPANSION_SUPPORT_REVIEW_ACCEPTED: ${{ inputs.support_review_accepted }}
+  BETA_EXPANSION_PRIVACY_REVIEW_ACCEPTED: ${{ inputs.privacy_review_accepted }}
+  BETA_EXPANSION_PARTICIPANT_IDENTIFIERS_RECORDED: ${{ inputs.participant_identifiers_recorded }}
+  BETA_EXPANSION_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  BETA_EXPANSION_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  BETA_EXPANSION_OWNER: ${{ inputs.expansion_owner }}
+  BETA_EXPANSION_INCIDENT_REFERENCE: ${{ inputs.incident_reference }}
+  BETA_EXPANSION_OPERATOR: ${{ inputs.operator }}
+  BETA_EXPANSION_NOTES: ${{ inputs.notes }}
+  BETA_EXPANSION_CONFIRM_REPORT: ${{ inputs.confirm_report }}
+  BETA_EXPANSION_DIR: artifacts/beta-expansion-decision
+
+jobs:
+  beta-expansion-decision-report:
+    name: Write ${{ inputs.target }} beta expansion decision report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_report != 'report' }}
+        run: |
+          echo "Beta expansion decision report requires confirm_report=report."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write beta expansion decision report
+        id: expansion
+        run: node scripts/write-beta-expansion-decision-report.mjs
+
+      - name: Upload beta expansion decision report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-beta-expansion-decision-${{ inputs.target }}
+          path: ${{ steps.expansion.outputs.expansion_report_path }}
+          if-no-files-found: error

@@ -1,0 +1,172 @@
+name: Beta Wave Outcome Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Beta environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      outcome_label:
+        description: Stable beta wave outcome label.
+        type: string
+        required: true
+      decision:
+        description: Decision before the next wave.
+        type: choice
+        required: true
+        default: continue
+        options:
+          - continue
+          - pause
+          - rollback
+          - disable
+      observation_status:
+        description: Post-wave observation status.
+        type: choice
+        required: true
+        default: stable
+        options:
+          - stable
+          - degraded
+          - incident
+      invitation_wave_plan:
+        description: Beta invitation wave plan artifact name, URL, or local path.
+        type: string
+        required: true
+      observation_report:
+        description: Post-wave production observation report artifact name, URL, or local path.
+        type: string
+        required: true
+      invited_count:
+        description: Aggregate participants invited in the wave.
+        type: string
+        required: true
+        default: "0"
+      activated_wallet_count:
+        description: Aggregate invited users who connected or activated wallets.
+        type: string
+        required: false
+        default: "0"
+      vault_created_count:
+        description: Aggregate created vault count.
+        type: string
+        required: false
+        default: "0"
+      deposit_count:
+        description: Aggregate deposit count.
+        type: string
+        required: false
+        default: "0"
+      withdraw_count:
+        description: Aggregate withdraw count.
+        type: string
+        required: false
+        default: "0"
+      support_request_count:
+        description: Aggregate support request count.
+        type: string
+        required: false
+        default: "0"
+      failed_transaction_count:
+        description: Aggregate failed create, deposit, unlock, or withdraw count.
+        type: string
+        required: false
+        default: "0"
+      incident_count:
+        description: Aggregate incident count.
+        type: string
+        required: false
+        default: "0"
+      participant_identifiers_recorded:
+        description: Must be false. Participant PII must not be recorded.
+        type: boolean
+        required: true
+        default: false
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for this wave.
+        type: string
+        required: true
+      incident_reference:
+        description: Incident ticket or review reference. Required for rollback, disable, incident status, or non-zero incidents.
+        type: string
+        required: false
+      operator:
+        description: Operator or team responsible for the outcome report.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_report:
+        description: Type report to write the wave outcome report.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-wave-outcome-report-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  BETA_WAVE_OUTCOME_TARGET: ${{ inputs.target }}
+  BETA_WAVE_OUTCOME_LABEL: ${{ inputs.outcome_label }}
+  BETA_WAVE_OUTCOME_DECISION: ${{ inputs.decision }}
+  BETA_WAVE_OUTCOME_OBSERVATION_STATUS: ${{ inputs.observation_status }}
+  BETA_WAVE_OUTCOME_INVITATION_WAVE_PLAN: ${{ inputs.invitation_wave_plan }}
+  BETA_WAVE_OUTCOME_OBSERVATION_REPORT: ${{ inputs.observation_report }}
+  BETA_WAVE_OUTCOME_INVITED_COUNT: ${{ inputs.invited_count }}
+  BETA_WAVE_OUTCOME_ACTIVATED_WALLET_COUNT: ${{ inputs.activated_wallet_count }}
+  BETA_WAVE_OUTCOME_VAULT_CREATED_COUNT: ${{ inputs.vault_created_count }}
+  BETA_WAVE_OUTCOME_DEPOSIT_COUNT: ${{ inputs.deposit_count }}
+  BETA_WAVE_OUTCOME_WITHDRAW_COUNT: ${{ inputs.withdraw_count }}
+  BETA_WAVE_OUTCOME_SUPPORT_REQUEST_COUNT: ${{ inputs.support_request_count }}
+  BETA_WAVE_OUTCOME_FAILED_TRANSACTION_COUNT: ${{ inputs.failed_transaction_count }}
+  BETA_WAVE_OUTCOME_INCIDENT_COUNT: ${{ inputs.incident_count }}
+  BETA_WAVE_OUTCOME_PARTICIPANT_IDENTIFIERS_RECORDED: ${{ inputs.participant_identifiers_recorded }}
+  BETA_WAVE_OUTCOME_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  BETA_WAVE_OUTCOME_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  BETA_WAVE_OUTCOME_INCIDENT_REFERENCE: ${{ inputs.incident_reference }}
+  BETA_WAVE_OUTCOME_OPERATOR: ${{ inputs.operator }}
+  BETA_WAVE_OUTCOME_NOTES: ${{ inputs.notes }}
+  BETA_WAVE_OUTCOME_CONFIRM_REPORT: ${{ inputs.confirm_report }}
+  BETA_WAVE_OUTCOME_DIR: artifacts/beta-wave-outcome
+
+jobs:
+  beta-wave-outcome-report:
+    name: Write ${{ inputs.target }} beta wave outcome report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_report != 'report' }}
+        run: |
+          echo "Beta wave outcome report requires confirm_report=report."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write beta wave outcome report
+        id: outcome
+        run: node scripts/write-beta-wave-outcome-report.mjs
+
+      - name: Upload beta wave outcome report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-beta-wave-outcome-${{ inputs.target }}
+          path: ${{ steps.outcome.outputs.outcome_report_path }}
+          if-no-files-found: error

@@ -2,6 +2,7 @@ export * from "./breakpoints";
 export * from "./colors";
 export * from "./gradients";
 export * from "./motion";
+export * from "./onboarding";
 export * from "./radii";
 export * from "./shadows";
 export * from "./spacing";

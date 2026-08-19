@@ -12,14 +12,15 @@ export interface PrimaryButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   icon?: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  fullWidth?: boolean;
 }
 
-export const PrimaryButton = ({ label, onPress, disabled, icon }: PrimaryButtonProps) => {
+export const PrimaryButton = ({ label, onPress, disabled, icon, fullWidth = false }: PrimaryButtonProps) => {
   const { getDirectionalIcon, inlineDirection } = useI18n();
   const motion = useInteractiveMotion("subtle");
 
   return (
-    <Animated.View style={[motion.animatedStyle, { opacity: disabled ? 0.74 : 1 }]}>
+    <Animated.View style={[motion.animatedStyle, { opacity: disabled ? 0.74 : 1, alignSelf: fullWidth ? "stretch" : undefined }]}>
       <Pressable
         accessibilityRole="button"
         disabled={disabled}

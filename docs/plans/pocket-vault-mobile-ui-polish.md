@@ -13,7 +13,9 @@ The polish pass keeps the existing Expo React Native architecture, bilingual i18
 - transaction success, error, recovery, and status states
 
 ## Visual Direction
-Pocket Vault should feel like a calm premium savings tool, not a trading dashboard. Screens should use the existing bright slate, blue, emerald, and warning accents with restrained contrast, strong hierarchy, and compact mobile spacing.
+Pocket Vault should feel like a calm premium savings tool, not a trading dashboard. Authenticated and public marketing screens use the existing bright slate, blue, emerald, and warning accents with restrained contrast, strong hierarchy, and compact mobile spacing.
+
+The root onboarding, create-account, and sign-in journey uses a dedicated clean monochrome system: an off-white canvas, white surfaces, charcoal text and primary actions, gray borders, and emerald progress or success cues. It must not reuse the earlier full-screen blue background or constrain desktop layouts to a narrow phone frame. The landing hero uses a responsive split composition on tablet and desktop and a stacked composition on compact screens, with a real goal-vault preview as product proof.
 
 Use icon-led headers for important panels. The leading icon should communicate the job of the panel before the user reads the text:
 - `bullseye-arrow` for goal and progress intent

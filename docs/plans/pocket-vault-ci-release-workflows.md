@@ -3,7 +3,7 @@
 ## Purpose
 This pass adds repository-owned GitHub Actions automation for the current production-shaped v1 codebase.
 
-The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, and release manifest generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
+The CI and release-candidate workflows intentionally stop at verification and release-candidate artifact creation. Contract deployment, API runtime preflight, API image publishing, API traffic planning, Vercel API traffic command planning, beta support export generation, beta invitation wave planning, beta wave outcome reporting, beta expansion decision reporting, beta graduation decision reporting, beta data retention planning, managed database planning, managed database schema generation, managed database export generation, managed database import planning, managed database parity planning, managed database runtime activation planning, mobile distribution, release manifest generation, production activation record generation, and production observation report generation have separate guarded manual workflows. No workflow mutates backend production infrastructure or promotes traffic automatically.
 
 ## Workflow Files
 - `.github/actions/setup-pnpm/action.yml`
@@ -46,13 +46,29 @@ The CI and release-candidate workflows intentionally stop at verification and re
 - `.github/workflows/vercel-api-traffic-command.yml`
   - manual staging or production Vercel API traffic command plan generation
   - validates Vercel project references, deployment URLs, production domain, and traffic plan evidence
-  - uploads exact promote or rollback command strings without running Vercel CLI
-  - emits manual-only disablement steps because disablement depends on project routing policy
+  - uploads exact promote, rollback, or alias-removal disablement command strings without running Vercel CLI
+  - requires the explicit `remove-alias` strategy for disablement
 - `.github/workflows/beta-support-export.yml`
   - manual staging or production beta support export generation
   - reads a downloaded API data snapshot artifact or runner-local snapshot directory
   - writes summary or explicitly confirmed private support JSONL exports
   - uploads a private operational artifact without connecting to live storage or mutating support status
+- `.github/workflows/beta-invitation-wave-plan.yml`
+  - manual staging or production beta invitation wave plan generation
+  - validates beta readiness, stable production observation, participant counts, value guidance, support reference, incident owner, and invite owner
+  - uploads a non-PII wave plan artifact without sending invitations
+- `.github/workflows/beta-wave-outcome-report.yml`
+  - manual staging or production beta wave outcome report generation
+  - validates invitation wave, post-wave observation, aggregate counts, support reference, incident owner, and continue/pause/rollback/disable decision rules
+  - uploads a non-PII outcome report artifact without sending invitations or executing recovery actions
+- `.github/workflows/beta-expansion-decision-report.yml`
+  - manual staging or production beta expansion decision report generation
+  - validates latest wave outcome, retention plan, support load, operator capacity, review approvals, participant limits, and expansion decision rules
+  - uploads a non-PII expansion decision artifact without sending invitations or reading live data
+- `.github/workflows/beta-graduation-decision-report.yml`
+  - manual staging or production beta graduation decision report generation
+  - validates expansion decision, latest wave outcome, retention plan, aggregate signals, readiness statuses, review approvals, and graduation decision rules
+  - uploads a non-PII graduation decision artifact without launching publicly
 - `.github/workflows/beta-data-retention-plan.yml`
   - manual staging or production beta data retention plan generation
   - records retention windows, owners, data classes, deletion request flow, and legal-hold flow
@@ -91,6 +107,14 @@ The CI and release-candidate workflows intentionally stop at verification and re
   - manual staging or production release manifest generation
   - records the exact API image, factory address, app/API URLs, mobile build references, and rollback pointers
   - uploads a release manifest artifact
+- `.github/workflows/production-activation-record.yml`
+  - manual staging or production activation record generation
+  - validates release, preflight, managed database, traffic execution, smoke, beta readiness, snapshot, support, and incident-owner references
+  - uploads an activation record artifact without deploying, mutating a database, or moving traffic
+- `.github/workflows/production-observation-report.yml`
+  - manual staging or production observation report generation
+  - reads public `/health` and `/ready` and records indexer, support, analytics, error budget, failed transaction, and incident signals
+  - uploads an observation report artifact without deploying, mutating a database, moving traffic, or inviting users
 
 ## Required GitHub Environments
 Create two GitHub Environments before relying on release-candidate runs:
@@ -261,6 +285,100 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `BETA_SUPPORT_EXPORT_INCIDENT_REFERENCE`
 - `BETA_SUPPORT_EXPORT_NOTES`
 - `BETA_SUPPORT_EXPORT_DIR`
+- `BETA_INVITATION_TARGET`
+- `BETA_INVITATION_WAVE_LABEL`
+- `BETA_INVITATION_READINESS_PLAN`
+- `BETA_INVITATION_OBSERVATION_REPORT`
+- `BETA_INVITATION_WAVE_NUMBER`
+- `BETA_INVITATION_WAVE_SIZE`
+- `BETA_INVITATION_PREVIOUSLY_INVITED_COUNT`
+- `BETA_INVITATION_PARTICIPANT_LIMIT`
+- `BETA_INVITATION_MAX_VAULT_USDC`
+- `BETA_INVITATION_COMMUNICATION_REFERENCE`
+- `BETA_INVITATION_SUPPORT_REFERENCE`
+- `BETA_INVITATION_INCIDENT_OWNER`
+- `BETA_INVITATION_OWNER`
+- `BETA_INVITATION_OPERATOR`
+- `BETA_INVITATION_NOTES`
+- `BETA_INVITATION_CONFIRM_PLAN`
+- `BETA_INVITATION_DIR`
+- `BETA_WAVE_OUTCOME_TARGET`
+- `BETA_WAVE_OUTCOME_LABEL`
+- `BETA_WAVE_OUTCOME_DECISION`
+- `BETA_WAVE_OUTCOME_OBSERVATION_STATUS`
+- `BETA_WAVE_OUTCOME_INVITATION_WAVE_PLAN`
+- `BETA_WAVE_OUTCOME_OBSERVATION_REPORT`
+- `BETA_WAVE_OUTCOME_INVITED_COUNT`
+- `BETA_WAVE_OUTCOME_ACTIVATED_WALLET_COUNT`
+- `BETA_WAVE_OUTCOME_VAULT_CREATED_COUNT`
+- `BETA_WAVE_OUTCOME_DEPOSIT_COUNT`
+- `BETA_WAVE_OUTCOME_WITHDRAW_COUNT`
+- `BETA_WAVE_OUTCOME_SUPPORT_REQUEST_COUNT`
+- `BETA_WAVE_OUTCOME_FAILED_TRANSACTION_COUNT`
+- `BETA_WAVE_OUTCOME_INCIDENT_COUNT`
+- `BETA_WAVE_OUTCOME_PARTICIPANT_IDENTIFIERS_RECORDED`
+- `BETA_WAVE_OUTCOME_SUPPORT_REFERENCE`
+- `BETA_WAVE_OUTCOME_INCIDENT_OWNER`
+- `BETA_WAVE_OUTCOME_INCIDENT_REFERENCE`
+- `BETA_WAVE_OUTCOME_OPERATOR`
+- `BETA_WAVE_OUTCOME_NOTES`
+- `BETA_WAVE_OUTCOME_CONFIRM_REPORT`
+- `BETA_WAVE_OUTCOME_DIR`
+- `BETA_EXPANSION_TARGET`
+- `BETA_EXPANSION_LABEL`
+- `BETA_EXPANSION_DECISION`
+- `BETA_EXPANSION_LATEST_WAVE_OUTCOME`
+- `BETA_EXPANSION_RETENTION_PLAN`
+- `BETA_EXPANSION_CURRENT_PARTICIPANT_COUNT`
+- `BETA_EXPANSION_NEXT_WAVE_SIZE`
+- `BETA_EXPANSION_PARTICIPANT_LIMIT`
+- `BETA_EXPANSION_OPEN_SUPPORT_REQUEST_COUNT`
+- `BETA_EXPANSION_UNRESOLVED_INCIDENT_COUNT`
+- `BETA_EXPANSION_FAILED_TRANSACTION_COUNT`
+- `BETA_EXPANSION_SUPPORT_BACKLOG_STATUS`
+- `BETA_EXPANSION_OPERATOR_CAPACITY_STATUS`
+- `BETA_EXPANSION_RETENTION_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_SUPPORT_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_PRIVACY_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_PARTICIPANT_IDENTIFIERS_RECORDED`
+- `BETA_EXPANSION_SUPPORT_REFERENCE`
+- `BETA_EXPANSION_INCIDENT_OWNER`
+- `BETA_EXPANSION_OWNER`
+- `BETA_EXPANSION_INCIDENT_REFERENCE`
+- `BETA_EXPANSION_OPERATOR`
+- `BETA_EXPANSION_NOTES`
+- `BETA_EXPANSION_CONFIRM_REPORT`
+- `BETA_EXPANSION_DIR`
+- `BETA_GRADUATION_TARGET`
+- `BETA_GRADUATION_LABEL`
+- `BETA_GRADUATION_DECISION`
+- `BETA_GRADUATION_EXPANSION_DECISION`
+- `BETA_GRADUATION_LATEST_WAVE_OUTCOME`
+- `BETA_GRADUATION_RETENTION_PLAN`
+- `BETA_GRADUATION_PARTICIPANT_COUNT`
+- `BETA_GRADUATION_MINIMUM_PARTICIPANT_COUNT`
+- `BETA_GRADUATION_OPEN_SUPPORT_REQUEST_COUNT`
+- `BETA_GRADUATION_UNRESOLVED_INCIDENT_COUNT`
+- `BETA_GRADUATION_FAILED_TRANSACTION_COUNT`
+- `BETA_GRADUATION_SUPPORT_READINESS`
+- `BETA_GRADUATION_PRIVACY_READINESS`
+- `BETA_GRADUATION_RELIABILITY_READINESS`
+- `BETA_GRADUATION_COMMUNICATIONS_READINESS`
+- `BETA_GRADUATION_STORE_READINESS`
+- `BETA_GRADUATION_SUPPORT_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_PRIVACY_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_RELIABILITY_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_RETENTION_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_COMMUNICATIONS_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_PARTICIPANT_IDENTIFIERS_RECORDED`
+- `BETA_GRADUATION_SUPPORT_REFERENCE`
+- `BETA_GRADUATION_INCIDENT_OWNER`
+- `BETA_GRADUATION_OWNER`
+- `BETA_GRADUATION_INCIDENT_REFERENCE`
+- `BETA_GRADUATION_OPERATOR`
+- `BETA_GRADUATION_NOTES`
+- `BETA_GRADUATION_CONFIRM_REPORT`
+- `BETA_GRADUATION_DIR`
 - `BETA_DATA_RETENTION_TARGET`
 - `BETA_DATA_RETENTION_LABEL`
 - `BETA_DATA_RETENTION_POLICY_OWNER`
@@ -280,6 +398,52 @@ Use GitHub Environment variables for public, non-secret release metadata:
 - `BETA_DATA_RETENTION_INCIDENT_RECORDS_DAYS`
 - `BETA_DATA_RETENTION_NOTES`
 - `BETA_DATA_RETENTION_DIR`
+- `PRODUCTION_ACTIVATION_TARGET`
+- `PRODUCTION_ACTIVATION_LABEL`
+- `PRODUCTION_ACTIVATION_OUTCOME`
+- `PRODUCTION_ACTIVATION_PERSISTENCE_DRIVER`
+- `PRODUCTION_ACTIVATION_RELEASE_MANIFEST`
+- `PRODUCTION_ACTIVATION_PREFLIGHT_REPORT`
+- `PRODUCTION_ACTIVATION_DATABASE_RUNTIME_PLAN`
+- `PRODUCTION_ACTIVATION_SCHEMA_EXECUTION`
+- `PRODUCTION_ACTIVATION_IMPORT_EXECUTION`
+- `PRODUCTION_ACTIVATION_PARITY_EXECUTION`
+- `PRODUCTION_ACTIVATION_TRAFFIC_PLAN`
+- `PRODUCTION_ACTIVATION_TRAFFIC_EXECUTION`
+- `PRODUCTION_ACTIVATION_SMOKE_RESULT`
+- `PRODUCTION_ACTIVATION_BETA_READINESS`
+- `PRODUCTION_ACTIVATION_SOURCE_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_ROLLBACK_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_SUPPORT_REFERENCE`
+- `PRODUCTION_ACTIVATION_INCIDENT_OWNER`
+- `PRODUCTION_ACTIVATION_CHANGE_WINDOW`
+- `PRODUCTION_ACTIVATION_OBSERVE_MINUTES`
+- `PRODUCTION_ACTIVATION_OPERATOR`
+- `PRODUCTION_ACTIVATION_NOTES`
+- `PRODUCTION_ACTIVATION_CONFIRM_RECORD`
+- `PRODUCTION_ACTIVATION_DIR`
+- `PRODUCTION_OBSERVATION_TARGET`
+- `PRODUCTION_OBSERVATION_LABEL`
+- `PRODUCTION_OBSERVATION_STATUS`
+- `PRODUCTION_OBSERVATION_PERSISTENCE_DRIVER`
+- `PRODUCTION_OBSERVATION_API_BASE_URL`
+- `PRODUCTION_OBSERVATION_ACTIVATION_RECORD`
+- `PRODUCTION_OBSERVATION_MINUTES`
+- `PRODUCTION_OBSERVATION_TIMEOUT_MS`
+- `PRODUCTION_OBSERVATION_INDEXER_STATUS`
+- `PRODUCTION_OBSERVATION_SUPPORT_STATUS`
+- `PRODUCTION_OBSERVATION_ANALYTICS_STATUS`
+- `PRODUCTION_OBSERVATION_ERROR_BUDGET_STATUS`
+- `PRODUCTION_OBSERVATION_SUPPORT_REQUEST_COUNT`
+- `PRODUCTION_OBSERVATION_FAILED_TRANSACTION_COUNT`
+- `PRODUCTION_OBSERVATION_INCIDENT_COUNT`
+- `PRODUCTION_OBSERVATION_SUPPORT_REFERENCE`
+- `PRODUCTION_OBSERVATION_INCIDENT_OWNER`
+- `PRODUCTION_OBSERVATION_INCIDENT_REFERENCE`
+- `PRODUCTION_OBSERVATION_OPERATOR`
+- `PRODUCTION_OBSERVATION_NOTES`
+- `PRODUCTION_OBSERVATION_CONFIRM`
+- `PRODUCTION_OBSERVATION_DIR`
 - `API_DATABASE_SCHEMA_TARGET`
 - `API_DATABASE_SCHEMA_LABEL`
 - `API_DATABASE_SCHEMA_ENGINE`
@@ -371,6 +535,46 @@ Use the manual beta support export workflow when operators need offline support 
 5. Download the export artifact and confirm the manifest says `commitAllowed: false`, `noLiveDatabaseConnected: true`, and `noSupportStatusMutated: true`.
 6. Update request statuses through the internal support triage API after review.
 
+## Beta Invitation Wave Gate
+Use the manual beta invitation wave workflow after beta readiness and a stable observation report:
+
+1. Choose `staging` or `production`.
+2. Provide beta readiness, stable observation report, wave number, wave size, previously invited count, value guidance, communication reference, support reference, incident owner, and invite owner.
+3. Set `confirm_plan` to `plan`.
+4. Download the wave plan and confirm it says `noInvitesSent: true`.
+5. Confirm the plan contains no participant names, emails, wallet addresses, social handles, invite links, or contact details.
+6. Send invitations only from the approved private operational system after reviewing the plan.
+
+## Beta Wave Outcome Gate
+Use the manual beta wave outcome workflow after a wave observation window:
+
+1. Choose `staging` or `production`.
+2. Provide the invitation wave plan, post-wave observation report, decision, aggregate invited, activation, vault, deposit, withdraw, support, failed transaction, and incident counts.
+3. Confirm `participant_identifiers_recorded=false`.
+4. Set `confirm_report` to `report`.
+5. Download the outcome report and confirm it contains aggregate counts only.
+6. Approve the next invitation wave only when the outcome decision is `continue`.
+
+## Beta Expansion Decision Gate
+Use the manual beta expansion decision workflow before a larger invitation wave:
+
+1. Choose `staging` or `production`.
+2. Provide the latest wave outcome, retention plan, current participant count, proposed next wave size, participant limit, support load, incident count, failed transaction count, support backlog status, operator capacity, and review approvals.
+3. Confirm `participant_identifiers_recorded=false`.
+4. Set `confirm_report` to `report`.
+5. Download the expansion decision report and confirm it contains aggregate counts only.
+6. Generate the next observation report and invitation wave plan only when the decision is `expand`.
+
+## Beta Graduation Decision Gate
+Use the manual beta graduation decision workflow before public launch planning:
+
+1. Choose `staging` or `production`.
+2. Provide the expansion decision, latest wave outcome, retention plan, participant count, minimum sample, support count, incident count, failed transaction count, readiness statuses, and review approvals.
+3. Confirm `participant_identifiers_recorded=false`.
+4. Set `confirm_report` to `report`.
+5. Download the graduation decision report and confirm it contains aggregate counts only.
+6. Begin public launch planning only when the decision is `graduate`.
+
 ## Beta Data Retention Gate
 Use the manual beta data retention plan workflow before expanding beyond limited beta:
 
@@ -398,7 +602,7 @@ Use the manual Vercel API traffic command workflow after the provider-neutral AP
 3. Provide the reviewed API traffic plan reference.
 4. Provide the non-secret Vercel project reference, optional scope, production API domain, and deployment URLs required by the selected action.
 5. Download the command plan artifact and confirm it says `noDeploymentPerformed: true` and `noTrafficMoved: true`.
-6. Execute any generated `vercel promote` or `vercel rollback` command only from an approved operator environment.
+6. Execute any generated `vercel promote`, `vercel rollback`, or `vercel alias rm` command only from an approved operator environment.
 
 ## API Managed Database Plan Gate
 Use the manual API managed database plan workflow before external database work:
@@ -475,6 +679,25 @@ Use the manual release manifest workflow before traffic movement:
 4. Add rollback API image and previous factory address when relevant.
 5. Save the manifest artifact with release notes.
 
+## Production Activation Record Gate
+Use the manual production activation record workflow after traffic execution, protected smoke, and beta readiness evidence exist:
+
+1. Choose `staging` or `production`.
+2. Provide a stable activation label and final outcome.
+3. Provide release manifest, API preflight, managed database runtime, schema execution, import execution, parity execution, traffic plan, traffic execution, smoke, beta readiness, source snapshot, rollback snapshot, support reference, and incident owner.
+4. Set `confirm_record` to `record`.
+5. Download the activation record and store it with release evidence before expanding beta invitations.
+
+## Production Observation Report Gate
+Use the manual production observation report workflow after an activation record is accepted and before beta invitation expansion:
+
+1. Choose `staging` or `production`.
+2. Provide a stable observation label, accepted activation record, public API URL, support reference, incident owner, and operational signal counts.
+3. Use `stable` only when public `/health`, public `/ready`, indexer, support, analytics, error budget, and incident signals are accepted.
+4. Use `degraded` or `incident` when beta expansion should pause for operator review.
+5. Set `confirm_observe` to `observe`.
+6. Download the observation report and store it with activation evidence before expanding the invitation wave.
+
 ## Operator Notes
 - Keep GitHub Environment values aligned with `docs/plans/pocket-vault-env-reference.md`.
 - Keep production approval on the GitHub Environment instead of adding custom approval logic to workflow YAML.
@@ -489,6 +712,12 @@ Use the manual release manifest workflow before traffic movement:
 - Use `docs/deployment/api-preflight.md` for API runtime env validation before backend deployment.
 - Use `docs/deployment/api-traffic-plan.md` for provider-neutral traffic movement, rollback, and disablement planning.
 - Use `docs/deployment/vercel-api-traffic.md` for Vercel-specific command planning after a provider-neutral traffic plan exists.
+- Use `docs/deployment/production-activation-record.md` for post-cutover acceptance, rollback, or disablement evidence.
+- Use `docs/deployment/production-observation-report.md` for post-activation observation windows before beta expansion.
+- Use `docs/deployment/beta-invitation-wave.md` for non-PII invitation wave approval before sending beta invites.
+- Use `docs/deployment/beta-wave-outcome.md` for aggregate invite-wave outcome decisions before the next wave.
+- Use `docs/deployment/beta-expansion-decision.md` for broader beta expansion decisions after wave outcomes.
+- Use `docs/deployment/beta-graduation-decision.md` for beta graduation decisions before public launch planning.
 - Use `docs/deployment/beta-support-export.md` for offline support review from API data snapshots.
 - Use `docs/deployment/beta-data-retention.md` for retention-window planning before broader beta expansion.
 - Use `docs/deployment/mobile-distribution.md` for EAS builds, store submission, and mobile rollback handling.

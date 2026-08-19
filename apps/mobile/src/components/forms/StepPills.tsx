@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { View } from "react-native";
 
 import { useI18n } from "../../lib/i18n";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { colors, radii, spacing } from "../../theme";
 import { AppText, MotionView, StatusPulse } from "../primitives";
 
@@ -11,10 +12,11 @@ export interface StepPillsProps {
 }
 
 export const StepPills = ({ currentStep, steps }: StepPillsProps) => {
+  const breakpoint = useBreakpoint();
   const { inlineDirection } = useI18n();
 
   return (
-    <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
+    <View style={{ flexDirection: inlineDirection(), flexWrap: breakpoint.isCompact ? "nowrap" : "wrap", gap: spacing[2] }}>
       {steps.map((step, index) => {
         const isActive = index === currentStep;
         const isComplete = index < currentStep;
@@ -31,8 +33,9 @@ export const StepPills = ({ currentStep, steps }: StepPillsProps) => {
             intensity={isActive ? "structural" : "subtle"}
             preset="scale"
             style={{
-              minHeight: 42,
-              paddingHorizontal: spacing[3],
+              flex: breakpoint.isCompact ? 1 : undefined,
+              minHeight: breakpoint.isCompact ? 38 : 42,
+              paddingHorizontal: breakpoint.isCompact ? spacing[2] : spacing[3],
               paddingVertical: spacing[2],
               borderRadius: radii.pill,
               backgroundColor: pillBackground,
@@ -63,7 +66,7 @@ export const StepPills = ({ currentStep, steps }: StepPillsProps) => {
                 )}
               </View>
             </StatusPulse>
-            <AppText size="sm" style={{ color: labelColor }} weight="semibold">
+            <AppText numberOfLines={1} size="sm" style={{ color: labelColor }} weight="semibold">
               {step}
             </AppText>
           </MotionView>

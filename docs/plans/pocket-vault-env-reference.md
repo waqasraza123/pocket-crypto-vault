@@ -137,6 +137,221 @@
 - `BETA_READINESS_NOTES`
 - `BETA_READINESS_DIR`
 
+## Beta Invitation Wave Variables
+- `BETA_INVITATION_TARGET`
+  - `staging` or `production`
+- `BETA_INVITATION_WAVE_LABEL`
+  - stable invitation wave label
+- `BETA_INVITATION_READINESS_PLAN`
+  - beta readiness artifact name, URL, or local path
+- `BETA_INVITATION_OBSERVATION_REPORT`
+  - stable production observation artifact name, URL, or local path
+- `BETA_INVITATION_WAVE_NUMBER`
+- `BETA_INVITATION_WAVE_SIZE`
+- `BETA_INVITATION_PREVIOUSLY_INVITED_COUNT`
+- `BETA_INVITATION_PARTICIPANT_LIMIT`
+  - used only when readiness artifact is not locally inspected
+- `BETA_INVITATION_MAX_VAULT_USDC`
+- `BETA_INVITATION_COMMUNICATION_REFERENCE`
+  - non-secret invite copy, rollout doc, or private channel reference
+- `BETA_INVITATION_SUPPORT_REFERENCE`
+- `BETA_INVITATION_INCIDENT_OWNER`
+- `BETA_INVITATION_OWNER`
+- `BETA_INVITATION_OPERATOR`
+- `BETA_INVITATION_NOTES`
+- `BETA_INVITATION_CONFIRM_PLAN`
+  - must be `plan`
+- `BETA_INVITATION_DIR`
+
+## Beta Wave Outcome Variables
+- `BETA_WAVE_OUTCOME_TARGET`
+  - `staging` or `production`
+- `BETA_WAVE_OUTCOME_LABEL`
+  - stable beta wave outcome label
+- `BETA_WAVE_OUTCOME_DECISION`
+  - `continue`, `pause`, `rollback`, or `disable`
+- `BETA_WAVE_OUTCOME_OBSERVATION_STATUS`
+  - `stable`, `degraded`, or `incident`
+- `BETA_WAVE_OUTCOME_INVITATION_WAVE_PLAN`
+  - beta invitation wave plan artifact name, URL, or local path
+- `BETA_WAVE_OUTCOME_OBSERVATION_REPORT`
+  - post-wave production observation artifact name, URL, or local path
+- `BETA_WAVE_OUTCOME_INVITED_COUNT`
+- `BETA_WAVE_OUTCOME_ACTIVATED_WALLET_COUNT`
+- `BETA_WAVE_OUTCOME_VAULT_CREATED_COUNT`
+- `BETA_WAVE_OUTCOME_DEPOSIT_COUNT`
+- `BETA_WAVE_OUTCOME_WITHDRAW_COUNT`
+- `BETA_WAVE_OUTCOME_SUPPORT_REQUEST_COUNT`
+- `BETA_WAVE_OUTCOME_FAILED_TRANSACTION_COUNT`
+- `BETA_WAVE_OUTCOME_INCIDENT_COUNT`
+- `BETA_WAVE_OUTCOME_PARTICIPANT_IDENTIFIERS_RECORDED`
+  - must be `false`
+- `BETA_WAVE_OUTCOME_SUPPORT_REFERENCE`
+- `BETA_WAVE_OUTCOME_INCIDENT_OWNER`
+- `BETA_WAVE_OUTCOME_INCIDENT_REFERENCE`
+  - required for rollback, disable, incident observation, or non-zero incidents
+- `BETA_WAVE_OUTCOME_OPERATOR`
+- `BETA_WAVE_OUTCOME_NOTES`
+- `BETA_WAVE_OUTCOME_CONFIRM_REPORT`
+  - must be `report`
+- `BETA_WAVE_OUTCOME_DIR`
+
+## Beta Expansion Decision Variables
+- `BETA_EXPANSION_TARGET`
+  - `staging` or `production`
+- `BETA_EXPANSION_LABEL`
+  - stable beta expansion decision label
+- `BETA_EXPANSION_DECISION`
+  - `expand`, `hold`, `rollback`, or `disable`
+- `BETA_EXPANSION_LATEST_WAVE_OUTCOME`
+  - latest beta wave outcome artifact name, URL, or local path
+- `BETA_EXPANSION_RETENTION_PLAN`
+  - beta data retention artifact name, URL, or local path
+- `BETA_EXPANSION_CURRENT_PARTICIPANT_COUNT`
+- `BETA_EXPANSION_NEXT_WAVE_SIZE`
+- `BETA_EXPANSION_PARTICIPANT_LIMIT`
+- `BETA_EXPANSION_OPEN_SUPPORT_REQUEST_COUNT`
+- `BETA_EXPANSION_UNRESOLVED_INCIDENT_COUNT`
+- `BETA_EXPANSION_FAILED_TRANSACTION_COUNT`
+- `BETA_EXPANSION_SUPPORT_BACKLOG_STATUS`
+  - `clear`, `watch`, or `blocked`
+- `BETA_EXPANSION_OPERATOR_CAPACITY_STATUS`
+  - `ready`, `constrained`, or `blocked`
+- `BETA_EXPANSION_RETENTION_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_SUPPORT_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_PRIVACY_REVIEW_ACCEPTED`
+- `BETA_EXPANSION_PARTICIPANT_IDENTIFIERS_RECORDED`
+  - must be `false`
+- `BETA_EXPANSION_SUPPORT_REFERENCE`
+- `BETA_EXPANSION_INCIDENT_OWNER`
+- `BETA_EXPANSION_OWNER`
+- `BETA_EXPANSION_INCIDENT_REFERENCE`
+  - required for rollback, disable, or unresolved incidents
+- `BETA_EXPANSION_OPERATOR`
+- `BETA_EXPANSION_NOTES`
+- `BETA_EXPANSION_CONFIRM_REPORT`
+  - must be `report`
+- `BETA_EXPANSION_DIR`
+
+## Beta Graduation Decision Variables
+- `BETA_GRADUATION_TARGET`
+  - `staging` or `production`
+- `BETA_GRADUATION_LABEL`
+  - stable beta graduation decision label
+- `BETA_GRADUATION_DECISION`
+  - `graduate`, `extend-beta`, `hold`, `rollback`, or `disable`
+- `BETA_GRADUATION_EXPANSION_DECISION`
+  - latest beta expansion decision artifact name, URL, or local path
+- `BETA_GRADUATION_LATEST_WAVE_OUTCOME`
+  - latest beta wave outcome artifact name, URL, or local path
+- `BETA_GRADUATION_RETENTION_PLAN`
+  - beta data retention artifact name, URL, or local path
+- `BETA_GRADUATION_PARTICIPANT_COUNT`
+- `BETA_GRADUATION_MINIMUM_PARTICIPANT_COUNT`
+- `BETA_GRADUATION_OPEN_SUPPORT_REQUEST_COUNT`
+- `BETA_GRADUATION_UNRESOLVED_INCIDENT_COUNT`
+- `BETA_GRADUATION_FAILED_TRANSACTION_COUNT`
+- `BETA_GRADUATION_SUPPORT_READINESS`
+  - `ready`, `watch`, or `blocked`
+- `BETA_GRADUATION_PRIVACY_READINESS`
+  - `ready`, `watch`, or `blocked`
+- `BETA_GRADUATION_RELIABILITY_READINESS`
+  - `ready`, `watch`, or `blocked`
+- `BETA_GRADUATION_COMMUNICATIONS_READINESS`
+  - `ready`, `watch`, or `blocked`
+- `BETA_GRADUATION_STORE_READINESS`
+  - `ready`, `watch`, or `blocked`
+- `BETA_GRADUATION_SUPPORT_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_PRIVACY_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_RELIABILITY_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_RETENTION_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_COMMUNICATIONS_REVIEW_ACCEPTED`
+- `BETA_GRADUATION_PARTICIPANT_IDENTIFIERS_RECORDED`
+  - must be `false`
+- `BETA_GRADUATION_SUPPORT_REFERENCE`
+- `BETA_GRADUATION_INCIDENT_OWNER`
+- `BETA_GRADUATION_OWNER`
+- `BETA_GRADUATION_INCIDENT_REFERENCE`
+  - required for rollback, disable, or unresolved incidents
+- `BETA_GRADUATION_OPERATOR`
+- `BETA_GRADUATION_NOTES`
+- `BETA_GRADUATION_CONFIRM_REPORT`
+  - must be `report`
+- `BETA_GRADUATION_DIR`
+
+## Production Activation Record Variables
+- `PRODUCTION_ACTIVATION_TARGET`
+  - `staging` or `production`
+- `PRODUCTION_ACTIVATION_LABEL`
+  - stable activation label
+- `PRODUCTION_ACTIVATION_OUTCOME`
+  - `accepted`, `rolled-back`, or `disabled`
+- `PRODUCTION_ACTIVATION_PERSISTENCE_DRIVER`
+  - `sqlite` or `postgresql`
+- `PRODUCTION_ACTIVATION_RELEASE_MANIFEST`
+- `PRODUCTION_ACTIVATION_PREFLIGHT_REPORT`
+- `PRODUCTION_ACTIVATION_DATABASE_RUNTIME_PLAN`
+  - required for PostgreSQL activation records
+- `PRODUCTION_ACTIVATION_SCHEMA_EXECUTION`
+  - required for PostgreSQL activation records
+- `PRODUCTION_ACTIVATION_IMPORT_EXECUTION`
+  - required for PostgreSQL activation records
+- `PRODUCTION_ACTIVATION_PARITY_EXECUTION`
+  - required for PostgreSQL activation records
+- `PRODUCTION_ACTIVATION_TRAFFIC_PLAN`
+- `PRODUCTION_ACTIVATION_TRAFFIC_EXECUTION`
+- `PRODUCTION_ACTIVATION_SMOKE_RESULT`
+- `PRODUCTION_ACTIVATION_BETA_READINESS`
+- `PRODUCTION_ACTIVATION_SOURCE_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_ROLLBACK_SNAPSHOT`
+- `PRODUCTION_ACTIVATION_SUPPORT_REFERENCE`
+- `PRODUCTION_ACTIVATION_INCIDENT_OWNER`
+- `PRODUCTION_ACTIVATION_CHANGE_WINDOW`
+- `PRODUCTION_ACTIVATION_OBSERVE_MINUTES`
+- `PRODUCTION_ACTIVATION_OPERATOR`
+- `PRODUCTION_ACTIVATION_NOTES`
+- `PRODUCTION_ACTIVATION_CONFIRM_RECORD`
+  - must be `record`
+- `PRODUCTION_ACTIVATION_DIR`
+
+## Production Observation Report Variables
+- `PRODUCTION_OBSERVATION_TARGET`
+  - `staging` or `production`
+- `PRODUCTION_OBSERVATION_LABEL`
+  - stable observation label
+- `PRODUCTION_OBSERVATION_STATUS`
+  - `stable`, `degraded`, or `incident`
+- `PRODUCTION_OBSERVATION_PERSISTENCE_DRIVER`
+  - `sqlite` or `postgresql`
+- `PRODUCTION_OBSERVATION_API_BASE_URL`
+  - public API base URL checked through `/health` and `/ready`
+- `PRODUCTION_OBSERVATION_ACTIVATION_RECORD`
+  - accepted activation record artifact name, URL, or local path
+- `PRODUCTION_OBSERVATION_MINUTES`
+  - observation window represented by the report
+- `PRODUCTION_OBSERVATION_TIMEOUT_MS`
+  - public API health/readiness request timeout
+- `PRODUCTION_OBSERVATION_INDEXER_STATUS`
+  - `healthy`, `lagging`, `disabled`, or `unknown`
+- `PRODUCTION_OBSERVATION_SUPPORT_STATUS`
+  - `quiet`, `active`, `blocked`, or `unknown`
+- `PRODUCTION_OBSERVATION_ANALYTICS_STATUS`
+  - `healthy`, `degraded`, `disabled`, or `unknown`
+- `PRODUCTION_OBSERVATION_ERROR_BUDGET_STATUS`
+  - `within-budget`, `watch`, `breached`, or `unknown`
+- `PRODUCTION_OBSERVATION_SUPPORT_REQUEST_COUNT`
+- `PRODUCTION_OBSERVATION_FAILED_TRANSACTION_COUNT`
+- `PRODUCTION_OBSERVATION_INCIDENT_COUNT`
+- `PRODUCTION_OBSERVATION_SUPPORT_REFERENCE`
+- `PRODUCTION_OBSERVATION_INCIDENT_OWNER`
+- `PRODUCTION_OBSERVATION_INCIDENT_REFERENCE`
+  - required when observation status is `incident`
+- `PRODUCTION_OBSERVATION_OPERATOR`
+- `PRODUCTION_OBSERVATION_NOTES`
+- `PRODUCTION_OBSERVATION_CONFIRM`
+  - must be `observe`
+- `PRODUCTION_OBSERVATION_DIR`
+
 ## Production Smoke Variables
 - `PRODUCTION_V1_SMOKE_TARGET`
   - `staging` or `production`

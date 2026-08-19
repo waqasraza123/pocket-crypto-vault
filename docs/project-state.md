@@ -27,10 +27,10 @@ User-facing product state:
 Operator-facing product state:
 - The API exposes health and readiness surfaces, internal sync triggers, enriched vault/activity reads, analytics ingestion, support intake, and internal support triage.
 - Backend persistence runs through typed ports with SQLite as the local/default durable store and PostgreSQL runtime support available when schema, credentials, and preflight gates are accepted.
-- Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, and production smoke evidence.
+- Production operations have guarded workflows for contract deployment, API image publishing, mobile build/submit, release manifests, data snapshots, managed database schema/import/parity execution, Vercel promote/rollback execution, production smoke evidence, post-cutover activation records, post-activation observation reports, limited-beta invitation wave plans, beta wave outcome reports, beta expansion decision reports, and beta graduation decision reports.
 - Production activation readiness now has explicit runtime gates for PostgreSQL cutover, protected smoke evidence, rollback evidence, support, analytics, and limited beta scope in API preflight and `/ready`.
 - Contract security hardening now uses SafeERC20, reentrancy protection, explicit vault and factory validation, zero-recipient withdrawal rejection, malicious-token regression tests, and a repo-local contract security audit note.
-- Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover, traffic movement, and provider-specific public API disablement automation remain unexecuted/deferred.
+- Current launch posture is code- and workflow-ready for controlled production execution, but live production database cutover and traffic movement remain unexecuted/deferred.
 
 ## Current Repository Reality
 The repository now has a real v1 foundation:
@@ -73,8 +73,8 @@ The repository now has a real v1 foundation:
 - guarded beta support export artifacts for offline operator review from verified API data snapshots
 - beta data retention plan artifacts covering support, snapshots, analytics, exports, logs, incidents, deletion requests, and legal holds
 - provider-neutral API traffic plan tooling for promotion, rollback, and disablement records
-- Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote or rollback commands without moving traffic
-- guarded Vercel API traffic execution workflow for reviewed promote and rollback command plans
+- Vercel-specific API traffic command plan tooling that validates the neutral traffic plan and emits reviewable promote, rollback, or alias-removal disable commands without moving traffic
+- guarded Vercel API traffic execution workflow for reviewed promote, rollback, and alias-removal disable command plans
 - provider-neutral managed database planning for future PostgreSQL migration
 - provider-neutral PostgreSQL schema bundle artifacts for the current API persistence contract
 - provider-neutral managed database export bundles that convert API data snapshots into JSONL handoff files
@@ -83,12 +83,19 @@ The repository now has a real v1 foundation:
 - provider-neutral managed database runtime activation plan artifacts before PostgreSQL mode is enabled
 - guarded PostgreSQL schema apply, JSONL import execution, and parity execution workflows behind protected credentials and explicit confirmations
 - guarded production v1 smoke workflow for public API health/readiness checks and operator-recorded create/deposit/withdraw/support evidence
+- guarded Vercel public API disablement execution through reviewed alias-removal command plans
+- guarded production activation record workflow for accepting, rolling back, or disabling a cutover after release, preflight, managed database, traffic, smoke, beta readiness, snapshot, support, and incident-owner evidence is assembled
+- guarded production observation report workflow for recording public API health/readiness plus indexer, support, analytics, error-budget, failed-transaction, and incident signals after activation
+- guarded beta invitation wave plan workflow for approving non-PII invite waves after beta readiness and stable observation evidence
+- guarded beta wave outcome report workflow for aggregate continue, pause, rollback, or disable decisions after each invitation wave
+- guarded beta expansion decision report workflow for expand, hold, rollback, or disable decisions after wave outcomes and retention review
+- guarded beta graduation decision report workflow for graduate, extend-beta, hold, rollback, or disable decisions before public launch planning
 - production activation readiness gates that block ambiguous production SQLite mode, reject mixed SQLite/PostgreSQL runtime env, and require accepted smoke, rollback, and beta scope evidence before limited beta traffic
 - production activation, production cutover, production smoke, limited beta, and rollback runbooks under `docs/plans/`
 - root README with setup, scripts, architecture, and verification guidance
 
 Still not implemented:
-- provider-specific public API disablement automation and live production execution of the approved database cutover and traffic movement procedures
+- live production execution of the approved database cutover and traffic movement procedures
 
 ## Confirmed Product Boundaries
 - Chain: Base
@@ -185,6 +192,13 @@ Still not implemented:
 - Phase 47: beta support export artifacts for offline operator review without live database access or support status mutation
 - Phase 48: beta data retention plan artifacts for real-audience private data handling before broader beta expansion
 - Phase 49: production v1 completion with CI blocker fixes, guarded PostgreSQL schema/import/parity execution, and guarded Vercel promote/rollback execution
+- Phase 51: guarded Vercel public API disablement execution through reviewed alias-removal command plans
+- Phase 52: production activation records for post-cutover acceptance, rollback, or disablement evidence
+- Phase 53: production observation reports for post-activation beta expansion gates
+- Phase 54: beta invitation wave plans for non-PII cohort approval
+- Phase 55: beta wave outcome reports for aggregate post-wave decisions
+- Phase 56: beta expansion decision reports for broader beta gates
+- Phase 57: beta graduation decision reports before public launch planning
 
 ## Important Decisions
 - The product should feel like a premium savings tool, not a DeFi dashboard.
@@ -237,8 +251,8 @@ Still not implemented:
 - Phase 12 refreshes the universal app with brighter layered tokens, app-owned motion primitives, reduced-motion handling, and Apple-like polish translated into an original Pocket Vault visual system.
 - Phase 12 initially kept the existing Expo React Native styling model and a small shared `Animated`-based motion layer, but the mobile marketing refresh now adopts NativeWind v5 preview with Tailwind CSS v4 for production-grade public mobile surfaces.
 - NativeWind is configured in `apps/mobile` with CSS-first tokens in `global.css`, a root `_layout.tsx` CSS import, `react-native-css`, and `withNativewind` wrapping Metro while preserving the required `valtio` resolver alias.
-- The current public mobile visual direction uses deep slate foundations, vibrant blue, cyan, emerald, and fuchsia accents, tighter radii, modern shadows, compact mobile spacing, and avoids Apple-like glass or decorative blob-heavy mobile layouts.
-- The compact public homepage keeps the footer inside the scroll content, removes mobile decorative hero circles, and uses dense below-hero content sections to avoid the previous oversized empty scroll region.
+- The public marketing surfaces use deep slate foundations with vibrant semantic accents, while the root onboarding journey uses a separate clean monochrome system with an off-white canvas, charcoal actions, and restrained emerald status cues.
+- The root onboarding homepage is responsive across mobile, tablet, and desktop, uses a real vault-progress preview instead of a phone-frame walkthrough, and shares its visual shell with sign-in and account creation.
 - The current mobile UI polish direction is documented in `docs/plans/pocket-vault-mobile-ui-polish.md`, including reusable feedback surfaces, icon-led cards, semantic accent usage, RTL layout expectations, and empty-state treatment.
 - Phase 11 adds a typed analytics boundary in the universal app, lean API-side event ingestion, structured backend observability signals, and post-launch metric definitions without collecting freeform private vault content.
 - Phase 13 makes the API-backed read model the default product path for dashboard, detail, and activity, while keeping chain reads limited to correctness fallbacks and session overlays limited to in-flight recovery.
@@ -294,9 +308,15 @@ Still not implemented:
 - Beta data retention plans are planning artifacts only; provider-specific deletion procedures and public privacy policy language remain separate approval tracks.
 - Phase 49 fixes API support route runtime exports and SQLite row typing so CI can cover beta support intake and triage.
 - Phase 49 adds guarded managed database execution scripts and workflows for schema apply, JSONL import, and parity comparison. These workflows require protected `API_DATABASE_URL` plus explicit confirmation inputs and write redacted execution result artifacts.
-- Phase 49 adds guarded Vercel API traffic execution for reviewed promote and rollback command plans. Disablement remains manual-only until the selected Vercel routing policy is explicit.
+- Phase 49 adds guarded Vercel API traffic execution for reviewed promote and rollback command plans.
 - Phase 49 adds a production v1 smoke artifact workflow that checks public API `/health` and `/ready` and records operator-provided create, deposit, withdraw, vault, wallet, and support evidence without sending chain transactions.
 - Phase 50 adds production-only Neon readiness through `API_POSTGRES_DRIVER=neon`, `@neondatabase/serverless`, and `ws` while keeping the existing API persistence tables and `API_DATABASE_URL` secret boundary.
+- Phase 51 adds guarded Vercel public API disablement execution through `remove-alias` command plans. Disable command planning validates the provider-neutral disable traffic plan and production API domain, execution runs `vercel alias rm`, and post-execution checks require public `/health` and `/ready` to stop being healthy.
+- Phase 53 adds guarded production observation reports that read public `/health` and `/ready`, validate an accepted activation record, and record indexer, support, analytics, error-budget, failed-transaction, and incident signals before beta invitation expansion.
+- Phase 54 adds guarded beta invitation wave plans that validate beta readiness, stable observation, participant counts, value guidance, support reference, incident owner, and invite owner without sending invites or recording participant PII.
+- Phase 55 adds guarded beta wave outcome reports that validate invitation wave evidence, post-wave observation, aggregate counts, and continue/pause/rollback/disable decisions without recording participant PII or executing recovery actions.
+- Phase 56 adds guarded beta expansion decision reports that validate latest wave outcome, retention evidence, participant capacity, support backlog, operator capacity, and privacy/support/retention reviews before broader beta waves.
+- Phase 57 adds guarded beta graduation decision reports that validate expansion evidence, wave outcome evidence, retention evidence, aggregate beta signals, readiness statuses, and review approvals before public launch planning.
 - Product docs live in `docs/product/pocket-vault/`:
   - `goal.md` for the concise product goal
   - `plan.md` for the detailed execution-oriented plan
@@ -357,6 +377,13 @@ Still not implemented:
 - The Phase 46 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-46.md`.
 - The Phase 47 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-47.md`.
 - The Phase 48 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-48.md`.
+- The Phase 51 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-51.md`.
+- The Phase 52 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-52.md`.
+- The Phase 53 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-53.md`.
+- The Phase 54 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-54.md`.
+- The Phase 55 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-55.md`.
+- The Phase 56 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-56.md`.
+- The Phase 57 implementation note lives at `docs/plans/pocket-vault-universal-react-native-phase-57.md`.
 - The CI and release workflow note lives at `docs/plans/pocket-vault-ci-release-workflows.md`.
 - The contract deployment runbook lives at `docs/deployment/contract-deployment.md`.
 - The API image runbook lives at `docs/deployment/api-image.md`.
@@ -372,6 +399,12 @@ Still not implemented:
 - The Vercel API traffic command runbook lives at `docs/deployment/vercel-api-traffic.md`.
 - The mobile distribution runbook lives at `docs/deployment/mobile-distribution.md`.
 - The release manifest runbook lives at `docs/deployment/release-manifest.md`.
+- The production activation record runbook lives at `docs/deployment/production-activation-record.md`.
+- The production observation report runbook lives at `docs/deployment/production-observation-report.md`.
+- The beta invitation wave runbook lives at `docs/deployment/beta-invitation-wave.md`.
+- The beta wave outcome runbook lives at `docs/deployment/beta-wave-outcome.md`.
+- The beta expansion decision runbook lives at `docs/deployment/beta-expansion-decision.md`.
+- The beta graduation decision runbook lives at `docs/deployment/beta-graduation-decision.md`.
 - The API data snapshot runbook lives at `docs/deployment/api-data-snapshots.md`.
 - The beta readiness runbook lives at `docs/deployment/beta-readiness.md`.
 - The beta support intake runbook lives at `docs/deployment/beta-support-intake.md`.
@@ -379,8 +412,8 @@ Still not implemented:
 - The beta data retention runbook lives at `docs/deployment/beta-data-retention.md`.
 
 ## Deferred / Not Yet Implemented
-- Accepted managed database schema/import/parity execution, production PostgreSQL cutover, and rollback operation
-- Actual provider-specific backend deployment, traffic switching, and automated rollback execution workflows
+- Live production PostgreSQL cutover and rollback operation
+- Live provider-specific backend deployment and traffic movement
 
 ## Risks / Watchouts
 - Preserve strict clarity around lock rules and withdrawal state.

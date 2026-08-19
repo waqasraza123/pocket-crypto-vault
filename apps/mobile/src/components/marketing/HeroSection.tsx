@@ -31,18 +31,18 @@ export const HeroSection = ({
 
   if (adaptiveLayout.isCompact) {
     return (
-      <SectionContainer gap={spacing[4]}>
+      <SectionContainer gap={spacing[3]}>
         <MotionView
           className={mobileHeroClassName}
           preset="hero"
           intensity="emphasis"
           style={{
             alignSelf: "flex-start",
-            gap: spacing[4],
+            gap: spacing[3],
             width: Platform.OS === "web" ? "100%" : mobileHeroWidth,
-            paddingHorizontal: spacing[5],
-            paddingBottom: spacing[5],
-            paddingTop: spacing[4],
+            paddingHorizontal: spacing[4],
+            paddingBottom: spacing[4],
+            paddingTop: spacing[3],
             ...({ boxSizing: "border-box" } as ViewStyle),
           }}
         >
@@ -50,7 +50,7 @@ export const HeroSection = ({
           <View className="absolute bottom-0 left-0 h-1.5 w-1/2 bg-vault-emerald" />
           <View className="absolute bottom-0 right-0 h-1.5 w-1/2 bg-vault-fuchsia" />
           <View
-            className="self-start rounded-2xl border border-cyan-300/30 bg-white/10 px-3 py-2"
+            className="self-start rounded-2xl border border-cyan-300/30 bg-white/10 px-3 py-1.5"
             style={{ alignSelf: "flex-start" }}
           >
             <AppText size="xs" style={{ color: "#a5f3fc" }} weight="semibold">
@@ -63,7 +63,7 @@ export const HeroSection = ({
                 <AppText
                   key={`${part}-${index}`}
                   size="xl"
-                  style={{ color: colors.white, fontSize: 36, lineHeight: 42 }}
+                  style={{ color: colors.white, fontSize: 32, lineHeight: 37 }}
                   weight="bold"
                 >
                   {part.endsWith(".") ? part : `${part}.`}
@@ -76,7 +76,7 @@ export const HeroSection = ({
           </View>
           <View
             className="rounded-3xl bg-white"
-            style={{ gap: spacing[4], padding: spacing[4], ...({ boxSizing: "border-box" } as ViewStyle) }}
+            style={{ gap: spacing[3], padding: spacing[3], ...({ boxSizing: "border-box" } as ViewStyle) }}
           >
             <View style={{ flexDirection: inlineDirection(), justifyContent: "space-between", gap: spacing[3] }}>
               <View style={{ flex: 1, gap: spacing[1] }}>
@@ -86,11 +86,11 @@ export const HeroSection = ({
                 <AppHeading size="md">{messages.landing.heroPreviewGoal}</AppHeading>
               </View>
             </View>
-            <View className="rounded-2xl bg-blue-600" style={{ gap: spacing[1], padding: spacing[4] }}>
+            <View className="rounded-2xl bg-blue-600" style={{ gap: spacing[1], padding: spacing[3] }}>
               <AppText size="xs" style={{ color: "#bfdbfe" }} weight="semibold">
                 {messages.common.labels.totalSaved}
               </AppText>
-              <AppHeading size="lg" style={{ color: colors.white }}>
+              <AppHeading size="md" style={{ color: colors.white }}>
                 {formatUsdc(savedAmount)}
               </AppHeading>
               <AppText size="sm" style={{ color: "#dbeafe" }}>
@@ -127,7 +127,7 @@ export const HeroSection = ({
             <Pressable
               accessibilityRole="button"
               onPress={onCreateVault}
-              className="min-h-12 rounded-2xl bg-blue-500 px-4 py-3 active:bg-blue-600"
+              className="min-h-11 rounded-2xl bg-blue-500 px-4 py-2.5 active:bg-blue-600"
             >
               <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "center", gap: spacing[2] }}>
                 <MaterialCommunityIcons color={colors.white} name="plus" size={18} />
@@ -140,7 +140,7 @@ export const HeroSection = ({
               <Pressable
                 accessibilityRole="button"
                 onPress={onEnterVaults}
-                className="min-h-11 flex-1 rounded-2xl border border-white/20 bg-white/10 px-3 py-3 active:bg-white/15"
+                className="min-h-10 flex-1 rounded-2xl border border-white/20 bg-white/10 px-3 py-2.5 active:bg-white/15"
               >
                 <AppText align="center" numberOfLines={1} size="sm" style={{ color: colors.white }} weight="semibold">
                   {model.heroActions[1].label}
@@ -149,7 +149,7 @@ export const HeroSection = ({
               <Pressable
                 accessibilityRole="button"
                 onPress={onReviewSecurity}
-                className="min-h-11 flex-1 rounded-2xl border border-white/20 bg-white/10 px-3 py-3 active:bg-white/15"
+                className="min-h-10 flex-1 rounded-2xl border border-white/20 bg-white/10 px-3 py-2.5 active:bg-white/15"
               >
                 <AppText align="center" numberOfLines={1} size="sm" style={{ color: colors.white }} weight="semibold">
                   {messages.common.buttons.reviewSecurity}

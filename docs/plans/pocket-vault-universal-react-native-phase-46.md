@@ -22,7 +22,7 @@ The script writes a JSON artifact with:
 - Vercel project, optional scope, production domain, candidate deployment, and rollback deployment references
 - required secret names, but never secret values
 - exact Vercel CLI command strings for promotion and rollback
-- manual-only disablement steps
+- manual-only disablement steps; Phase 51 later replaced this with an executable alias-removal disablement path
 - pre-execution checks, rollback triggers, and post-execution checks
 
 ## Validation

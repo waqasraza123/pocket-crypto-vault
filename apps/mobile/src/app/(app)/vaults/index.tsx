@@ -11,6 +11,7 @@ import { useI18n } from "../../../lib/i18n";
 import { routes } from "../../../lib/routing";
 import { colors, radii, spacing } from "../../../theme";
 import { useAppReadiness } from "../../../hooks/useAppReadiness";
+import { useBreakpoint } from "../../../hooks/useBreakpoint";
 import { useWalletConnection } from "../../../hooks/useWalletConnection";
 import { useVaults } from "../../../hooks/useVaults";
 import {
@@ -21,12 +22,22 @@ import {
   GuidedStepsCard,
   StateBanner,
 } from "../../../components/feedback";
-import { NetworkStatusBanner, ScreenHeader } from "../../../components/layout";
+import {
+  MobileActionBar,
+  NativeActionDock,
+  NativeAppScreenShell,
+  NativeMetricRow,
+  NativeScreenHeader,
+  NativeScrollRegion,
+  NetworkStatusBanner,
+  ScreenHeader,
+} from "../../../components/layout";
 import { AnimatedNumberText, AppText, EmptyState, MotionView, PageContainer, PrimaryButton, Screen, SurfaceCard } from "../../../components/primitives";
 import { VaultGrid } from "../../../components/vaults";
 
 export default function MyVaultsScreen() {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { readiness } = useAppReadiness();
   const { dataSource, degradedState, isLoading, notice, queryStatus, vaults } = useVaults();
@@ -124,15 +135,157 @@ export default function MyVaultsScreen() {
     context: analyticsContext,
   });
 
+  if (breakpoint.isCompact) {
+    return (
+      <Screen
+        scroll={false}
+        contentContainerStyle={{ flex: 1 }}
+        edges={["left", "right"]}
+      >
+        <Stack.Screen options={{ title: messages.pages.myVaults.title }} />
+        <NativeAppScreenShell
+          top={
+            <NativeScreenHeader
+              eyebrow={messages.pages.myVaults.eyebrow}
+              title={messages.pages.myVaults.title}
+              description={messages.pages.myVaults.description}
+            />
+          }
+          bottom={
+            <NativeActionDock>
+              <PrimaryButton
+                fullWidth
+                icon="plus"
+                label={messages.common.buttons.createVault}
+                onPress={() => router.push(routes.createVault)}
+              />
+            </NativeActionDock>
+          }
+        >
+          <View style={{ flex: 1, minHeight: 0, gap: spacing[3] }}>
+            {connectionState.status === "walletUnavailable" || connectionState.status === "disconnected" ? (
+              <DisconnectedState onConnect={() => void connect()} />
+            ) : null}
+
+            {connectionState.status === "unsupportedNetwork" ? (
+              <NetworkStatusBanner
+                label={connectionState.session?.chainId ? `Chain ${connectionState.session.chainId}` : null}
+                onSwitch={() => void switchNetwork()}
+              />
+            ) : null}
+
+            {connectionState.status === "ready" && readiness.configurationStatus === "invalid" ? <ConfigurationNotice /> : null}
+
+            {connectionState.status === "ready" && isLoading ? (
+              <AppLoadingState
+                title={messages.feedback.syncingTitle}
+                description={messages.pages.myVaults.description}
+              />
+            ) : null}
+
+            {notice && connectionState.status === "ready" ? (
+              <StateBanner
+                icon={dataSource === "fallback" ? "database-clock-outline" : "information-outline"}
+                label={notice}
+                tone={dataSource === "fallback" ? "warning" : "neutral"}
+              />
+            ) : null}
+
+            <NativeMetricRow
+              items={[
+                {
+                  label: messages.common.labels.totalSaved,
+                  value: formatUsdc(totalSaved),
+                  icon: "wallet-outline",
+                  tone: "accent",
+                },
+                {
+                  label: messages.common.labels.vaultCount,
+                  value: String(vaults.length),
+                  icon: "shield-lock-outline",
+                  tone: "positive",
+                },
+                {
+                  label: messages.common.labels.eligibleSoon,
+                  value: String(unlockedCount),
+                  icon: "timer-check-outline",
+                  tone: "warning",
+                },
+              ]}
+            />
+
+            <View style={{ flex: 1, minHeight: 0 }}>
+              {connectionState.status === "ready" && !isLoading && queryStatus === "empty" ? (
+                <NativeScrollRegion>
+                  <GuidedStepsCard
+                    description={messages.pages.myVaults.startHereDescription}
+                    eyebrow={messages.pages.myVaults.emptyEyebrow}
+                    icon="bullseye-arrow"
+                    steps={messages.pages.myVaults.startHereSteps}
+                    title={messages.pages.myVaults.startHereTitle}
+                  />
+                </NativeScrollRegion>
+              ) : null}
+
+              {connectionState.status === "ready" && !isLoading && (queryStatus === "error" || queryStatus === "unavailable") ? (
+                <NativeScrollRegion>
+                  <AppErrorState
+                    description={
+                      degradedState === "partial"
+                        ? messages.feedback.partialStateDescription
+                        : messages.feedback.dataUnavailableDescription
+                    }
+                    primaryAction={{
+                      label: messages.common.buttons.tryAgain,
+                      onPress: () => router.replace(routes.appHome),
+                      icon: "refresh",
+                    }}
+                    title={
+                      degradedState === "partial"
+                        ? messages.feedback.partialStateTitle
+                        : messages.feedback.dataUnavailableTitle
+                    }
+                  />
+                </NativeScrollRegion>
+              ) : null}
+
+              {showVaultGrid ? (
+                <NativeScrollRegion>
+                  <VaultGrid vaults={vaults} />
+                </NativeScrollRegion>
+              ) : null}
+            </View>
+          </View>
+        </NativeAppScreenShell>
+      </Screen>
+    );
+  }
+
   return (
-    <Screen contentContainerStyle={{ paddingBottom: spacing[12] }}>
+    <Screen
+      contentContainerStyle={{ paddingBottom: breakpoint.isCompact ? spacing[6] : spacing[12] }}
+      edges={breakpoint.isCompact ? ["left", "right"] : undefined}
+      footer={
+        breakpoint.isCompact ? (
+          <MobileActionBar>
+            <PrimaryButton
+              fullWidth
+              icon="plus"
+              label={messages.common.buttons.createVault}
+              onPress={() => router.push(routes.createVault)}
+            />
+          </MobileActionBar>
+        ) : undefined
+      }
+    >
       <Stack.Screen options={{ title: messages.pages.myVaults.title }} />
-      <PageContainer width="dashboard" style={{ gap: spacing[8], paddingTop: spacing[6] }}>
+      <PageContainer width="dashboard" style={{ gap: breakpoint.isCompact ? spacing[5] : spacing[8], paddingTop: breakpoint.isCompact ? spacing[4] : spacing[6] }}>
         <ScreenHeader
           eyebrow={messages.pages.myVaults.eyebrow}
           title={messages.pages.myVaults.title}
           description={messages.pages.myVaults.description}
           action={
+            breakpoint.isCompact ? undefined :
             <PrimaryButton
               icon="plus"
               label={messages.common.buttons.createVault}
@@ -169,18 +322,18 @@ export default function MyVaultsScreen() {
           />
         ) : null}
 
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: spacing[4] }}>
+        <View style={{ flexDirection: breakpoint.isCompact ? "column" : "row", flexWrap: breakpoint.isCompact ? "nowrap" : "wrap", gap: breakpoint.isCompact ? spacing[3] : spacing[4] }}>
           {dashboardMetrics.map((metric, index) => (
-            <MotionView key={metric.label} delay={index * 70} style={{ flex: 1, minWidth: 220 }}>
+            <MotionView key={metric.label} delay={index * 70} style={{ flex: 1, minWidth: breakpoint.isCompact ? undefined : 220 }}>
               <SurfaceCard
                 accentColor={metric.iconColor}
                 tone={metric.tone}
                 style={{
                   flex: 1,
-                  minWidth: 220,
+                  minWidth: breakpoint.isCompact ? undefined : 220,
                   backgroundColor: metric.cardBackgroundColor,
                   borderColor: metric.borderColor,
-                  padding: spacing[5],
+                  padding: breakpoint.isCompact ? spacing[4] : spacing[5],
                 }}
               >
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: spacing[3] }}>

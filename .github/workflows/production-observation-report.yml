@@ -1,0 +1,184 @@
+name: Production Observation Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Observation environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      observation_label:
+        description: Stable observation label.
+        type: string
+        required: true
+      observation_status:
+        description: Final observation status.
+        type: choice
+        required: true
+        default: stable
+        options:
+          - stable
+          - degraded
+          - incident
+      persistence_driver:
+        description: Active API persistence driver.
+        type: choice
+        required: true
+        default: postgresql
+        options:
+          - sqlite
+          - postgresql
+      api_base_url:
+        description: Public API base URL.
+        type: string
+        required: true
+      activation_record:
+        description: Production activation record artifact name, URL, or local path.
+        type: string
+        required: true
+      observe_minutes:
+        description: Observation window represented by this report.
+        type: string
+        required: false
+        default: "60"
+      indexer_status:
+        description: Indexer status during the observation window.
+        type: choice
+        required: true
+        default: healthy
+        options:
+          - healthy
+          - lagging
+          - disabled
+          - unknown
+      support_status:
+        description: Support queue status during the observation window.
+        type: choice
+        required: true
+        default: quiet
+        options:
+          - quiet
+          - active
+          - blocked
+          - unknown
+      analytics_status:
+        description: Analytics status during the observation window.
+        type: choice
+        required: true
+        default: healthy
+        options:
+          - healthy
+          - degraded
+          - disabled
+          - unknown
+      error_budget_status:
+        description: Error budget status during the observation window.
+        type: choice
+        required: true
+        default: within-budget
+        options:
+          - within-budget
+          - watch
+          - breached
+          - unknown
+      support_request_count:
+        description: Support requests observed in the window.
+        type: string
+        required: false
+        default: "0"
+      failed_transaction_count:
+        description: Failed create, deposit, unlock, or withdraw attempts observed in the window.
+        type: string
+        required: false
+        default: "0"
+      incident_count:
+        description: Incidents opened during the observation window.
+        type: string
+        required: false
+        default: "0"
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for this observation.
+        type: string
+        required: true
+      incident_reference:
+        description: Incident ticket or review reference. Required when status is incident.
+        type: string
+        required: false
+      operator:
+        description: Operator or team responsible for observation.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_observe:
+        description: Type observe to write the observation report.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-observation-report-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  PRODUCTION_OBSERVATION_TARGET: ${{ inputs.target }}
+  PRODUCTION_OBSERVATION_LABEL: ${{ inputs.observation_label }}
+  PRODUCTION_OBSERVATION_STATUS: ${{ inputs.observation_status }}
+  PRODUCTION_OBSERVATION_PERSISTENCE_DRIVER: ${{ inputs.persistence_driver }}
+  PRODUCTION_OBSERVATION_API_BASE_URL: ${{ inputs.api_base_url }}
+  PRODUCTION_OBSERVATION_ACTIVATION_RECORD: ${{ inputs.activation_record }}
+  PRODUCTION_OBSERVATION_MINUTES: ${{ inputs.observe_minutes }}
+  PRODUCTION_OBSERVATION_INDEXER_STATUS: ${{ inputs.indexer_status }}
+  PRODUCTION_OBSERVATION_SUPPORT_STATUS: ${{ inputs.support_status }}
+  PRODUCTION_OBSERVATION_ANALYTICS_STATUS: ${{ inputs.analytics_status }}
+  PRODUCTION_OBSERVATION_ERROR_BUDGET_STATUS: ${{ inputs.error_budget_status }}
+  PRODUCTION_OBSERVATION_SUPPORT_REQUEST_COUNT: ${{ inputs.support_request_count }}
+  PRODUCTION_OBSERVATION_FAILED_TRANSACTION_COUNT: ${{ inputs.failed_transaction_count }}
+  PRODUCTION_OBSERVATION_INCIDENT_COUNT: ${{ inputs.incident_count }}
+  PRODUCTION_OBSERVATION_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  PRODUCTION_OBSERVATION_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  PRODUCTION_OBSERVATION_INCIDENT_REFERENCE: ${{ inputs.incident_reference }}
+  PRODUCTION_OBSERVATION_OPERATOR: ${{ inputs.operator }}
+  PRODUCTION_OBSERVATION_NOTES: ${{ inputs.notes }}
+  PRODUCTION_OBSERVATION_CONFIRM: ${{ inputs.confirm_observe }}
+  PRODUCTION_OBSERVATION_DIR: artifacts/production-observation
+
+jobs:
+  production-observation-report:
+    name: Write ${{ inputs.target }} production observation report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_observe != 'observe' }}
+        run: |
+          echo "Production observation report requires confirm_observe=observe."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write production observation report
+        id: observation
+        run: node scripts/write-production-observation-report.mjs
+
+      - name: Upload production observation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-production-observation-${{ inputs.target }}
+          path: ${{ steps.observation.outputs.observation_report_path }}
+          if-no-files-found: error

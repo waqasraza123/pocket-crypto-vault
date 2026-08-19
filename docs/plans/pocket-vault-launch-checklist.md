@@ -45,6 +45,12 @@
 - Confirm at least one operator can move a support request from `open` to `triage` and `closed` through the internal API.
 - Confirm beta support exports can be generated from an API data snapshot when offline review is needed.
 - Confirm `/ready.productionActivation.safeForLimitedBetaTraffic=true` before inviting production beta users.
+- Generate the production activation record after traffic execution, protected smoke, beta readiness, and snapshot evidence are accepted.
+- Generate a stable production observation report after activation and before expanding beta invitations.
+- Generate a beta invitation wave plan before each cohort invite and keep participant PII outside artifacts.
+- Generate a beta wave outcome report after each wave observation window before approving the next wave.
+- Generate a beta expansion decision report before any larger invitation wave.
+- Generate a beta graduation decision report before public launch planning.
 - Confirm rollback steps are reviewed with the operator before sending invitations.
 - Treat beta limits as operational guidance, not protocol-enforced limits.
 
@@ -140,7 +146,7 @@
 - Provide the reviewed traffic plan reference, Vercel project reference, production API domain, and deployment URLs required by the selected action.
 - Download the command plan artifact and confirm it says `noDeploymentPerformed: true` and `noTrafficMoved: true`.
 - Confirm the artifact names only required Vercel secret names and does not include secret values.
-- Execute any generated `vercel promote` or `vercel rollback` command only through `Vercel API Traffic Execute` with `confirm_execute=execute` or another approved operator environment.
+- Execute any generated `vercel promote`, `vercel rollback`, or `vercel alias rm` command only through `Vercel API Traffic Execute` with `confirm_execute=execute` or another approved operator environment.
 - Store the Vercel traffic execution result artifact with release evidence.
 
 ## Product Smoke Checks
@@ -155,6 +161,57 @@
 - Submit one support intake request and confirm internal triage visibility.
 - Record smoke wallet, vault, create transaction, deposit transaction, rule path, unlock or guardian transaction when applicable, withdraw transaction when eligible, support request, dashboard, detail, activity, indexer, metadata, and support verification evidence in the smoke artifact.
 - Confirm metadata reconciliation notices remain calm and honest if syncing lags.
+
+## Production Activation Record
+- Run the `Production Activation Record` workflow after API traffic execution and protected smoke pass.
+- Provide release manifest, API preflight, managed database runtime plan, schema execution, import execution, parity execution, traffic plan, traffic execution, smoke result, beta readiness, source snapshot, rollback snapshot, support reference, and incident owner.
+- Use `activation_outcome=accepted` only when the activation remains live and accepted.
+- Use `activation_outcome=rolled-back` or `disabled` when the cutover ended in recovery mode.
+- Confirm the artifact says `noDeploymentPerformed: true`, `noDatabaseMutated: true`, and `noTrafficMoved: true`.
+- Store the activation record with release evidence before expanding beta invitations.
+
+## Production Observation Report
+- Run the `Production Observation Report` workflow after the activation record is accepted and before each beta invitation wave expands.
+- Provide the accepted activation record, public API URL, support reference, incident owner, observation window, indexer status, support status, analytics status, error budget status, support request count, failed transaction count, and incident count.
+- Use `observation_status=stable` only when public `/health`, public `/ready`, indexer, support, analytics, error budget, and incident signals are accepted.
+- Use `observation_status=degraded` or `incident` when invitation expansion should pause.
+- Confirm the artifact says `noDeploymentPerformed: true`, `noDatabaseMutated: true`, `noTrafficMoved: true`, `noChainTransactionSent: true`, and `noUserInvitesSent: true`.
+- Store the observation report with activation evidence.
+
+## Beta Invitation Wave
+- Run the `Beta Invitation Wave Plan` workflow after beta readiness and a stable production observation report.
+- Provide readiness, observation, wave number, wave size, previously invited count, max vault USDC guidance, communication reference, support reference, incident owner, and invite owner.
+- Confirm the wave size plus previously invited count stays within the approved participant limit.
+- Confirm the artifact says `noInvitesSent: true`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, or contact details are recorded.
+- Send invitations only from the approved private operational system after reviewing the wave plan.
+
+## Beta Wave Outcome
+- Run the `Beta Wave Outcome Report` workflow after each invitation wave observation window.
+- Provide the invitation wave plan, post-wave observation report, decision, aggregate invited count, activated wallet count, vault count, deposit count, withdraw count, support request count, failed transaction count, incident count, support reference, and incident owner.
+- Use `decision=continue` only when the post-wave observation is stable and incident count is zero.
+- Use `decision=pause`, `rollback`, or `disable` when support, transaction, readiness, incident, or error-budget signals require review or recovery.
+- Confirm `participant_identifiers_recorded=false`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, contact details, private support text, or participant-level transaction traces are recorded.
+- Approve the next invitation wave only after a `continue` outcome report.
+
+## Beta Expansion Decision
+- Run the `Beta Expansion Decision Report` workflow before a larger invitation wave.
+- Provide latest wave outcome, retention plan, current participant count, proposed next wave size, participant limit, open support count, unresolved incident count, failed transaction count, support backlog status, operator capacity, retention review, support review, privacy review, support reference, incident owner, and expansion owner.
+- Use `decision=expand` only when the latest wave outcome is `continue`, support is clear, capacity is ready, reviews are accepted, and aggregate blockers are zero.
+- Use `decision=hold`, `rollback`, or `disable` when review, support, incident, transaction, retention, or capacity gates are not accepted.
+- Confirm `participant_identifiers_recorded=false`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, contact details, private support text, or participant-level transaction traces are recorded.
+- Generate the next observation report and invitation wave plan only after an `expand` decision.
+
+## Beta Graduation Decision
+- Run the `Beta Graduation Decision Report` workflow before public launch planning.
+- Provide expansion decision, latest wave outcome, retention plan, participant count, minimum participant sample, open support count, unresolved incident count, failed transaction count, support readiness, privacy readiness, reliability readiness, communications readiness, store readiness, review approvals, support reference, incident owner, and graduation owner.
+- Use `decision=graduate` only when expanded beta evidence is clean, review gates are accepted, and readiness statuses are `ready`.
+- Use `decision=extend-beta`, `hold`, `rollback`, or `disable` when more beta evidence, review work, or recovery action is needed.
+- Confirm `participant_identifiers_recorded=false`.
+- Confirm no participant names, emails, wallet addresses, social handles, invite links, contact details, private support text, or participant-level transaction traces are recorded.
+- Start public launch planning only after a `graduate` decision.
 
 ## Post-Deploy Checks
 - Confirm `/ready` stays usable after deployment.
@@ -171,7 +228,8 @@
 - If the API is unhealthy, disable public launch traffic or point the app back to a known-good API base URL.
 - If an API image is unhealthy, redeploy the previous known-good image tag.
 - Generate an `API Traffic Plan` rollback or disable plan before manual provider changes when time allows.
-- Generate a `Vercel API Traffic Command` rollback plan before running Vercel rollback when the API host is Vercel and time allows.
+- Generate a `Vercel API Traffic Command` rollback or disable plan before running Vercel rollback or alias removal when the API host is Vercel and time allows.
+- For Vercel disablement, use `VERCEL_API_DISABLE_STRATEGY=remove-alias` and confirm the execution artifact records `publicTrafficDisabled: true`.
 - Restore API data from the intended snapshot only with the API stopped.
 - If indexer background sync is disabled, do not claim indexed activity freshness until manual sync procedures are in place.
 - If a new factory deployment is wrong, restore the previous factory address in app/API configuration and stop promotion.

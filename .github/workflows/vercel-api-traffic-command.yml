@@ -47,6 +47,16 @@ on:
         description: Current production API domain.
         type: string
         required: true
+      disable_strategy:
+        description: Disablement strategy. Required for disable; currently remove-alias.
+        type: choice
+        required: false
+        options:
+          - remove-alias
+      disable_alias_domain:
+        description: Bare API alias domain to remove. Defaults to production_domain hostname.
+        type: string
+        required: false
       change_window:
         description: Approved change window.
         type: string
@@ -84,6 +94,8 @@ env:
   VERCEL_API_CANDIDATE_DEPLOYMENT_URL: ${{ inputs.candidate_deployment_url }}
   VERCEL_API_ROLLBACK_DEPLOYMENT_URL: ${{ inputs.rollback_deployment_url }}
   VERCEL_API_PRODUCTION_DOMAIN: ${{ inputs.production_domain }}
+  VERCEL_API_DISABLE_STRATEGY: ${{ inputs.disable_strategy }}
+  VERCEL_API_DISABLE_ALIAS_DOMAIN: ${{ inputs.disable_alias_domain }}
   VERCEL_API_TRAFFIC_CHANGE_WINDOW: ${{ inputs.change_window }}
   VERCEL_API_TRAFFIC_OBSERVE_MINUTES: ${{ inputs.observe_minutes }}
   VERCEL_API_TRAFFIC_OPERATOR: ${{ inputs.operator }}

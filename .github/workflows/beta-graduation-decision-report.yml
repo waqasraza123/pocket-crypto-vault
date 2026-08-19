@@ -1,0 +1,235 @@
+name: Beta Graduation Decision Report
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Beta environment.
+        type: choice
+        required: true
+        options:
+          - staging
+          - production
+      graduation_label:
+        description: Stable beta graduation decision label.
+        type: string
+        required: true
+      decision:
+        description: Decision after expanded beta review.
+        type: choice
+        required: true
+        default: hold
+        options:
+          - graduate
+          - extend-beta
+          - hold
+          - rollback
+          - disable
+      expansion_decision:
+        description: Latest beta expansion decision artifact name, URL, or local path.
+        type: string
+        required: true
+      latest_wave_outcome:
+        description: Latest beta wave outcome artifact name, URL, or local path.
+        type: string
+        required: true
+      retention_plan:
+        description: Beta data retention plan artifact name, URL, or local path.
+        type: string
+        required: true
+      participant_count:
+        description: Aggregate beta participant count.
+        type: string
+        required: true
+        default: "0"
+      minimum_participant_count:
+        description: Minimum participant sample required before graduation.
+        type: string
+        required: true
+        default: "10"
+      open_support_request_count:
+        description: Open support request count before graduation.
+        type: string
+        required: false
+        default: "0"
+      unresolved_incident_count:
+        description: Unresolved incident count before graduation.
+        type: string
+        required: false
+        default: "0"
+      failed_transaction_count:
+        description: Failed create, deposit, unlock, or withdraw count since latest outcome.
+        type: string
+        required: false
+        default: "0"
+      support_readiness:
+        description: Support readiness for graduation.
+        type: choice
+        required: true
+        default: watch
+        options:
+          - ready
+          - watch
+          - blocked
+      privacy_readiness:
+        description: Privacy readiness for graduation.
+        type: choice
+        required: true
+        default: watch
+        options:
+          - ready
+          - watch
+          - blocked
+      reliability_readiness:
+        description: Reliability readiness for graduation.
+        type: choice
+        required: true
+        default: watch
+        options:
+          - ready
+          - watch
+          - blocked
+      communications_readiness:
+        description: Communications readiness for graduation.
+        type: choice
+        required: true
+        default: watch
+        options:
+          - ready
+          - watch
+          - blocked
+      store_readiness:
+        description: App store or distribution readiness for graduation.
+        type: choice
+        required: true
+        default: watch
+        options:
+          - ready
+          - watch
+          - blocked
+      support_review_accepted:
+        description: Support review is accepted for graduation.
+        type: boolean
+        required: true
+        default: false
+      privacy_review_accepted:
+        description: Privacy review is accepted for graduation.
+        type: boolean
+        required: true
+        default: false
+      reliability_review_accepted:
+        description: Reliability review is accepted for graduation.
+        type: boolean
+        required: true
+        default: false
+      retention_review_accepted:
+        description: Retention review is accepted for graduation.
+        type: boolean
+        required: true
+        default: false
+      communications_review_accepted:
+        description: Communications review is accepted for graduation.
+        type: boolean
+        required: true
+        default: false
+      participant_identifiers_recorded:
+        description: Must be false. Participant PII must not be recorded.
+        type: boolean
+        required: true
+        default: false
+      support_reference:
+        description: Non-secret support queue, runbook, or escalation reference.
+        type: string
+        required: true
+      incident_owner:
+        description: Incident owner or team for graduation.
+        type: string
+        required: true
+      graduation_owner:
+        description: Operator or team responsible for approving graduation.
+        type: string
+        required: true
+      incident_reference:
+        description: Incident ticket or review reference. Required for rollback, disable, or unresolved incidents.
+        type: string
+        required: false
+      operator:
+        description: Operator or team responsible for the report.
+        type: string
+        required: false
+      notes:
+        description: Optional non-secret operator notes.
+        type: string
+        required: false
+      confirm_report:
+        description: Type report to write the graduation decision report.
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beta-graduation-decision-report-${{ inputs.target }}
+  cancel-in-progress: false
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+  BETA_GRADUATION_TARGET: ${{ inputs.target }}
+  BETA_GRADUATION_LABEL: ${{ inputs.graduation_label }}
+  BETA_GRADUATION_DECISION: ${{ inputs.decision }}
+  BETA_GRADUATION_EXPANSION_DECISION: ${{ inputs.expansion_decision }}
+  BETA_GRADUATION_LATEST_WAVE_OUTCOME: ${{ inputs.latest_wave_outcome }}
+  BETA_GRADUATION_RETENTION_PLAN: ${{ inputs.retention_plan }}
+  BETA_GRADUATION_PARTICIPANT_COUNT: ${{ inputs.participant_count }}
+  BETA_GRADUATION_MINIMUM_PARTICIPANT_COUNT: ${{ inputs.minimum_participant_count }}
+  BETA_GRADUATION_OPEN_SUPPORT_REQUEST_COUNT: ${{ inputs.open_support_request_count }}
+  BETA_GRADUATION_UNRESOLVED_INCIDENT_COUNT: ${{ inputs.unresolved_incident_count }}
+  BETA_GRADUATION_FAILED_TRANSACTION_COUNT: ${{ inputs.failed_transaction_count }}
+  BETA_GRADUATION_SUPPORT_READINESS: ${{ inputs.support_readiness }}
+  BETA_GRADUATION_PRIVACY_READINESS: ${{ inputs.privacy_readiness }}
+  BETA_GRADUATION_RELIABILITY_READINESS: ${{ inputs.reliability_readiness }}
+  BETA_GRADUATION_COMMUNICATIONS_READINESS: ${{ inputs.communications_readiness }}
+  BETA_GRADUATION_STORE_READINESS: ${{ inputs.store_readiness }}
+  BETA_GRADUATION_SUPPORT_REVIEW_ACCEPTED: ${{ inputs.support_review_accepted }}
+  BETA_GRADUATION_PRIVACY_REVIEW_ACCEPTED: ${{ inputs.privacy_review_accepted }}
+  BETA_GRADUATION_RELIABILITY_REVIEW_ACCEPTED: ${{ inputs.reliability_review_accepted }}
+  BETA_GRADUATION_RETENTION_REVIEW_ACCEPTED: ${{ inputs.retention_review_accepted }}
+  BETA_GRADUATION_COMMUNICATIONS_REVIEW_ACCEPTED: ${{ inputs.communications_review_accepted }}
+  BETA_GRADUATION_PARTICIPANT_IDENTIFIERS_RECORDED: ${{ inputs.participant_identifiers_recorded }}
+  BETA_GRADUATION_SUPPORT_REFERENCE: ${{ inputs.support_reference }}
+  BETA_GRADUATION_INCIDENT_OWNER: ${{ inputs.incident_owner }}
+  BETA_GRADUATION_OWNER: ${{ inputs.graduation_owner }}
+  BETA_GRADUATION_INCIDENT_REFERENCE: ${{ inputs.incident_reference }}
+  BETA_GRADUATION_OPERATOR: ${{ inputs.operator }}
+  BETA_GRADUATION_NOTES: ${{ inputs.notes }}
+  BETA_GRADUATION_CONFIRM_REPORT: ${{ inputs.confirm_report }}
+  BETA_GRADUATION_DIR: artifacts/beta-graduation-decision
+
+jobs:
+  beta-graduation-decision-report:
+    name: Write ${{ inputs.target }} beta graduation decision report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.target }}
+    steps:
+      - name: Validate confirmation
+        if: ${{ inputs.confirm_report != 'report' }}
+        run: |
+          echo "Beta graduation decision report requires confirm_report=report."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write beta graduation decision report
+        id: graduation
+        run: node scripts/write-beta-graduation-decision-report.mjs
+
+      - name: Upload beta graduation decision report
+        uses: actions/upload-artifact@v4
+        with:
+          name: pocket-vault-beta-graduation-decision-${{ inputs.target }}
+          path: ${{ steps.graduation.outputs.graduation_report_path }}
+          if-no-files-found: error

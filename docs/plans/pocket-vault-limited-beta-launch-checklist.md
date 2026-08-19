@@ -15,6 +15,12 @@
 - Analytics ready: analytics persistence is enabled or an approved alternate monitoring path is recorded.
 - Rollback ready: rollback URL, image, snapshot, and traffic reversal path are accepted.
 - Operator evidence captured: release manifest, preflight, runtime plan, traffic plan, smoke result, snapshots, and beta readiness artifacts are stored.
+- Activation recorded: post-cutover activation record is accepted or the recovery outcome is recorded.
+- Observation clean: stable production observation report is stored for the current invitation wave.
+- Invitation wave approved: beta invitation wave plan is stored and contains no participant PII.
+- Prior wave outcome accepted: previous wave outcome report is `continue` before any expansion.
+- Expansion accepted: beta expansion decision report is `expand` before any larger wave.
+- Graduation accepted: beta graduation decision report is `graduate` before public launch planning.
 - Beta scope approved: participant limit, value limit, support owner, incident owner, observation window, pause criteria, and re-enable criteria are recorded.
 
 ## Required Commands
@@ -23,15 +29,28 @@
 - `pnpm api:database:runtime:plan`
 - `pnpm smoke:production-v1`
 - `pnpm beta:readiness`
+- `pnpm production:activation:record`
+- `pnpm production:observation:report`
+- `pnpm beta:invitation:wave`
+- `pnpm beta:wave:outcome`
+- `pnpm beta:expansion:decision`
+- `pnpm beta:graduation:decision`
 
 ## Launch Procedure
 1. Confirm all go/no-go gates.
 2. Confirm `/ready.productionActivation.safeForLimitedBetaTraffic=true`.
 3. Move traffic through the approved traffic execution path.
-4. Invite only the approved initial beta cohort.
-5. Monitor for the approved observation window before expanding invites.
-6. Review support queue after each participant wave.
-7. Record launch outcome and incidents in release notes.
+4. Run the production activation record and store it with release evidence.
+5. Run a stable production observation report and store it with release evidence.
+6. Run a beta invitation wave plan for the initial cohort.
+7. Invite only the approved initial beta cohort from the private operational system.
+8. Monitor for the approved observation window before expanding invites.
+9. Run a beta wave outcome report before deciding on expansion.
+10. Run a beta expansion decision report before any larger wave.
+11. Run a beta graduation decision report before public launch planning.
+12. Run another observation report and invitation wave plan before each invitation expansion when the decision remains beta-only.
+13. Review support queue after each participant wave.
+14. Record launch outcome and incidents in release notes.
 
 ## Monitoring Priorities
 - `/health` alive.
@@ -51,4 +70,3 @@
 - Support cannot triage urgent requests.
 - PostgreSQL errors affect indexed reads or support persistence.
 - Public API rollback path is unavailable.
-

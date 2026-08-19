@@ -33,6 +33,7 @@ export const Screen = ({
   const breakpoint = useBreakpoint();
   const content = scroll ? (
     <ScrollView
+      style={{ flex: 1 }}
       contentContainerStyle={[{ flexGrow: 1 }, contentContainerStyle]}
       keyboardShouldPersistTaps={keyboardShouldPersistTaps}
       showsVerticalScrollIndicator={false}

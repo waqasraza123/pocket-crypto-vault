@@ -2,6 +2,10 @@
 
 Pocket Vault is a Base-native USDC pocket-money savings app for 18+ college and university students starting with crypto. A student connects a wallet, creates one vault for an emergency or student-life goal, deposits over time, and withdraws only when the selected rule allows it.
 
+## Screenshots
+
+![alt text](.github/screenshots/image1.png) ![alt text](.github/screenshots/image2.png) ![alt text](.github/screenshots/image3.png)
+
 The product is intentionally narrow:
 
 - Base only
@@ -170,11 +174,29 @@ pnpm api:traffic:plan
 pnpm api:traffic:vercel
 pnpm smoke:production-v1
 pnpm beta:readiness
+pnpm production:activation:record
+pnpm production:observation:report
+pnpm beta:invitation:wave
+pnpm beta:wave:outcome
+pnpm beta:expansion:decision
+pnpm beta:graduation:decision
 ```
 
 `pnpm smoke:production-v1` checks public API health/readiness and records operator evidence. It does not send wallet transactions.
 
 `/ready.productionActivation.safeForLimitedBetaTraffic` should be `true` before inviting production beta users.
+
+`pnpm production:activation:record` records the final accepted, rolled-back, or disabled activation outcome after release, preflight, traffic execution, smoke, beta readiness, snapshot, support, and incident-owner evidence is assembled. It does not deploy, mutate a database, or move traffic.
+
+`pnpm production:observation:report` records the first post-activation observation window from public API health/readiness and operator-owned support, indexer, analytics, error budget, failed transaction, and incident signals. It does not mutate infrastructure or invite users.
+
+`pnpm beta:invitation:wave` records an approved limited-beta invite wave after readiness and stable observation evidence. It does not send invites or record participant PII.
+
+`pnpm beta:wave:outcome` records aggregate results after an invite wave and decides whether to continue, pause, roll back, or disable before another wave. It does not record participant PII or execute recovery actions.
+
+`pnpm beta:expansion:decision` records whether to expand, hold, roll back, or disable after reviewing the latest wave outcome, retention readiness, support load, operator capacity, and privacy gates. It does not send invites or read live data.
+
+`pnpm beta:graduation:decision` records whether expanded beta evidence is ready for public launch planning, needs more beta time, should hold, or requires rollback/disablement. It does not launch publicly or record participant PII.
 
 Runbooks:
 
@@ -182,6 +204,12 @@ Runbooks:
 - `docs/plans/pocket-vault-production-smoke-runbook.md`
 - `docs/plans/pocket-vault-limited-beta-launch-checklist.md`
 - `docs/plans/pocket-vault-rollback-runbook.md`
+- `docs/deployment/production-activation-record.md`
+- `docs/deployment/production-observation-report.md`
+- `docs/deployment/beta-invitation-wave.md`
+- `docs/deployment/beta-wave-outcome.md`
+- `docs/deployment/beta-expansion-decision.md`
+- `docs/deployment/beta-graduation-decision.md`
 
 ## Rollback
 

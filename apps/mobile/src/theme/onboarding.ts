@@ -1,0 +1,18 @@
+export const onboardingPalette = {
+  canvas: "#f4f5f1",
+  surface: "#ffffff",
+  surfaceMuted: "#ecefe9",
+  surfaceStrong: "#e1e5df",
+  border: "#d3d9d1",
+  borderStrong: "#aeb8ad",
+  ink: "#171b18",
+  text: "#39413b",
+  muted: "#687169",
+  accent: "#237255",
+  accentStrong: "#17553e",
+  accentSoft: "#e1f0e8",
+  onInk: "#dce4dd",
+  onInkMuted: "#c9d0ca",
+  progressTrack: "#353c37",
+  white: "#ffffff",
+} as const;

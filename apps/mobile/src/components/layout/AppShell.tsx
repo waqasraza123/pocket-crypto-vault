@@ -6,15 +6,18 @@ import { createConnectionAnalyticsContext, useTrackEventWhen } from "../../lib/a
 import { useAppReadiness } from "../../hooks/useAppReadiness";
 import { useTransactionRecovery } from "../../hooks/useTransactionRecovery";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
-import { spacing } from "../../theme";
+import { useBreakpoint } from "../../hooks/useBreakpoint";
+import { colors, spacing } from "../../theme";
 import { PageContainer } from "../primitives";
 import { AppFooter } from "./AppFooter";
 import { AppStatusBanner } from "./AppStatusBanner";
+import { MobileAppHeader, MobileAppTabBar } from "./MobileAppChrome";
 import { TopNavigation } from "./TopNavigation";
 import { WalletStatusCard } from "./WalletStatusCard";
 import { TransactionRecoveryNotice } from "../feedback";
 
 export const AppShell = ({ children }: PropsWithChildren) => {
+  const breakpoint = useBreakpoint();
   const { connectionState } = useWalletConnection();
   const { readiness } = useAppReadiness();
   const { items, dismiss } = useTransactionRecovery({
@@ -41,6 +44,20 @@ export const AppShell = ({ children }: PropsWithChildren) => {
     key: `app-shell:${readiness.status}:${readiness.api.status}:${readiness.configurationStatus}`,
     context: analyticsContext,
   });
+
+  if (breakpoint.isCompact) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <MobileAppHeader />
+        <PageContainer width="dashboard" style={{ gap: spacing[2], paddingTop: spacing[2] }}>
+          <AppStatusBanner readiness={readiness} />
+          {activeRecovery ? <TransactionRecoveryNotice item={activeRecovery} onDismiss={() => void dismiss(activeRecovery.id)} /> : null}
+        </PageContainer>
+        <View style={{ flex: 1 }}>{children}</View>
+        <MobileAppTabBar />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1 }}>
