@@ -1,106 +1,50 @@
 import type { PropsWithChildren, ReactNode } from "react";
-import { Platform, ScrollView, View, useWindowDimensions, type ViewStyle } from "react-native";
+import { ScrollView, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { colors, createShadowStyle, spacing } from "../../theme";
+import { onboardingPalette, spacing } from "../../theme";
 
 export interface OnboardingShellProps {
   footer?: ReactNode;
 }
 
 export const OnboardingShell = ({ children, footer }: PropsWithChildren<OnboardingShellProps>) => {
-  const { height } = useWindowDimensions();
-  const frameWidth = Platform.OS === "web" ? ("min(100vw, 430px)" as ViewStyle["width"]) : "100%";
+  const { height, width } = useWindowDimensions();
   const isShortViewport = height > 0 && height < 760;
+  const isCompact = width < 768;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#061133" }}>
-      <View style={{ flex: 1, alignItems: "center", backgroundColor: "#061133" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: onboardingPalette.canvas }}>
+      <View style={{ flex: 1, backgroundColor: onboardingPalette.canvas }}>
         <View
+          pointerEvents="none"
           style={{
-            flex: 1,
-            width: frameWidth,
-            maxWidth: 430,
-            backgroundColor: "#07133d",
-            overflow: "hidden",
-            ...createShadowStyle({
-              color: colors.textPrimary,
-              opacity: Platform.OS === "web" ? 0.22 : 0,
-              radius: 46,
-              offsetY: 20,
-              elevation: 0,
-            }),
+            position: "absolute",
+            right: isCompact ? -120 : -80,
+            top: isCompact ? 220 : -160,
+            width: isCompact ? 240 : 420,
+            height: isCompact ? 240 : 420,
+            borderRadius: isCompact ? 120 : 210,
+            borderWidth: 1,
+            borderColor: onboardingPalette.border,
+            opacity: 0.7,
           }}
+        />
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            width: "100%",
+            maxWidth: 1180,
+            alignSelf: "center",
+            paddingHorizontal: isCompact ? spacing[5] : spacing[10],
+            paddingBottom: isShortViewport ? spacing[5] : spacing[8],
+            paddingTop: isShortViewport ? spacing[4] : spacing[6],
+          }}
+          showsVerticalScrollIndicator={false}
         >
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              left: -130,
-              top: -120,
-              width: 290,
-              height: 210,
-              borderRadius: 86,
-              borderWidth: 2,
-              borderColor: "rgba(170, 218, 255, 0.64)",
-              backgroundColor: "rgba(37, 99, 235, 0.82)",
-              transform: [{ rotate: "-8deg" }],
-            }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              right: -96,
-              top: -96,
-              width: 178,
-              height: 178,
-              borderRadius: 58,
-              borderWidth: 2,
-              borderColor: "rgba(170, 218, 255, 0.64)",
-              backgroundColor: "rgba(96, 165, 250, 0.86)",
-              transform: [{ rotate: "12deg" }],
-            }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              left: -80,
-              right: -80,
-              top: 214,
-              height: 248,
-              backgroundColor: "#1957ff",
-              opacity: 0.96,
-            }}
-          />
-          <View
-            pointerEvents="none"
-            style={{
-              position: "absolute",
-              left: -120,
-              right: -120,
-              top: 352,
-              height: 340,
-              backgroundColor: "#061133",
-              borderTopLeftRadius: 180,
-              borderTopRightRadius: 180,
-              opacity: 0.94,
-            }}
-          />
-          <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingHorizontal: isShortViewport ? spacing[4] : spacing[5],
-              paddingBottom: isShortViewport ? spacing[4] : spacing[5],
-              paddingTop: isShortViewport ? spacing[3] : spacing[4],
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={{ flex: 1, justifyContent: "space-between", gap: spacing[5] }}>{children}</View>
-          </ScrollView>
-          {footer}
-        </View>
+          <View style={{ flex: 1, gap: isCompact ? spacing[8] : spacing[12] }}>{children}</View>
+        </ScrollView>
+        {footer}
       </View>
     </SafeAreaView>
   );

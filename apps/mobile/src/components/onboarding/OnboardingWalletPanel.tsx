@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { AppConnectionState } from "@pocket-vault/shared";
 
 import { useI18n, type AppMessages } from "../../lib/i18n";
-import { colors, createShadowStyle, radii, spacing } from "../../theme";
+import { colors, createShadowStyle, onboardingPalette, radii, spacing } from "../../theme";
 import { AppText } from "../primitives";
 
 export interface OnboardingWalletPanelProps {
@@ -40,18 +40,18 @@ export const OnboardingWalletPanel = ({ connectionState, mode, onPrimary, onSeco
   return (
     <View
       style={{
-        borderRadius: 30,
+        borderRadius: 28,
         borderWidth: 1,
-        borderColor: "rgba(191, 219, 254, 0.55)",
-        backgroundColor: "rgba(255, 255, 255, 0.95)",
-        padding: spacing[5],
-        gap: spacing[4],
+        borderColor: onboardingPalette.border,
+        backgroundColor: onboardingPalette.surface,
+        padding: spacing[6],
+        gap: spacing[5],
         ...createShadowStyle({
-          color: colors.textPrimary,
-          opacity: 0.18,
+          color: onboardingPalette.ink,
+          opacity: 0.1,
           radius: 30,
           offsetY: 16,
-          elevation: 10,
+          elevation: 7,
         }),
       }}
     >
@@ -63,21 +63,21 @@ export const OnboardingWalletPanel = ({ connectionState, mode, onPrimary, onSeco
             borderRadius: 18,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: colors.accentSoft,
+            backgroundColor: onboardingPalette.surfaceMuted,
           }}
         >
-          <MaterialCommunityIcons color={colors.accentStrong} name={copy.icon as ComponentProps<typeof MaterialCommunityIcons>["name"]} size={24} />
+          <MaterialCommunityIcons color={onboardingPalette.ink} name={copy.icon as ComponentProps<typeof MaterialCommunityIcons>["name"]} size={24} />
         </View>
         <View style={{ flex: 1, gap: spacing[1] }}>
-          <AppText size="sm" tone="accent" weight="bold">
+          <AppText size="sm" style={{ color: onboardingPalette.accentStrong }} weight="bold">
             {copy.eyebrow}
           </AppText>
-          <AppText weight="bold">{copy.panelTitle}</AppText>
+          <AppText style={{ color: onboardingPalette.ink }} weight="bold">{copy.panelTitle}</AppText>
         </View>
       </View>
 
       <View style={{ gap: spacing[2] }}>
-        <AppText tone="secondary">{copy.panelDescription}</AppText>
+        <AppText style={{ color: onboardingPalette.text }}>{copy.panelDescription}</AppText>
         <View
           style={{
             flexDirection: inlineDirection(),
@@ -105,22 +105,26 @@ export const OnboardingWalletPanel = ({ connectionState, mode, onPrimary, onSeco
             borderRadius: radii.lg,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: isPrimaryDisabled ? colors.borderStrong : pressed ? colors.accentStrong : colors.accent,
+            backgroundColor: isPrimaryDisabled
+              ? onboardingPalette.borderStrong
+              : pressed
+                ? onboardingPalette.accentStrong
+                : onboardingPalette.ink,
             paddingHorizontal: spacing[5],
             paddingVertical: spacing[4],
           })}
         >
           <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[2] }}>
-            <MaterialCommunityIcons color={colors.white} name={getDirectionalIcon(primaryIcon)} size={19} />
-            <AppText style={{ color: colors.white }} weight="bold">
+            <MaterialCommunityIcons color={onboardingPalette.white} name={getDirectionalIcon(primaryIcon)} size={19} />
+            <AppText style={{ color: onboardingPalette.white }} weight="bold">
               {primaryLabel}
             </AppText>
           </View>
         </Pressable>
         <Pressable accessibilityRole="button" onPress={onSecondary} style={{ alignItems: "center", paddingVertical: spacing[2] }}>
           <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[2] }}>
-            <MaterialCommunityIcons color={colors.accentStrong} name={getDirectionalIcon("arrow-left")} size={17} />
-            <AppText tone="accent" weight="semibold">
+            <MaterialCommunityIcons color={onboardingPalette.ink} name={getDirectionalIcon("arrow-left")} size={17} />
+            <AppText style={{ color: onboardingPalette.ink }} weight="semibold">
               {messages.onboarding.actions.backToStart}
             </AppText>
           </View>
@@ -135,9 +139,9 @@ const getStatusCopy = (connectionState: AppConnectionState, messages: AppMessage
     return {
       label: messages.onboarding.status.ready,
       icon: "check-circle-outline" as const,
-      iconColor: colors.positive,
-      textColor: colors.textPrimary,
-      backgroundColor: colors.positiveSoft,
+      iconColor: onboardingPalette.accent,
+      textColor: onboardingPalette.ink,
+      backgroundColor: onboardingPalette.accentSoft,
     };
   }
 
@@ -146,7 +150,7 @@ const getStatusCopy = (connectionState: AppConnectionState, messages: AppMessage
       label: messages.onboarding.status.unsupported,
       icon: "alert-circle-outline" as const,
       iconColor: colors.warning,
-      textColor: colors.textPrimary,
+      textColor: onboardingPalette.ink,
       backgroundColor: colors.warningSoft,
     };
   }
@@ -155,9 +159,9 @@ const getStatusCopy = (connectionState: AppConnectionState, messages: AppMessage
     return {
       label: messages.onboarding.status.connecting,
       icon: "timer-sand" as const,
-      iconColor: colors.accentStrong,
-      textColor: colors.textPrimary,
-      backgroundColor: colors.accentSoft,
+      iconColor: onboardingPalette.muted,
+      textColor: onboardingPalette.ink,
+      backgroundColor: onboardingPalette.surfaceMuted,
     };
   }
 
@@ -165,17 +169,17 @@ const getStatusCopy = (connectionState: AppConnectionState, messages: AppMessage
     return {
       label: messages.onboarding.status.unavailable,
       icon: "wallet-outline" as const,
-      iconColor: colors.textMuted,
-      textColor: colors.textSecondary,
-      backgroundColor: colors.surfaceMuted,
+      iconColor: onboardingPalette.muted,
+      textColor: onboardingPalette.text,
+      backgroundColor: onboardingPalette.surfaceMuted,
     };
   }
 
   return {
     label: messages.onboarding.status.disconnected,
     icon: "wallet-outline" as const,
-    iconColor: colors.accentStrong,
-    textColor: colors.textPrimary,
-    backgroundColor: colors.accentSoft,
+    iconColor: onboardingPalette.muted,
+    textColor: onboardingPalette.ink,
+    backgroundColor: onboardingPalette.surfaceMuted,
   };
 };

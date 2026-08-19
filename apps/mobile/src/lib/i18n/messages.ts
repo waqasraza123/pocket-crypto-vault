@@ -102,34 +102,29 @@ const enMessages = {
   },
   onboarding: {
     landing: {
-      eyebrow: "Wallet-first student saving",
-      title: "The most trusted platform for protected pocket money",
+      eyebrow: "Student savings, with rules",
+      title: "Save for what matters. Withdraw when the rule allows.",
       description:
-        "Create a calm USDC vault on Base, keep one student goal visible, and let the rule protect withdrawals from impulse decisions.",
+        "Create a USDC vault on Base for one student goal, add pocket money over time, and keep withdrawals protected from impulse decisions.",
+      highlights: ["One clear goal", "USDC only", "Built on Base"],
     },
     actions: {
       signIn: "Sign in",
       createAccount: "Create account",
       backToStart: "Back to start",
     },
-    previewTitle: "Let’s secure your student savings",
-    previewSteps: [
-      {
-        title: "Create your account",
-        description: "Connect the wallet you control",
-        icon: "account-plus-outline",
-      },
-      {
-        title: "Secure your account",
-        description: "Choose a vault rule before funding",
-        icon: "shield-lock-outline",
-      },
-      {
-        title: "Verify your goal",
-        description: "Save only for one clear student need",
-        icon: "bullseye-arrow",
-      },
-    ],
+    preview: {
+      eyebrow: "Protected student vault",
+      goal: "Campus emergency fund",
+      status: "Protected",
+      savedLabel: "Saved so far",
+      fundedLabel: "funded",
+      ruleLabel: "Withdrawal rule",
+      ruleValue: "Time lock • Aug 30, 2026",
+      networkLabel: "Network and asset",
+      networkValue: "Base • USDC",
+      footer: "Deposits stay open while every withdrawal follows your protection rule.",
+    },
     signIn: {
       eyebrow: "Returning wallet",
       title: "Sign in to your protected vaults",
@@ -865,34 +860,29 @@ const arMessages: AppMessages = {
   },
   onboarding: {
     landing: {
-      eyebrow: "ادخار طلابي يبدأ من المحفظة",
-      title: "المنصة الأكثر ثقة لحماية مصروف الطالب",
+      eyebrow: "ادخار طلابي بقواعد واضحة",
+      title: "ادخر لما يهمك. واسحب عندما تسمح القاعدة.",
       description:
-        "أنشئ خزنة USDC هادئة على Base، وأبقِ هدفاً طلابياً واحداً واضحاً، ودع القاعدة تحمي السحب من قرارات الاندفاع.",
+        "أنشئ خزنة USDC على Base لهدف طلابي واحد، وأضف من مصروفك مع الوقت، وحافظ على حماية السحب من القرارات المندفعة.",
+      highlights: ["هدف واحد واضح", "USDC فقط", "مبني على Base"],
     },
     actions: {
       signIn: "تسجيل الدخول",
       createAccount: "إنشاء حساب",
       backToStart: "العودة للبداية",
     },
-    previewTitle: "لنؤمّن مدخراتك الطلابية",
-    previewSteps: [
-      {
-        title: "أنشئ حسابك",
-        description: "اربط المحفظة التي تتحكم بها",
-        icon: "account-plus-outline",
-      },
-      {
-        title: "أمّن حسابك",
-        description: "اختر قاعدة الخزنة قبل التمويل",
-        icon: "shield-lock-outline",
-      },
-      {
-        title: "ثبّت هدفك",
-        description: "ادخر لحاجة طلابية واضحة واحدة",
-        icon: "bullseye-arrow",
-      },
-    ],
+    preview: {
+      eyebrow: "خزنة طلابية محمية",
+      goal: "صندوق طوارئ الجامعة",
+      status: "محمية",
+      savedLabel: "المدخر حتى الآن",
+      fundedLabel: "مموّل",
+      ruleLabel: "قاعدة السحب",
+      ruleValue: "قفل زمني • 30 أغسطس 2026",
+      networkLabel: "الشبكة والأصل",
+      networkValue: "Base • USDC",
+      footer: "تبقى الإيداعات مفتوحة بينما يخضع كل سحب لقاعدة الحماية التي اخترتها.",
+    },
     signIn: {
       eyebrow: "محفظة عائدة",
       title: "سجّل الدخول إلى خزائنك المحمية",

@@ -1,30 +1,17 @@
 # Current Session
 
 ## Latest Task
-- Converted remaining compact mobile screens toward native app behavior with fixed top/body/bottom regions and limited scroll regions.
-- Added reusable native-fit screen primitives for app shells, screen headers, hero cards, action docks, scroll regions, metric rows, and step screens.
-- Updated compact app chrome density so app screens have more usable viewport height.
-- Converted `/vaults` to summary-first metrics plus a scrollable vault/state region.
-- Converted `/activity` to fixed header/metrics with the timeline as the scroll region.
-- Converted `/vaults/new` to a compact step wizard with fixed bottom actions and scrollable form content.
-- Converted `/support` to compact grouped steps with fixed bottom actions while preserving validation and API submission.
-- Converted `/vaults/[vaultAddress]` to compact segmented deposit/withdraw/activity panels.
-- Converted compact How It Works and Security pages to native story screens with fixed CTAs.
-- Preserved wallet-first onboarding, wallet state handling, transaction state handling, and existing desktop/tablet layouts.
+- Rebuilt the root onboarding homepage with a responsive clean monochrome composition.
+- Removed the full-screen navy and cobalt background treatment and the desktop phone-frame constraint.
+- Replaced the onboarding walkthrough illustration with a localized vault preview showing savings progress, rule, network, and protected state.
+- Applied the same neutral visual system to create-account and sign-in screens without changing wallet behavior, routes, or analytics.
+- Added a backward-compatible monochrome language-switcher appearance and preserved English, Arabic, and RTL behavior.
 
-## Changed Files
-- `apps/mobile/src/app/(app)/activity.tsx`
-- `apps/mobile/src/app/(app)/support.tsx`
-- `apps/mobile/src/app/(app)/vaults/[vaultAddress].tsx`
-- `apps/mobile/src/app/(app)/vaults/index.tsx`
-- `apps/mobile/src/app/(app)/vaults/new.tsx`
-- `apps/mobile/src/components/layout/AppShell.tsx`
-- `apps/mobile/src/components/layout/MobileAppChrome.tsx`
-- `apps/mobile/src/components/layout/NativeAppScreen.tsx`
-- `apps/mobile/src/components/layout/index.ts`
-- `apps/mobile/src/components/marketing/HowItWorksPageContent.tsx`
-- `apps/mobile/src/components/marketing/SecurityPageContent.tsx`
-- `docs/_local/current-session.md`
+## Changed Areas
+- Onboarding screens, shell, action buttons, vault preview, and wallet panel
+- Shared language switcher appearance
+- Onboarding theme tokens and bilingual messages
+- UI direction and project-state documentation
 
 ## Verification
 - `pnpm --filter @pocket-vault/mobile typecheck`
@@ -34,5 +21,5 @@
 - `pnpm --filter @pocket-vault/mobile exec expo export --platform android --output-dir ../../dist/android`
 
 ## Notes
-- Manual visual checks for short/tall mobile viewports and all wallet states still need to be performed in a simulator or browser session.
-- Pre-existing modified marketing compaction and onboarding files remain in the worktree and were not reverted.
+- Exported homepage and sign-in artifacts received a local static thumbnail sanity check.
+- Interactive viewport and wallet-state visual QA remains recommended in a browser and native simulator.

@@ -5,11 +5,12 @@ import { Stack, useRouter } from "expo-router";
 
 import { productConfig } from "@pocket-vault/config";
 
+import { useBreakpoint } from "../../hooks/useBreakpoint";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { createConnectionAnalyticsContext, useScreenTracking } from "../../lib/analytics";
 import { useI18n } from "../../lib/i18n";
 import { routes } from "../../lib/routing";
-import { colors, radii, spacing } from "../../theme";
+import { onboardingPalette, radii, spacing } from "../../theme";
 import { AppHeading, AppText, MotionView } from "../primitives";
 import { LanguageSwitcher } from "../layout/LanguageSwitcher";
 import { OnboardingActionButtons } from "./OnboardingActionButtons";
@@ -19,6 +20,7 @@ import { OnboardingWalletPanel } from "./OnboardingWalletPanel";
 
 export const OnboardingLandingScreen = () => {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { connectionState } = useWalletConnection();
   const { inlineDirection, messages } = useI18n();
 
@@ -34,47 +36,87 @@ export const OnboardingLandingScreen = () => {
   return (
     <OnboardingShell>
       <Stack.Screen options={{ title: productConfig.shortName }} />
-      <View style={{ gap: spacing[5] }}>
-        <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between", gap: spacing[3] }}>
-          <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[2] }}>
+      <OnboardingHeader />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: breakpoint.isCompact ? "column" : inlineDirection(),
+          alignItems: breakpoint.isCompact ? "stretch" : "center",
+          justifyContent: "space-between",
+          gap: breakpoint.isCompact ? spacing[8] : spacing[16],
+        }}
+      >
+        <MotionView
+          preset="hero"
+          intensity="emphasis"
+          style={{ flex: breakpoint.isCompact ? undefined : 0.9, maxWidth: breakpoint.isCompact ? undefined : 520, gap: spacing[6] }}
+        >
+          <View style={{ gap: spacing[4] }}>
             <View
               style={{
-                width: 36,
-                height: 36,
-                borderRadius: 14,
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: colors.white,
+                alignSelf: "flex-start",
+                borderRadius: radii.pill,
+                backgroundColor: onboardingPalette.accentSoft,
+                paddingHorizontal: spacing[3],
+                paddingVertical: spacing[2],
               }}
             >
-              <MaterialCommunityIcons color={colors.accentStrong} name="shield-lock-outline" size={21} />
+              <AppText size="xs" style={{ color: onboardingPalette.accentStrong, letterSpacing: 0.8 }} weight="bold">
+                {messages.onboarding.landing.eyebrow}
+              </AppText>
             </View>
-            <AppText style={{ color: colors.white }} weight="bold">
-              {productConfig.shortName}
+            <AppHeading
+              size="lg"
+              style={{
+                color: onboardingPalette.ink,
+                fontSize: breakpoint.isCompact ? 40 : breakpoint.isExpanded ? 58 : 48,
+                lineHeight: breakpoint.isCompact ? 46 : breakpoint.isExpanded ? 64 : 55,
+              }}
+            >
+              {messages.onboarding.landing.title}
+            </AppHeading>
+            <AppText size={breakpoint.isCompact ? "md" : "lg"} style={{ color: onboardingPalette.text }}>
+              {messages.onboarding.landing.description}
             </AppText>
           </View>
-          <LanguageSwitcher compact />
-        </View>
 
-        <MotionView preset="hero" intensity="emphasis" style={{ alignItems: "center", paddingTop: spacing[2], gap: spacing[3] }}>
-          <AppText align="center" size="xs" style={{ color: "#bfdbfe", letterSpacing: 1.2 }} weight="bold">
-            {messages.onboarding.landing.eyebrow}
-          </AppText>
-          <AppHeading align="center" size="lg" style={{ color: colors.white, fontSize: 35, lineHeight: 41 }}>
-            {messages.onboarding.landing.title}
-          </AppHeading>
-          <AppText align="center" style={{ color: "#dbeafe" }}>
-            {messages.onboarding.landing.description}
-          </AppText>
+          <View style={{ flexDirection: inlineDirection(), flexWrap: "wrap", gap: spacing[2] }}>
+            {messages.onboarding.landing.highlights.map((highlight, index) => (
+              <View
+                key={highlight}
+                style={{
+                  flexDirection: inlineDirection(),
+                  alignItems: "center",
+                  gap: spacing[2],
+                  borderRadius: radii.pill,
+                  borderWidth: 1,
+                  borderColor: onboardingPalette.border,
+                  backgroundColor: onboardingPalette.surface,
+                  paddingHorizontal: spacing[3],
+                  paddingVertical: spacing[2],
+                }}
+              >
+                <MaterialCommunityIcons
+                  color={index === 0 ? onboardingPalette.accent : onboardingPalette.ink}
+                  name={index === 0 ? "shield-check-outline" : index === 1 ? "currency-usd" : "cube-outline"}
+                  size={16}
+                />
+                <AppText size="sm" style={{ color: onboardingPalette.text }} weight="semibold">
+                  {highlight}
+                </AppText>
+              </View>
+            ))}
+          </View>
+
+          <OnboardingActionButtons
+            onCreateAccount={() => router.push(routes.createAccount)}
+            onSignIn={() => router.push(routes.signIn)}
+          />
         </MotionView>
-      </View>
 
-      <View style={{ gap: spacing[5] }}>
-        <OnboardingPreviewCard />
-        <OnboardingActionButtons
-          onCreateAccount={() => router.push(routes.createAccount)}
-          onSignIn={() => router.push(routes.signIn)}
-        />
+        <View style={{ flex: breakpoint.isCompact ? undefined : 1.1, width: "100%", maxWidth: 540 }}>
+          <OnboardingPreviewCard />
+        </View>
       </View>
     </OnboardingShell>
   );
@@ -82,6 +124,7 @@ export const OnboardingLandingScreen = () => {
 
 export const OnboardingWalletEntryScreen = ({ mode }: { mode: "createAccount" | "signIn" }) => {
   const router = useRouter();
+  const breakpoint = useBreakpoint();
   const { connect, connectionState, switchNetwork } = useWalletConnection();
   const { getDirectionalIcon, inlineDirection, messages } = useI18n();
   const copy = mode === "signIn" ? messages.onboarding.signIn : messages.onboarding.createAccount;
@@ -121,75 +164,121 @@ export const OnboardingWalletEntryScreen = ({ mode }: { mode: "createAccount" | 
   return (
     <OnboardingShell>
       <Stack.Screen options={{ title: copy.title }} />
-      <View style={{ gap: spacing[5] }}>
-        <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between", gap: spacing[3] }}>
+      <OnboardingHeader />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: breakpoint.isCompact ? "column" : inlineDirection(),
+          alignItems: breakpoint.isCompact ? "stretch" : "center",
+          justifyContent: "space-between",
+          gap: breakpoint.isCompact ? spacing[8] : spacing[16],
+        }}
+      >
+        <MotionView
+          preset="hero"
+          intensity="emphasis"
+          style={{ flex: breakpoint.isCompact ? undefined : 0.9, maxWidth: breakpoint.isCompact ? undefined : 500, gap: spacing[6] }}
+        >
           <Pressable
             accessibilityRole="button"
             onPress={() => router.replace(routes.landing)}
             style={({ pressed }) => ({
-              width: 42,
-              height: 42,
-              borderRadius: 16,
+              alignSelf: "flex-start",
+              flexDirection: inlineDirection(),
               alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: pressed ? "rgba(255, 255, 255, 0.22)" : "rgba(255, 255, 255, 0.14)",
+              gap: spacing[2],
+              borderRadius: radii.pill,
+              backgroundColor: pressed ? onboardingPalette.surfaceStrong : onboardingPalette.surface,
+              borderWidth: 1,
+              borderColor: onboardingPalette.border,
+              paddingHorizontal: spacing[3],
+              paddingVertical: spacing[2],
             })}
           >
-            <MaterialCommunityIcons color={colors.white} name={getDirectionalIcon("arrow-left")} size={21} />
+            <MaterialCommunityIcons color={onboardingPalette.ink} name={getDirectionalIcon("arrow-left")} size={17} />
+            <AppText size="sm" style={{ color: onboardingPalette.ink }} weight="semibold">
+              {messages.onboarding.actions.backToStart}
+            </AppText>
           </Pressable>
-          <LanguageSwitcher compact />
-        </View>
 
-        <MotionView preset="hero" intensity="emphasis" style={{ gap: spacing[3], paddingTop: spacing[3] }}>
-          <AppText size="xs" style={{ color: "#bfdbfe", letterSpacing: 1.2 }} weight="bold">
-            {copy.eyebrow}
-          </AppText>
-          <AppHeading size="lg" style={{ color: colors.white, fontSize: 35, lineHeight: 41 }}>
-            {copy.title}
-          </AppHeading>
-          <AppText style={{ color: "#dbeafe" }}>{copy.description}</AppText>
-        </MotionView>
-      </View>
+          <View style={{ gap: spacing[4] }}>
+            <AppText size="xs" style={{ color: onboardingPalette.accentStrong, letterSpacing: 0.8 }} weight="bold">
+              {copy.eyebrow}
+            </AppText>
+            <AppHeading
+              size="lg"
+              style={{
+                color: onboardingPalette.ink,
+                fontSize: breakpoint.isCompact ? 38 : 50,
+                lineHeight: breakpoint.isCompact ? 44 : 57,
+              }}
+            >
+              {copy.title}
+            </AppHeading>
+            <AppText size={breakpoint.isCompact ? "md" : "lg"} style={{ color: onboardingPalette.text }}>
+              {copy.description}
+            </AppText>
+          </View>
 
-      <View style={{ gap: spacing[5] }}>
-        <View
-          style={{
-            borderRadius: 32,
-            borderWidth: 1,
-            borderColor: "rgba(255, 255, 255, 0.22)",
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-            padding: spacing[4],
-            gap: spacing[3],
-          }}
-        >
-          {copy.highlights.map((highlight) => (
-            <View key={highlight} style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3] }}>
-              <View
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: radii.pill,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "rgba(255, 255, 255, 0.18)",
-                }}
-              >
-                <MaterialCommunityIcons color="#bfdbfe" name="check" size={16} />
+          <View style={{ gap: spacing[3] }}>
+            {copy.highlights.map((highlight) => (
+              <View key={highlight} style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3] }}>
+                <View
+                  style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 15,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: onboardingPalette.accentSoft,
+                  }}
+                >
+                  <MaterialCommunityIcons color={onboardingPalette.accentStrong} name="check" size={16} />
+                </View>
+                <AppText style={{ flex: 1, color: onboardingPalette.text }} weight="semibold">
+                  {highlight}
+                </AppText>
               </View>
-              <AppText style={{ flex: 1, color: colors.white }} weight="semibold">
-                {highlight}
-              </AppText>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
+        </MotionView>
 
-        <OnboardingWalletPanel
-          connectionState={connectionState}
-          mode={mode}
-          onPrimary={() => void handlePrimary()}
-          onSecondary={() => router.replace(routes.landing)}
-        />
+        <View style={{ flex: breakpoint.isCompact ? undefined : 1, width: "100%", maxWidth: 500 }}>
+          <OnboardingWalletPanel
+            connectionState={connectionState}
+            mode={mode}
+            onPrimary={() => void handlePrimary()}
+            onSecondary={() => router.replace(routes.landing)}
+          />
+        </View>
       </View>
     </OnboardingShell>
+  );
+};
+
+const OnboardingHeader = () => {
+  const { inlineDirection } = useI18n();
+
+  return (
+    <View style={{ flexDirection: inlineDirection(), alignItems: "center", justifyContent: "space-between", gap: spacing[3] }}>
+      <View style={{ flexDirection: inlineDirection(), alignItems: "center", gap: spacing[3] }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 14,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: onboardingPalette.ink,
+          }}
+        >
+          <MaterialCommunityIcons color={onboardingPalette.white} name="shield-lock-outline" size={21} />
+        </View>
+        <AppText style={{ color: onboardingPalette.ink }} weight="bold">
+          {productConfig.shortName}
+        </AppText>
+      </View>
+      <LanguageSwitcher appearance="monochrome" compact />
+    </View>
   );
 };
